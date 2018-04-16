@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import numpy as np
-import paddle.v2
+import paddle
 import paddle.fluid as fluid
 import paddle.fluid.core as core
 import paddle.fluid.framework as framework
@@ -23,7 +23,7 @@ from beam_search_api import *
 
 dict_size = 30000
 source_dict_dim = target_dict_dim = dict_size
-src_dict, trg_dict = paddle.v2.dataset.wmt14.get_dict(dict_size)
+src_dict, trg_dict = paddle.dataset.wmt14.get_dict(dict_size)
 hidden_dim = 32
 word_dim = 16
 IS_SPARSE = True
@@ -171,17 +171,18 @@ def train_main():
     optimizer = fluid.optimizer.Adagrad(learning_rate=1e-4)
     optimizer.minimize(avg_cost)
 
-    train_data = paddle.v2.batch(
-        paddle.v2.reader.shuffle(
-            paddle.v2.dataset.wmt14.train(dict_size), buf_size=1000),
+    train_data = paddle.batch(
+        paddle.reader.shuffle(
+            paddle.dataset.wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
 
     exe = Executor(place)
 
     exe.run(framework.default_startup_program())
 
-    batch_id = 0
-    for pass_id in xrange(1):
+    #batch_id = 0
+    for pass_id in xrange(10):
+        batch_id = 0
         for data in train_data():
             word_data = to_lodtensor(map(lambda x: x[0], data), place)
             trg_word = to_lodtensor(map(lambda x: x[1], data), place)
@@ -217,9 +218,9 @@ def decode_main():
     init_lod = [i for i in range(batch_size)] + [batch_size]
     init_lod = [init_lod, init_lod]
 
-    train_data = paddle.v2.batch(
-        paddle.v2.reader.shuffle(
-            paddle.v2.dataset.wmt14.train(dict_size), buf_size=1000),
+    train_data = paddle.batch(
+        paddle.reader.shuffle(
+            paddle.dataset.wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
         init_ids = set_init_lod(init_ids_data, init_lod, place)
@@ -241,5 +242,5 @@ def decode_main():
 
 
 if __name__ == '__main__':
-    #train_main()
-    decode_main()
+    train_main()
+    #decode_main()
