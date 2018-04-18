@@ -40,11 +40,11 @@ class BeamSearchOpTester(unittest.TestCase):
         tensor_pre_gpu = self.scope.var("pre_ids").get_tensor()
         np_data_pre = np.array([[1, 2, 3, 4]], dtype='int64')
         tensor_pre_gpu.set(np_data_pre, core.CUDAPlace(0))
+        print tensor_pre_gpu, '\n'
         print "Check point 1"
 
         tensor_pre_cpu = self.scope.var("pre_ids").get_tensor()
         tensor_pre_cpu.set(np_data_pre, core.CPUPlace())
-        print tensor_pre_gpu, '\n'
         print tensor_pre_cpu, '\n'
         print "Check point 1.1"
 
