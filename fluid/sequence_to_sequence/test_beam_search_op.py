@@ -37,10 +37,17 @@ class BeamSearchOpTester(unittest.TestCase):
         #self.scope.var('selected_scores')
 
     def test_set(self):
-        tensor_pre = self.scope.var("pre_ids").get_tensor()
+        tensor_pre_gpu = self.scope.var("pre_ids").get_tensor()
         np_data_pre = np.array([[1, 2, 3, 4]], dtype='int64')
-        tensor_pre.set(np_data_pre, core.CUDAPlace(0))
-        print "Check point 1"    
+        tensor_pre_gpu.set(np_data_pre, core.CUDAPlace(0))
+        print "Check point 1"
+
+        tensor_pre_cpu = self.scope.var("pre_ids").get_tensor()
+        tensor_pre_cpu.set(np_data_pre, core.CPUPlace())
+        print tensor_pre_gpu, '\n'
+        print tensor_pre_cpu, '\n'
+        print "Check point 1.1"
+
 
         tensor_ids = self.scope.var("ids").get_tensor()
         lod_ids = [[0, 1, 4], [0, 1, 2, 3, 4]]
