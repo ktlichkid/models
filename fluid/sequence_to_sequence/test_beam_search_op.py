@@ -50,6 +50,18 @@ class BeamSearchOpTester(unittest.TestCase):
         tensor_ids.set_lod(lod_ids)
         print "Check point 2"
 
+        tensor_score = self.scope.var("scores").get_tensor()
+        np_data_score = np.array(
+            [
+                [0.5, 0.3, 0.2],
+                [0.6, 0.3, 0.1],
+                [0.9, 0.5, 0.1],
+                [0.7, 0.5, 0.1],
+            ],
+            dtype='float32')
+        tensor_score.set(np_data_score, core.CUDAPlace(0))
+        tensor_score.set_lod(lod_ids)
+        print "Check point 3"
         
 
 
