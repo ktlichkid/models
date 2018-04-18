@@ -33,8 +33,8 @@ class BeamSearchOpTester(unittest.TestCase):
         # self._create_ids()
         # self._create_scores()
         # self._create_pre_ids()
-        # self.scope.var('selected_ids')
-        # self.scope.var('selected_scores')
+        self.scope.var('selected_ids')
+        self.scope.var('selected_scores')
 
     def test_set(self):
         tensor_pre_gpu = self.scope.var("pre_ids").get_tensor()
@@ -52,7 +52,7 @@ class BeamSearchOpTester(unittest.TestCase):
         lod_ids = [[0, 1, 4], [0, 1, 2, 3, 4]]
         np_data_ids = np.array(
             [[4, 2, 5], [2, 1, 3], [3, 5, 2], [8, 2, 1]], dtype='int64')
-        tensor_ids.set(np_data_ids, core.CUDAPlace(0))
+        tensor_ids.set(np_data_ids, core.CPUPlace())
         tensor_ids.set_lod(lod_ids)
         print "Check point 2"
 
@@ -65,10 +65,24 @@ class BeamSearchOpTester(unittest.TestCase):
                 [0.7, 0.5, 0.1],
             ],
             dtype='float32')
-        tensor_score.set(np_data_score, core.CUDAPlace(0))
+        tensor_score.set(np_data_score, core.CPUPlace())
         tensor_score.set_lod(lod_ids)
         print "Check point 3"
 
+        op = Operator(
+            'beam_search',
+            pre_ids="pre_ids",
+            ids='ids',
+            scores='scores',
+            selected_ids='selected_ids',
+            selected_scores='selected_scores',
+            level=0,
+            beam_size=2,
+            end_id=0, )
+        op.run(self.scope, core.CPUPlace())
+        selected_ids = self.scope.find_var("selected_ids").get_tensor()
+        print 'selected_ids', np.array(selected_ids)
+        print 'lod', selected_ids.lod()
 
 
     # def test_run(self):
