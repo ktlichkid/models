@@ -21,7 +21,7 @@ import numpy as np
 
 def create_tensor(scope, name, np_data):
     tensor = scope.var(name).get_tensor()
-    #tensor.set(np_data, core.CPUPlace())
+    # tensor.set(np_data, core.CPUPlace())
     tensor.set(np_data, core.CUDAPlace(0))
     return tensor
 
@@ -29,25 +29,24 @@ def create_tensor(scope, name, np_data):
 class BeamSearchOpTester(unittest.TestCase):
     def setUp(self):
         self.scope = core.Scope()
-        #self.tensor = None
-        #self._create_ids()
-        #self._create_scores()
-        #self._create_pre_ids()
-        #self.scope.var('selected_ids')
-        #self.scope.var('selected_scores')
+        # self.tensor = None
+        # self._create_ids()
+        # self._create_scores()
+        # self._create_pre_ids()
+        # self.scope.var('selected_ids')
+        # self.scope.var('selected_scores')
 
     def test_set(self):
         tensor_pre_gpu = self.scope.var("pre_ids").get_tensor()
         np_data_pre = np.array([[1, 2, 3, 4]], dtype='int64')
         tensor_pre_gpu.set(np_data_pre, core.CUDAPlace(0))
-        print tensor_pre_gpu, '\n'
+        print np.array(tensor_pre_gpu), '\n'
         print "Check point 1"
 
         tensor_pre_cpu = self.scope.var("pre_ids").get_tensor()
         tensor_pre_cpu.set(np_data_pre, core.CPUPlace())
-        print tensor_pre_cpu, '\n'
+        print np.array(tensor_pre_cpu), '\n'
         print "Check point 1.1"
-
 
         tensor_ids = self.scope.var("ids").get_tensor()
         lod_ids = [[0, 1, 4], [0, 1, 2, 3, 4]]
@@ -69,25 +68,25 @@ class BeamSearchOpTester(unittest.TestCase):
         tensor_score.set(np_data_score, core.CUDAPlace(0))
         tensor_score.set_lod(lod_ids)
         print "Check point 3"
-        
 
 
-    #def test_run(self):
+
+    # def test_run(self):
     #    op = Operator(
     #        'beam_search',
     #        pre_ids="pre_ids",
     #        ids='ids',
-   #         scores='scores',
+    #         scores='scores',
     #        selected_ids='selected_ids',
     #        selected_scores='selected_scores',
     #        level=0,
     #        beam_size=2,
     #        end_id=0, )
-        #op.run(self.scope, core.CPUPlace())
+    # op.run(self.scope, core.CPUPlace())
     #    op.run(self.scope, core.CUDAPlace(0))
-      #  selected_ids = self.scope.find_var("selected_ids").get_tensor()
-      #  print 'selected_ids', np.array(selected_ids)
-      #  print 'lod', selected_ids.lod()
+    #  selected_ids = self.scope.find_var("selected_ids").get_tensor()
+    #  print 'selected_ids', np.array(selected_ids)
+    #  print 'lod', selected_ids.lod()
 
     def _create_pre_ids(self):
         np_data = np.array([[1, 2, 3, 4]], dtype='int64')
