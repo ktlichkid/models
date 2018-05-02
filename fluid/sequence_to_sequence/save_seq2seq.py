@@ -216,11 +216,19 @@ def train_main():
                            main_program=framework.default_main_program(),
                            model_filename='test_save',
                            params_filename=None)
-
+            #
             # fluid.io.load_inference_model(dirname=model_path,
             #               executor=exe,
             #               model_filename='test_save',
             #               params_filename=None)
+            #
+            # fluid.io.save_inference_model(dirname=model_path,
+            #                feeded_var_names=['src_word_id'],
+            #                target_vars=[rnn_out],
+            #                executor=exe,
+            #                main_program=framework.default_main_program(),
+            #                model_filename='test_save',
+            #                params_filename=None)
 
 
 def decode_main():
@@ -231,11 +239,11 @@ def decode_main():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join(model_save_dir, str(0))
-    fluid.io.load_inference_model(dirname=model_path,
-                                  executor=exe,
-                                  model_filename='test_save',
-                                  params_filename=None)
+    # model_path = os.path.join(model_save_dir, str(0))
+    # fluid.io.load_inference_model(dirname=model_path,
+    #                               executor=exe,
+    #                               model_filename='test_save',
+    #                               params_filename=None)
 
     init_ids_data = np.array([0 for _ in range(batch_size)], dtype='int64')
     init_scores_data = np.array(
@@ -269,5 +277,5 @@ def decode_main():
 
 
 if __name__ == '__main__':
-    #train_main()
-    decode_main()
+    train_main()
+    #decode_main()
