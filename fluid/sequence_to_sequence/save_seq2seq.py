@@ -206,29 +206,33 @@ def train_main():
             batch_id += 1
 
         if pass_id % 10 == 0:
-            model_path = os.path.join(model_save_dir, str(pass_id))
-            if not os.path.isdir(model_path):
-                os.makedirs(model_path)
-            fluid.io.save_inference_model(dirname=model_path,
+            model_path_0 = os.path.join(model_save_dir, str(0))
+            if not os.path.isdir(model_path_0):
+                os.makedirs(model_path_0)
+            fluid.io.save_inference_model(dirname=model_path_0,
                            feeded_var_names=['src_word_id'],
                            target_vars=[rnn_out],
                            executor=exe,
                            main_program=framework.default_main_program(),
                            model_filename='test_save',
                            params_filename=None)
-            #
-            # fluid.io.load_inference_model(dirname=model_path,
-            #               executor=exe,
-            #               model_filename='test_save',
-            #               params_filename=None)
-            #
-            # fluid.io.save_inference_model(dirname=model_path,
-            #                feeded_var_names=['src_word_id'],
-            #                target_vars=[rnn_out],
-            #                executor=exe,
-            #                main_program=framework.default_main_program(),
-            #                model_filename='test_save',
-            #                params_filename=None)
+
+            fluid.io.load_inference_model(dirname=model_path_0,
+                          executor=exe,
+                          model_filename='test_save',
+                          params_filename=None)
+
+            model_path_1 = os.path.join(model_save_dir, str(1))
+            if not os.path.isdir(model_path_1):
+                os.makedirs(model_path_1)
+
+            fluid.io.save_inference_model(dirname=model_path_1,
+                           feeded_var_names=['src_word_id'],
+                           target_vars=[rnn_out],
+                           executor=exe,
+                           main_program=framework.default_main_program(),
+                           model_filename='test_save',
+                           params_filename=None)
 
 
 def decode_main():
