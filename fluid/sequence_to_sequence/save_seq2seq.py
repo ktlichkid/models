@@ -205,12 +205,13 @@ def train_main():
                 break
             batch_id += 1
 
-            model_path = os.path.join(model_save_dir, str(pass_id))
-            if not os.path.isdir(model_path):
-                os.makedirs(model_path)
-            fluid.io.save_inference_model(dirname=model_path,
+            if pass_id % 10 == 0:
+                model_path = os.path.join(model_save_dir, str(pass_id))
+                if not os.path.isdir(model_path):
+                    os.makedirs(model_path)
+                fluid.io.save_inference_model(dirname=model_path,
                            feeded_var_names=['src_word_id'],
-                           target_vars=[trg_word, trg_word_next],
+                           target_vars=[rnn_out],
                            executor=exe,
                            main_program=framework.default_main_program(),
                            model_filename='test_save',
