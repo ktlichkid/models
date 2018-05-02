@@ -271,34 +271,15 @@ def decode_main():
     translation_ids, translation_scores = decoder_decode(state_cell)
 
     exe = Executor(place)
-    main_prog = framework.default_startup_program()
-    exe.run(main_prog)
+    exe.run(framework.default_startup_program())
 
-    model_path = os.path.join(model_save_dir, str(1))
-    prog_path = os.path.join(model_path, "program" + str(1))
-
+    model_path = os.path.join(model_save_dir, str(0))
     if not os.path.isdir(model_path):
         os.makedirs(model_path)
-
-    with open(prog_path, "wb") as f:
-        f.write(main_prog.desc.serialize_to_string())
-
-    fluid.io.save_persistables(executor=exe,
-                               dirname=model_path,
-                               main_program=main_prog)
-
-    '''
-    model_path = os.path.join(model_save_dir, str(0))
-    prog_path = os.path.join(model_path, "program" + str(0))
-
-    with open(prog_path, "rb") as f:
-        program_desc_str = f.read()
-    program = framework.Program.parse_from_string(program_desc_str)
-
     fluid.io.load_persistables(executor=exe,
                                dirname=model_path,
                                main_program=framework.default_main_program())
-    '''
+
     init_ids_data = np.array([0 for _ in range(batch_size)], dtype='int64')
     init_scores_data = np.array(
         [1. for _ in range(batch_size)], dtype='float32')
