@@ -191,7 +191,8 @@ def train_main():
             word_data = to_lodtensor(map(lambda x: x[0], data), place)
             trg_word = to_lodtensor(map(lambda x: x[1], data), place)
             trg_word_next = to_lodtensor(map(lambda x: x[2], data), place)
-            outs = exe.run(framework.default_main_program(),
+            program = framework.default_main_program()
+            outs = exe.run(program,
                            feed={
                                'src_word_id': word_data,
                                'target_language_word': trg_word,
@@ -204,19 +205,29 @@ def train_main():
             if batch_id > 500:
                 break
             batch_id += 1
-
         if pass_id % 10 == 0:
-            model_path_0 = os.path.join(model_save_dir, str(0))
-            if not os.path.isdir(model_path_0):
-                os.makedirs(model_path_0)
-            fluid.io.save_inference_model(dirname=model_path_0,
-                           feeded_var_names=['src_word_id'],
-                           target_vars=[rnn_out],
-                           executor=exe,
-                           main_program=framework.default_main_program(),
-                           model_filename='test_save',
-                           params_filename=None)
+            model_path = os.path.join(model_save_dir, str(pass_id))
+            prog_path = os.path.join(model_path, "program" + str(pass_id))
+            if not os.path.isdir(model_path):
+                os.makedirs(model_path)
 
+            with open(prog_path, "wb") as f:
+                f.write(program.desc.serialize_to_string())
+
+            fluid.io.save_persistables(exe, model_path, program)
+
+        # if pass_id % 10 == 0:
+        #     model_path_0 = os.path.join(model_save_dir, str(0))
+        #     if not os.path.isdir(model_path_0):
+        #         os.makedirs(model_path_0)
+        #     fluid.io.save_inference_model(dirname=model_path_0,
+        #                    feeded_var_names=['src_word_id'],
+        #                    target_vars=[rnn_out],
+        #                    executor=exe,
+        #                    main_program=framework.default_main_program(),
+        #                    model_filename='test_save',
+        #                    params_filename=None)
+        #
             # fluid.io.load_inference_model(dirname=model_path_0,
             #               executor=exe,
             #               model_filename='test_save',
@@ -298,4 +309,4 @@ def decode_main():
 
 if __name__ == '__main__':
     train_main()
-    decode_main()
+    # decode_main()
