@@ -217,6 +217,11 @@ def train_main():
                            model_filename='test_save',
                            params_filename=None)
 
+            fluid.io.load_inference_model(dirname=model_path,
+                           executor=exe,
+                           model_filename='test_save',
+                           params_filename=None)
+
 
 def decode_main():
     context = encoder()
