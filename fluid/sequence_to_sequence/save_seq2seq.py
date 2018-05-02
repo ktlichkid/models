@@ -205,6 +205,7 @@ def train_main():
             if batch_id > 500:
                 break
             batch_id += 1
+
         if pass_id % 10 == 0:
             model_path = os.path.join(model_save_dir, str(pass_id))
             prog_path = os.path.join(model_path, "program" + str(pass_id))
@@ -275,13 +276,15 @@ def decode_main():
     model_path = os.path.join(model_save_dir, str(0))
     prog_path = os.path.join(model_path, "program" + str(0))
 
+    '''
     with open(prog_path, "rb") as f:
         program_desc_str = f.read()
     program = framework.Program.parse_from_string(program_desc_str)
+    '''
 
     fluid.io.load_persistables(executor=exe,
                                dirname=model_path,
-                               main_program=program)
+                               main_program=framework.default_main_program())
 
     init_ids_data = np.array([0 for _ in range(batch_size)], dtype='int64')
     init_scores_data = np.array(
