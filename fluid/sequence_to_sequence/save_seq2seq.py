@@ -214,7 +214,9 @@ def train_main():
             with open(prog_path, "wb") as f:
                 f.write(program.desc.serialize_to_string())
 
-            fluid.io.save_persistables(exe, model_path, program)
+            fluid.io.save_persistables(executor=exe,
+                                       dirname=model_path,
+                                       main_program=program)
 
         # if pass_id % 10 == 0:
         #     model_path_0 = os.path.join(model_save_dir, str(0))
@@ -271,10 +273,15 @@ def decode_main():
     exe.run(framework.default_startup_program())
 
     model_path = os.path.join(model_save_dir, str(0))
-    fluid.io.load_inference_model(dirname=model_path,
-                                  executor=exe,
-                                  model_filename='test_save',
-                                  params_filename=None)
+    prog_path = os.path.join(model_path, "program" + str(0))
+
+    with open(prog_path, "rb") as f:
+        program_desc_str = f.read()
+    program = framework.Program.parse_from_string(program_desc_str)
+
+    fluid.io.load_persistables(executor=exe,
+                               dirname=model_path,
+                               main_program=program)
 
     init_ids_data = np.array([0 for _ in range(batch_size)], dtype='int64')
     init_scores_data = np.array(
