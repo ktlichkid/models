@@ -185,7 +185,7 @@ def train_main():
     exe.run(framework.default_startup_program())
 
     #batch_id = 0
-    for pass_id in xrange(10):
+    for pass_id in xrange(1):
         batch_id = 0
         for data in train_data():
             word_data = to_lodtensor(map(lambda x: x[0], data), place)
@@ -205,16 +205,16 @@ def train_main():
                 break
             batch_id += 1
 
-    model_path = os.path.join(model_save_dir, str(pass_id))
-    if not os.path.isdir(model_path):
-        os.makedirs(model_path)
-    fluid.io.save_inference_model(dirname=model_path,
-                         feeded_var_names=['src_word_id'],
-                         target_vars=['target_language_word'],
-                         executor=exe,
-                         main_program=framework.default_main_program(),
-                         model_filename='test_save',
-                         params_filename=None)
+            model_path = os.path.join(model_save_dir, str(pass_id))
+            if not os.path.isdir(model_path):
+                os.makedirs(model_path)
+            fluid.io.save_inference_model(dirname=model_path,
+                           feeded_var_names=['src_word_id'],
+                           target_vars=[trg_word, trg_word_next],
+                           executor=exe,
+                           main_program=framework.default_main_program(),
+                           model_filename='test_save',
+                           params_filename=None)
 
 
 def decode_main():
