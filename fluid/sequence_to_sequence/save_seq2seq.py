@@ -201,7 +201,7 @@ def train_main():
             avg_cost_val = np.array(outs[0])
             print('pass_id=' + str(pass_id) + ' batch=' + str(batch_id) +
                   " avg_cost=" + str(avg_cost_val))
-            if batch_id > 3000:
+            if batch_id > 500:
                 break
             batch_id += 1
 
@@ -217,22 +217,38 @@ def train_main():
                            model_filename='test_save',
                            params_filename=None)
 
-            fluid.io.load_inference_model(dirname=model_path_0,
-                          executor=exe,
-                          model_filename='test_save',
-                          params_filename=None)
-
-            model_path_1 = os.path.join(model_save_dir, str(1))
-            if not os.path.isdir(model_path_1):
-                os.makedirs(model_path_1)
-
-            fluid.io.save_inference_model(dirname=model_path_1,
-                           feeded_var_names=['src_word_id'],
-                           target_vars=[rnn_out],
-                           executor=exe,
-                           main_program=framework.default_main_program(),
-                           model_filename='test_save',
-                           params_filename=None)
+            # fluid.io.load_inference_model(dirname=model_path_0,
+            #               executor=exe,
+            #               model_filename='test_save',
+            #               params_filename=None)
+            #
+            # model_path_1 = os.path.join(model_save_dir, str(1))
+            # if not os.path.isdir(model_path_1):
+            #     os.makedirs(model_path_1)
+            #
+            # fluid.io.save_inference_model(dirname=model_path_1,
+            #                feeded_var_names=['src_word_id'],
+            #                target_vars=[rnn_out],
+            #                executor=exe,
+            #                main_program=framework.default_main_program(),
+            #                model_filename='test_save',
+            #                params_filename=None)
+            #
+            # for data in train_data():
+            #     word_data = to_lodtensor(map(lambda x: x[0], data), place)
+            #     trg_word = to_lodtensor(map(lambda x: x[1], data), place)
+            #     trg_word_next = to_lodtensor(map(lambda x: x[2], data), place)
+            #     outs = exe.run(framework.default_main_program(),
+            #                feed={
+            #                    'src_word_id': word_data,
+            #                    'target_language_word': trg_word,
+            #                    'target_language_next_word': trg_word_next
+            #                },
+            #                fetch_list=[avg_cost])
+            #     avg_cost_val = np.array(outs[0])
+            #     print('pass_id=' + str(pass_id) + ' batch=' + str(batch_id) +
+            #           " avg_cost=" + str(avg_cost_val))
+            #
 
 
 def decode_main():
@@ -243,11 +259,11 @@ def decode_main():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    # model_path = os.path.join(model_save_dir, str(0))
-    # fluid.io.load_inference_model(dirname=model_path,
-    #                               executor=exe,
-    #                               model_filename='test_save',
-    #                               params_filename=None)
+    model_path = os.path.join(model_save_dir, str(0))
+    fluid.io.load_inference_model(dirname=model_path,
+                                  executor=exe,
+                                  model_filename='test_save',
+                                  params_filename=None)
 
     init_ids_data = np.array([0 for _ in range(batch_size)], dtype='int64')
     init_scores_data = np.array(
@@ -282,4 +298,4 @@ def decode_main():
 
 if __name__ == '__main__':
     train_main()
-    #decode_main()
+    decode_main()
