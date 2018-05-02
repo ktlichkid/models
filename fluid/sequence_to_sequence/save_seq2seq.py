@@ -24,7 +24,7 @@ import os
 
 dict_size = 30000
 source_dict_dim = target_dict_dim = dict_size
-src_dict, trg_dict = paddle.dataset.wmt14.get_dict(dict_size)
+src_dict, trg_dict = paddle.dataset.wmt16.get_dict(dict_size)
 hidden_dim = 32
 word_dim = 16
 IS_SPARSE = True
@@ -177,7 +177,7 @@ def train_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(dict_size), buf_size=1000),
+            paddle.dataset.wmt16.train(dict_size), buf_size=1000),
         batch_size=batch_size)
 
     exe = Executor(place)
@@ -185,7 +185,7 @@ def train_main():
     exe.run(framework.default_startup_program())
 
     #batch_id = 0
-    for pass_id in xrange(1):
+    for pass_id in xrange(100):
         batch_id = 0
         for data in train_data():
             word_data = to_lodtensor(map(lambda x: x[0], data), place)
@@ -208,16 +208,16 @@ def train_main():
 
         if pass_id % 10 == 0:
             model_path = os.path.join(model_save_dir, str(pass_id))
-            prog_path = os.path.join(model_path, "program" + str(pass_id))
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
 
-            with open(prog_path, "wb") as f:
-                f.write(program.desc.serialize_to_string())
-
-            fluid.io.save_persistables(executor=exe,
-                                       dirname=model_path,
-                                       main_program=program)
+            fluid.io.save_inference_model(dirname=model_path,
+                            feeded_var_names=['src_word_id'],
+                            target_vars=[rnn_out],
+                            executor=exe,
+                            main_program=framework.default_main_program(),
+                            model_filename='test_save',
+                            params_filename=None)
 
         # if pass_id % 10 == 0:
         #     model_path_0 = os.path.join(model_save_dir, str(0))
@@ -290,7 +290,7 @@ def decode_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(dict_size), buf_size=1000),
+            paddle.dataset.wmt16.train(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
         init_ids = set_init_lod(init_ids_data, init_lod, place)
@@ -312,5 +312,5 @@ def decode_main():
 
 
 if __name__ == '__main__':
-    # train_main()
-    decode_main()
+    train_main()
+    # decode_main()
