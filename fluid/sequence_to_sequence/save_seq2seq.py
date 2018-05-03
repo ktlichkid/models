@@ -303,7 +303,7 @@ def decode_main():
         init_scores = set_init_lod(init_scores_data, init_lod, place)
 
         src_word_data = to_lodtensor(map(lambda x: x[0], data), place)
-
+        print "xyz"
         result_ids, result_scores = exe.run(
             framework.default_main_program(),
             feed={
