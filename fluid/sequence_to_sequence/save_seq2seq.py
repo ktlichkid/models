@@ -117,11 +117,11 @@ def decoder_decode(state_cell):
 
     with decoder.block():
         prev_ids = decoder.read_array(init=init_ids, is_ids=True)
-        print prev_ids
+        pd.Print(prev_ids)
         prev_scores = decoder.read_array(init=init_scores, is_scores=True)
-        print prev_scores
+        pd.Print(prev_scores)
         prev_ids_embedding = embedding(prev_ids)
-        print prev_ids_embedding
+        pd.Print(prev_ids_embedding)
         prev_state = decoder.state_cell.get_state('h')
         prev_state_expanded = pd.sequence_expand(prev_state, prev_scores)
         decoder.state_cell.set_state('h', prev_state_expanded)
