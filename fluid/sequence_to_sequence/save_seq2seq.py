@@ -24,7 +24,7 @@ import os
 
 dict_size = 30000
 source_dict_dim = target_dict_dim = dict_size
-src_dict, trg_dict = paddle.dataset.wmt16.get_dict(dict_size)
+src_dict, trg_dict = paddle.dataset.wmt14.get_dict(dict_size)
 hidden_dim = 32
 word_dim = 16
 IS_SPARSE = True
@@ -290,7 +290,7 @@ def decode_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.train(dict_size), buf_size=1000),
+            paddle.dataset.wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
         init_ids = set_init_lod(init_ids_data, init_lod, place)
@@ -312,5 +312,5 @@ def decode_main():
 
 
 if __name__ == '__main__':
-    train_main()
-    # decode_main()
+    # train_main()
+    decode_main()
