@@ -117,7 +117,7 @@ def decoder_decode(state_cell):
 
     with decoder.block():
         prev_ids = decoder.read_array(init=init_ids, is_ids=True)
-        #pd.Print(prev_ids, message="prev_ids: ")
+        pd.Print(prev_ids, message="0. prev_ids: ")
         prev_scores = decoder.read_array(init=init_scores, is_scores=True)
         #pd.Print(prev_scores, message="prev_scores: ")
         prev_ids_embedding = embedding(prev_ids)
