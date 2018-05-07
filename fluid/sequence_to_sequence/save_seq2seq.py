@@ -207,6 +207,7 @@ def train_main():
     for pass_id in xrange(10000):
         batch_id = 0
         for data in train_data():
+            print data
             word_data = to_lodtensor(map(lambda x: x[0], data), place)
             trg_word = to_lodtensor(map(lambda x: x[1], data), place)
             trg_word_next = to_lodtensor(map(lambda x: x[2], data), place)
