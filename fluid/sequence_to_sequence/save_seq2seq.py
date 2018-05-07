@@ -330,18 +330,18 @@ def decode_main():
             fetch_list=[translation_ids, translation_scores],
             return_numpy=False)
         print(dir(result_ids))
-        lod_list = result_ids.lod()[1]
+        lod_list_1 = result_ids.lod()[1]
         token_array = np.array(result_ids)
         result = []
-        for i in xrange(len(lod_list) - 1):
-            result.append(token_array[lod_list[i]:lod_list[i+1]])
-        print(result)
+        for i in xrange(len(lod_list_1) - 1):
+            sentence_list = [trg_dict[token] for token in token_array[lod_list_1[i]:lod_list_1[i+1]]]
+            sentence = " ".join(sentence_list)
+            result.append(sentence)
         lod_list_0 = result_ids.lod()[0]
         final_result = []
         for i in xrange(len(lod_list_0) - 1):
             final_result.append(result[lod_list_0[i]:lod_list_0[i+1]])
-        print(final_result)
-
+        print final_result
 
 if __name__ == '__main__':
     # train_main()
