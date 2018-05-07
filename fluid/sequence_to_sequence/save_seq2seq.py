@@ -336,6 +336,11 @@ def decode_main():
         for i in xrange(len(lod_list) - 1):
             result.append(token_array[lod_list[i]:lod_list[i+1]])
         print(result)
+        lod_list_0 = result_ids.lod()[0]
+        final_result = []
+        for i in xrange(len(lod_list_0) - 1):
+            final_result.append(result[lod_list_0[i]:lod_list_0[i+1]])
+        print(final_result)
 
 
 if __name__ == '__main__':
