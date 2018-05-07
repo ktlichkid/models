@@ -330,7 +330,12 @@ def decode_main():
             fetch_list=[translation_ids, translation_scores],
             return_numpy=False)
         print(dir(result_ids))
-        print result_ids.lod()
+        lod_list = result_ids.lod()[1]
+        token_array = np.array(result_ids)
+        result = []
+        for i in xrange(len(lod_list) - 1):
+            result.append(token_array[lod_list[i]:lod_list[i+1]])
+        print(result)
 
 
 if __name__ == '__main__':
