@@ -118,7 +118,7 @@ def decoder_decode(state_cell):
 
     with decoder.block():
         prev_ids = decoder.read_array(init=init_ids, is_ids=True)
-        pd.Print(prev_ids, message="0. prev_ids: ")
+        #pd.Print(prev_ids, message="0. prev_ids: ")
         prev_scores = decoder.read_array(init=init_scores, is_scores=True)
         #pd.Print(prev_scores, message="prev_scores: ")
         prev_ids_embedding = embedding(prev_ids)
@@ -144,14 +144,14 @@ def decoder_decode(state_cell):
         selected_ids, selected_scores = pd.beam_search(
             prev_ids, topk_indices, topk_scores, beam_size, end_id=1, level=0)
 
-        pd.Print(selected_ids, message="selected_ids: ")
-        pd.Print(selected_scores, message="selected_scores: ")
+        #pd.Print(selected_ids, message="selected_ids: ")
+        #pd.Print(selected_scores, message="selected_scores: ")
         decoder.state_cell.update_states()
-        pd.Print(prev_ids, message="1. prev_ids: ")
+        #pd.Print(prev_ids, message="1. prev_ids: ")
         decoder.update_array(prev_ids, selected_ids)
-        pd.Print(prev_ids, message="2. prev_ids: ")
+        #pd.Print(prev_ids, message="2. prev_ids: ")
         decoder.update_array(prev_scores, selected_scores)
-        pd.Print(prev_ids, message="3. prev_ids: ")
+        #pd.Print(prev_ids, message="3. prev_ids: ")
 
     translation_ids, translation_scores = decoder()
 
@@ -189,7 +189,7 @@ def train_main():
     cost = pd.cross_entropy(input=rnn_out, label=label)
     avg_cost = pd.mean(x=cost)
 
-    optimizer = fluid.optimizer.Adagrad(learning_rate=2e-4)
+    optimizer = fluid.optimizer.Adagrad(learning_rate=1e-3)
     optimizer.minimize(avg_cost)
 
     train_data = paddle.batch(
@@ -293,7 +293,7 @@ def decode_main():
 #    model_path = os.path.join(model_save_dir, str(0))
 #    if not os.path.isdir(model_path):
 #        os.makedirs(model_path)
-    model_path = os.path.join(model_save_dir, str(1000))
+    model_path = os.path.join(model_save_dir, str(9000))
     fluid.io.load_inference_model(dirname=model_path,
                                   executor=exe,
                                   model_filename='test_save',
@@ -320,7 +320,6 @@ def decode_main():
         init_scores = set_init_lod(init_scores_data, init_lod, place)
 
         src_word_data = to_lodtensor(map(lambda x: x[0], data), place)
-        print "xyz"
         result_ids, result_scores = exe.run(
             framework.default_main_program(),
             feed={
@@ -330,10 +329,10 @@ def decode_main():
             },
             fetch_list=[translation_ids, translation_scores],
             return_numpy=False)
+        print(dir(result_ids))
         print result_ids.lod()
-        break
 
 
 if __name__ == '__main__':
-    train_main()
-    # decode_main()
+    # train_main()
+    decode_main()
