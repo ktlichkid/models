@@ -37,7 +37,7 @@ beam_size = 2
 
 decoder_size = hidden_dim
 
-place = core.CPUPlace()
+place = core.CUDAPlace(0)
 
 model_save_dir = 'model'
 
@@ -202,7 +202,7 @@ def train_main():
     exe.run(framework.default_startup_program())
 
     #batch_id = 0
-    for pass_id in xrange(100):
+    for pass_id in xrange(10000):
         batch_id = 0
         for data in train_data():
             word_data = to_lodtensor(map(lambda x: x[0], data), place)
@@ -223,7 +223,7 @@ def train_main():
                 break
             batch_id += 1
 
-        if pass_id % 10 == 0:
+        if pass_id % 1000 == 0:
             model_path = os.path.join(model_save_dir, str(pass_id))
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
