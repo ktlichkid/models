@@ -201,6 +201,8 @@ def train_main():
 
     exe.run(framework.default_startup_program())
 
+    print train_data
+
     #batch_id = 0
     for pass_id in xrange(10000):
         batch_id = 0
@@ -344,5 +346,5 @@ def decode_main():
 
 
 if __name__ == '__main__':
-    # train_main()
-    decode_main()
+    train_main()
+    # decode_main()
