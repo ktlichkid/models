@@ -26,10 +26,10 @@ import os
 dict_size = 30000
 source_dict_dim = target_dict_dim = dict_size
 src_dict, trg_dict = wmt14.get_dict(dict_size)
-hidden_dim = 32
-word_dim = 16
+hidden_dim = 512
+word_dim = 512
 IS_SPARSE = True
-batch_size = 2
+batch_size = 10
 max_length = 8
 topk_size = 50
 trg_dic_size = 10000
@@ -189,7 +189,7 @@ def train_main():
     cost = pd.cross_entropy(input=rnn_out, label=label)
     avg_cost = pd.mean(x=cost)
 
-    optimizer = fluid.optimizer.Adagrad(learning_rate=1e-4)
+    optimizer = fluid.optimizer.Adagrad(learning_rate=2e-3)
     optimizer.minimize(avg_cost)
 
     train_data = paddle.batch(
