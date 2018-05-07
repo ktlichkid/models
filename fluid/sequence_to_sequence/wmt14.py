@@ -159,15 +159,15 @@ def get_dict(dict_size, reverse=True):
     return src_dict, trg_dict
 
 
-def fetch():
-    paddle.dataset.common.download(URL_TRAIN, 'wmt14', MD5_TRAIN)
-    paddle.dataset.common.download(URL_MODEL, 'wmt14', MD5_MODEL)
+# def fetch():
+#     paddle.dataset.common.download(URL_TRAIN, 'wmt14', MD5_TRAIN)
+#     paddle.dataset.common.download(URL_MODEL, 'wmt14', MD5_MODEL)
 
 
-def convert(path):
-    """
-    Converts dataset to recordio format
-    """
-    dict_size = 30000
-    paddle.dataset.common.convert(path, train(dict_size), 1000, "wmt14_train")
-    paddle.dataset.common.convert(path, test(dict_size), 1000, "wmt14_test")
+# def convert(path):
+#     """
+#     Converts dataset to recordio format
+#     """
+#     dict_size = 30000
+#     paddle.dataset.common.convert(path, train(dict_size), 1000, "wmt14_train")
+#     paddle.dataset.common.convert(path, test(dict_size), 1000, "wmt14_test")
