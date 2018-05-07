@@ -329,5 +329,5 @@ def decode_main():
 
 
 if __name__ == '__main__':
-    # train_main()
-    decode_main()
+    train_main()
+    # decode_main()
