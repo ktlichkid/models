@@ -18,13 +18,14 @@ import paddle.fluid as fluid
 import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 import paddle.fluid.layers as pd
+import wmt14
 from paddle.fluid.executor import Executor
 from beam_search_api import *
 import os
 
 dict_size = 30000
 source_dict_dim = target_dict_dim = dict_size
-src_dict, trg_dict = paddle.dataset.wmt14.get_dict(dict_size)
+src_dict, trg_dict = wmt14.get_dict(dict_size)
 hidden_dim = 32
 word_dim = 16
 IS_SPARSE = True
@@ -193,7 +194,7 @@ def train_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.train(dict_size), buf_size=1000),
+            wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
 
     exe = Executor(place)
@@ -306,7 +307,7 @@ def decode_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(dict_size), buf_size=1000),
+            wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
         init_ids = set_init_lod(init_ids_data, init_lod, place)
