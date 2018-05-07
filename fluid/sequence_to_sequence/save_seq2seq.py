@@ -338,10 +338,10 @@ def decode_main():
             sentence = " ".join(sentence_list)
             result.append(sentence)
         lod_list_0 = result_ids.lod()[0]
-        final_result = []
-        for i in xrange(len(lod_list_0) - 1):
-            final_result.append(result[lod_list_0[i]:lod_list_0[i+1]])
-        print final_result
+        final_result = [result[lod_list_0[i]:lod_list_0[i+1]] for i in xrange(len(lod_list_0) - 1)]
+        for paragraph in final_result:
+            print paragraph
+
 
 if __name__ == '__main__':
     # train_main()
