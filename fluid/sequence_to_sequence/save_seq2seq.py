@@ -146,9 +146,11 @@ def decoder_decode(state_cell):
         pd.Print(selected_ids, message="selected_ids: ")
         pd.Print(selected_scores, message="selected_scores: ")
         decoder.state_cell.update_states()
-        pd.Print(prev_ids, message="prev_ids: ")
+        pd.Print(prev_ids, message="1. prev_ids: ")
         decoder.update_array(prev_ids, selected_ids)
+        pd.Print(prev_ids, message="2. prev_ids: ")
         decoder.update_array(prev_scores, selected_scores)
+        pd.Print(prev_ids, message="3. prev_ids: ")
 
     translation_ids, translation_scores = decoder()
 
