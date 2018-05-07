@@ -22,7 +22,7 @@ parse training set and test set into paddle reader creators.
 import tarfile
 import gzip
 
-import paddle.dataset.common
+# import paddle.dataset.common
 
 __all__ = [
     'train',
@@ -122,7 +122,7 @@ def train(dict_size):
     :rtype: callable
     """
     return reader_creator(
-        paddle.dataset.common.download(URL_TRAIN, 'wmt14', MD5_TRAIN),
+        'wmt14.tar',
         'train/train', dict_size)
 
 
@@ -138,20 +138,20 @@ def test(dict_size):
     :rtype: callable
     """
     return reader_creator(
-        paddle.dataset.common.download(URL_TRAIN, 'wmt14', MD5_TRAIN),
+        'wmt14.tar',
         'test/test', dict_size)
 
 
 def gen(dict_size):
     return reader_creator(
-        paddle.dataset.common.download(URL_TRAIN, 'wmt14', MD5_TRAIN),
+        'wmt14.tar',
         'gen/gen', dict_size)
 
 
 def get_dict(dict_size, reverse=True):
     # if reverse = False, return dict = {'a':'001', 'b':'002', ...}
     # else reverse = true, return dict = {'001':'a', '002':'b', ...}
-    tar_file = paddle.dataset.common.download(URL_TRAIN, 'wmt14', MD5_TRAIN)
+    tar_file = 'wmt14.tar'
     src_dict, trg_dict = __read_to_dict(tar_file, dict_size)
     if reverse:
         src_dict = {v: k for k, v in src_dict.items()}
