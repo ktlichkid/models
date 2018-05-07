@@ -293,11 +293,11 @@ def decode_main():
 #    model_path = os.path.join(model_save_dir, str(0))
 #    if not os.path.isdir(model_path):
 #        os.makedirs(model_path)
-    model_path = os.path.join(model_save_dir, str(9000))
-    fluid.io.load_inference_model(dirname=model_path,
-                                  executor=exe,
-                                  model_filename='test_save',
-                                  params_filename=None)
+#    model_path = os.path.join(model_save_dir, str(9000))
+#    fluid.io.load_inference_model(dirname=model_path,
+#                                  executor=exe,
+#                                  model_filename='test_save',
+#                                  params_filename=None)
 
 #    fluid.io.load_persistables(executor=exe,
 #                               dirname=model_path,
