@@ -201,13 +201,9 @@ def train_main():
 
     exe.run(framework.default_startup_program())
 
-    print train_data
-
-    #batch_id = 0
     for pass_id in xrange(10000):
         batch_id = 0
         for data in train_data():
-            print data
             word_data = to_lodtensor(map(lambda x: x[0], data), place)
             trg_word = to_lodtensor(map(lambda x: x[1], data), place)
             trg_word_next = to_lodtensor(map(lambda x: x[2], data), place)
@@ -319,6 +315,7 @@ def decode_main():
             wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
+        print data
         init_ids = set_init_lod(init_ids_data, init_lod, place)
         init_scores = set_init_lod(init_scores_data, init_lod, place)
 
@@ -347,5 +344,5 @@ def decode_main():
 
 
 if __name__ == '__main__':
-    train_main()
-    # decode_main()
+    # train_main()
+    decode_main()
