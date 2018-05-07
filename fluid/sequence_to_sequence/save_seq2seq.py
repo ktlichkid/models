@@ -189,7 +189,7 @@ def train_main():
     cost = pd.cross_entropy(input=rnn_out, label=label)
     avg_cost = pd.mean(x=cost)
 
-    optimizer = fluid.optimizer.Adagrad(learning_rate=2e-3)
+    optimizer = fluid.optimizer.Adagrad(learning_rate=2e-4)
     optimizer.minimize(avg_cost)
 
     train_data = paddle.batch(
@@ -290,12 +290,18 @@ def decode_main():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join(model_save_dir, str(0))
-    if not os.path.isdir(model_path):
-        os.makedirs(model_path)
-    fluid.io.load_persistables(executor=exe,
-                               dirname=model_path,
-                               main_program=framework.default_main_program())
+#    model_path = os.path.join(model_save_dir, str(0))
+#    if not os.path.isdir(model_path):
+#        os.makedirs(model_path)
+    model_path = os.path.join(model_save_dir, str(1000))
+    fluid.io.load_inference_model(dirname=model_path,
+                                  executor=exe,
+                                  model_filename='test_save',
+                                  params_filename=None)
+
+#    fluid.io.load_persistables(executor=exe,
+#                               dirname=model_path,
+#                               main_program=framework.default_main_program())
 
     init_ids_data = np.array([0 for _ in range(batch_size)], dtype='int64')
     init_scores_data = np.array(
