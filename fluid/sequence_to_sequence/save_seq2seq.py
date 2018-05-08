@@ -29,11 +29,11 @@ src_dict, trg_dict = wmt14.get_dict(dict_size)
 hidden_dim = 512
 word_dim = 512
 IS_SPARSE = True
-batch_size = 8
+batch_size = 4
 max_length = 15
 topk_size = 50
 trg_dic_size = 10000
-beam_size = 3
+beam_size = 4
 
 decoder_size = hidden_dim
 
@@ -358,5 +358,5 @@ def decode_main():
         break
 
 if __name__ == '__main__':
-    # train_main()
+    #train_main()
     decode_main()
