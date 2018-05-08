@@ -29,8 +29,8 @@ src_dict, trg_dict = wmt14.get_dict(dict_size)
 hidden_dim = 512
 word_dim = 512
 IS_SPARSE = True
-batch_size = 1
-max_length = 18
+batch_size = 8
+max_length = 15
 topk_size = 50
 trg_dic_size = 10000
 beam_size = 2
@@ -40,7 +40,6 @@ decoder_size = hidden_dim
 place = core.CUDAPlace(0)
 
 model_save_dir = 'model'
-
 
 
 def encoder():
@@ -201,7 +200,7 @@ def train_main():
 
     exe.run(framework.default_startup_program())
 
-    for pass_id in xrange(10000):
+    for pass_id in xrange(10001):
         batch_id = 0
         for data in train_data():
             word_data = to_lodtensor(map(lambda x: x[0], data), place)
@@ -216,8 +215,9 @@ def train_main():
                            },
                            fetch_list=[avg_cost])
             avg_cost_val = np.array(outs[0])
-            print('pass_id=' + str(pass_id) + ' batch=' + str(batch_id) +
-                  " avg_cost=" + str(avg_cost_val))
+            if pass_id % 100 == 0:
+                print('pass_id=' + str(pass_id) + ' batch=' + str(batch_id) +
+                     " avg_cost=" + str(avg_cost_val))
             if batch_id > 500:
                 break
             batch_id += 1
@@ -315,11 +315,21 @@ def decode_main():
             wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
-        print data
+        print "One batch data:"
+        for tup in data:
+            for i in range(len(tup)):
+                if i == 0:
+                    words = [src_dict[tup[i][j]] for j in xrange(len(tup[i]))]
+                else:
+                    words = [trg_dict[tup[i][j]] for j in xrange(len(tup[i]))]
+                sentence = " ".join(words)
+                print sentence
+        print "One batch over"
         init_ids = set_init_lod(init_ids_data, init_lod, place)
         init_scores = set_init_lod(init_scores_data, init_lod, place)
 
         src_word_data = to_lodtensor(map(lambda x: x[0], data), place)
+
         result_ids, result_scores = exe.run(
             framework.default_main_program(),
             feed={
@@ -329,20 +339,24 @@ def decode_main():
             },
             fetch_list=[translation_ids, translation_scores],
             return_numpy=False)
-        print(dir(result_ids))
+
+        print(np.array(result_scores))
+        print result_scores.lod()
         lod_list_1 = result_ids.lod()[1]
         token_array = np.array(result_ids)
         result = []
         for i in xrange(len(lod_list_1) - 1):
-            sentence_list = [trg_dict[token] for token in token_array[lod_list_1[i]:lod_list_1[i+1]]]
+            sentence_list = [trg_dict[token] 
+                             for token in token_array[lod_list_1[i]:lod_list_1[i+1]]]
             sentence = " ".join(sentence_list)
             result.append(sentence)
         lod_list_0 = result_ids.lod()[0]
-        final_result = [result[lod_list_0[i]:lod_list_0[i+1]] for i in xrange(len(lod_list_0) - 1)]
+        final_result = [result[lod_list_0[i]:lod_list_0[i+1]] 
+                        for i in xrange(len(lod_list_0) - 1)]
         for paragraph in final_result:
             print paragraph
-
+        break
 
 if __name__ == '__main__':
-    #train_main()
+    # train_main()
     decode_main()
