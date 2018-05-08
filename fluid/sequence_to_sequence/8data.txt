@@ -1,0 +1,133 @@
+One batch data:
+<s> Une porte remet à l&apos; idée de parc , sans aucun doute . <e>
+<s> A door refers to the idea of the park , no doubt .
+A door refers to the idea of the park , no doubt . <e>
+<s> &quot; Les gens à tous les niveaux font du football depuis longtemps et attendent que jeudi il y ait un Président &quot; . <e>
+<s> &quot; People at all levels have been in football for long , and they expect the President to be known on Thursday . &quot;
+&quot; People at all levels have been in football for long , and they expect the President to be known on Thursday . &quot; <e>
+<s> En tournant , il a <unk> une voiture <unk> , il l&apos; a <unk> avec deux autres voitures et trois roues . <e>
+<s> He <unk> a parked vehicle and pushed it up against two other cars and three bikes when turning around .
+He <unk> a parked vehicle and pushed it up against two other cars and three bikes when turning around . <e>
+<s> Comment <unk> cette progression ? <e>
+<s> How do you explain this progression ?
+How do you explain this progression ? <e>
+<s> &quot; Il faut penser à de nouveaux instruments <unk> , de planification , car les actuels &#91; en référence au Plan Général <unk> ( <unk> ) &#93; peuvent provoquer des authentiques désastres &quot; . <e>
+<s> &quot; We must think of new urban planning tools , because the current &#91; in reference to the General Metropolitan Plan ( GMP ) &#93; can lead to a real disaster . &quot;
+&quot; We must think of new urban planning tools , because the current &#91; in reference to the General Metropolitan Plan ( GMP ) &#93; can lead to a real disaster . &quot; <e>
+<s> <unk> <unk> a déclaré : &quot; En concert , nous voulons collecter de l&apos; énergie positive . &quot; <e>
+<s> Simon <unk> : At the concerts we want a fusion of positive energy
+Simon <unk> : At the concerts we want a fusion of positive energy <e>
+<s> &quot; Nous avons réalisé qu&apos; il n &quot; était pas si difficile que ça de les retrouver &quot; , déclare <unk> <unk> , auteur principal d&apos; un rapport publié récemment par le groupe de réflexion de <unk> sur le <unk> numérique en Europe . <e>
+<s> &quot; We realized that it wasn &apos;t that difficult to get to them at all , &quot; says Jamie <unk> , the lead author of a recently published report on European digital populism by British think tank <unk> .
+&quot; We realized that it wasn &apos;t that difficult to get to them at all , &quot; says Jamie <unk> , the lead author of a recently published report on European digital populism by British think tank <unk> . <e>
+<s> Soit . <e>
+<s> Let is be so .
+Let is be so . <e>
+One batch over
+[1.00000000e+00 3.80647898e-01 3.33366275e-01 9.91542518e-01
+ 9.91668820e-01 9.95966196e-01 9.95912611e-01 9.96081710e-01
+ 9.92304802e-01 9.92944777e-01 9.93988872e-01 9.95352626e-01
+ 9.89086866e-01 9.83245373e-01 9.88110662e-01 9.90992904e-01
+ 1.00000000e+00 1.25192955e-01 9.93197322e-01 9.91523385e-01
+ 9.88050699e-01 9.94200885e-01 9.95902956e-01 9.96438563e-01
+ 9.96621728e-01 9.96728420e-01 9.92217541e-01 9.96726632e-01
+ 9.96317267e-01 9.96649325e-01 9.97204840e-01 9.96642709e-01
+ 1.00000000e+00 1.23736657e-01 9.94834661e-01 9.93918777e-01
+ 9.88363504e-01 9.88323689e-01 9.94692028e-01 9.95764732e-01
+ 9.96228039e-01 9.95988190e-01 9.96448874e-01 9.96154368e-01
+ 9.94844794e-01 9.95781064e-01 9.93989766e-01 9.94178832e-01
+ 1.00000000e+00 3.76001805e-01 3.32220197e-01 9.95159090e-01
+ 9.97086823e-01 9.95339394e-01 9.96528804e-01 9.95225072e-01
+ 9.95182335e-01 9.95164871e-01 9.95477080e-01 9.95124698e-01
+ 9.93833303e-01 9.94261324e-01 9.95554745e-01 9.95196164e-01
+ 1.00000000e+00 1.24679141e-01 9.93580818e-01 9.96296704e-01
+ 9.90606844e-01 9.90674436e-01 9.93002117e-01 9.94575858e-01
+ 9.95356143e-01 9.94614661e-01 9.90050197e-01 9.93106306e-01
+ 9.82261121e-01 9.93031025e-01 9.93311226e-01 9.88278747e-01
+ 1.00000000e+00 1.24614462e-01 9.92808342e-01 9.93276656e-01
+ 9.94086623e-01 9.94882405e-01 9.93485332e-01 9.94051158e-01
+ 9.93697047e-01 9.94265020e-01 9.95597482e-01 9.94429052e-01
+ 9.95407522e-01 9.95666027e-01 9.94876385e-01 9.96434212e-01
+ 1.00000000e+00 3.75774920e-01 3.32227975e-01 9.95160043e-01
+ 9.97085869e-01 9.95336533e-01 9.96529281e-01 9.95224833e-01
+ 9.95182097e-01 9.95164871e-01 9.95477200e-01 9.95124817e-01
+ 9.93833661e-01 9.94260967e-01 9.95554507e-01 9.95196283e-01
+ 1.00000000e+00 1.24659054e-01 9.93112624e-01 9.91432071e-01
+ 9.88166094e-01 9.94215131e-01 9.95928347e-01 9.96441066e-01
+ 9.96624231e-01 9.96727109e-01 9.92217898e-01 9.96727228e-01
+ 9.96318221e-01 9.96649683e-01 9.97203767e-01 9.96643007e-01
+ 1.00000000e+00 1.24721244e-01 9.93583143e-01 9.96296942e-01
+ 9.90606248e-01 9.90673721e-01 9.93003309e-01 9.94575620e-01
+ 9.95356143e-01 9.94614422e-01 9.90050197e-01 9.93106663e-01
+ 9.82261002e-01 9.93030906e-01 9.93311346e-01 9.88278270e-01
+ 1.00000000e+00 3.51965218e-03 1.00000000e+00 1.22516754e-03
+ 5.28194904e-01 6.39914691e-01 7.32384562e-01 8.61232042e-01
+ 9.77401733e-01 9.87429202e-01 9.84848440e-01 9.88008499e-01
+ 9.83465672e-01 9.93119717e-01 9.93919373e-01 9.86951470e-01
+ 9.91433740e-01 9.91564631e-01 1.00000000e+00 1.22516754e-03
+ 4.37178344e-01 9.87409651e-01 3.68934870e-01 4.53299582e-01
+ 5.89151025e-01 7.38943756e-01 9.30838645e-01 9.83114719e-01
+ 9.87496257e-01 9.65790272e-01 9.89643037e-01 9.90664244e-01
+ 9.83405948e-01 9.87396538e-01 1.00000000e+00 1.20287295e-03
+ 5.36584795e-01 9.91917670e-01 8.59890878e-01 7.34378397e-01
+ 9.81879652e-01 9.89179015e-01 9.92960513e-01 9.94374394e-01
+ 9.92905736e-01 9.94031012e-01 9.95407522e-01 9.94637787e-01
+ 9.92769718e-01 9.94857073e-01 1.00000000e+00 3.75993371e-01
+ 3.32221538e-01 9.95158851e-01 9.97087061e-01 9.95339632e-01
+ 9.96528685e-01 9.95225430e-01 9.95182455e-01 9.95164990e-01
+ 9.95477200e-01 9.95124698e-01 9.93833303e-01 9.94261205e-01
+ 9.95554745e-01 9.95196283e-01 1.00000000e+00 1.24683596e-01
+ 9.93580461e-01 9.96296465e-01 9.90606725e-01 9.90674913e-01
+ 9.93002236e-01 9.94576216e-01 9.95356381e-01 9.94614661e-01
+ 9.90050077e-01 9.93106425e-01 9.82261121e-01 9.93030906e-01
+ 9.93311226e-01 9.88278866e-01 1.00000000e+00 1.24626055e-01
+ 9.92809772e-01 9.93278325e-01 9.94086385e-01 9.94882405e-01
+ 9.93485332e-01 9.94051039e-01 9.93697047e-01 9.94265020e-01
+ 9.95597482e-01 9.94429052e-01 9.95407403e-01 9.95665908e-01
+ 9.94876504e-01 9.96434212e-01 1.00000000e+00 3.74439418e-01
+ 3.32278758e-01 9.95166481e-01 9.97080982e-01 9.95322347e-01
+ 9.96531963e-01 9.95222330e-01 9.95181859e-01 9.95164871e-01
+ 9.95476842e-01 9.95124578e-01 9.93836582e-01 9.94259477e-01
+ 9.95554388e-01 9.95196402e-01 1.00000000e+00 1.24971248e-01
+ 9.93115604e-01 9.91440535e-01 9.88172114e-01 9.94209468e-01
+ 9.95925009e-01 9.96441066e-01 9.96624231e-01 9.96727586e-01
+ 9.92216945e-01 9.96727109e-01 9.96318221e-01 9.96649802e-01
+ 9.97203767e-01 9.96642947e-01 1.00000000e+00 1.24958970e-01
+ 9.93597269e-01 9.96300340e-01 9.90600884e-01 9.90669310e-01
+ 9.93009984e-01 9.94572997e-01 9.95356023e-01 9.94613945e-01
+ 9.90049720e-01 9.93108392e-01 9.82260644e-01 9.93031025e-01
+ 9.93311584e-01 9.88277733e-01 1.00000000e+00 3.76019478e-01
+ 3.32216531e-01 9.95157778e-01 9.97086704e-01 9.95339513e-01
+ 9.96528566e-01 9.95225430e-01 9.95182455e-01 9.95164990e-01
+ 9.95477319e-01 9.95124817e-01 9.93832946e-01 9.94261444e-01
+ 9.95554626e-01 9.95195925e-01 1.00000000e+00 1.24686070e-01
+ 9.93577719e-01 9.96295989e-01 9.90607262e-01 9.90675032e-01
+ 9.93002117e-01 9.94576573e-01 9.95356262e-01 9.94614661e-01
+ 9.90049958e-01 9.93106425e-01 9.82261360e-01 9.93031025e-01
+ 9.93311226e-01 9.88278985e-01 1.00000000e+00 1.24619141e-01
+ 9.92812097e-01 9.93278682e-01 9.94086027e-01 9.94882047e-01
+ 9.93485332e-01 9.94050920e-01 9.93697047e-01 9.94265139e-01
+ 9.95597601e-01 9.94428813e-01 9.95407283e-01 9.95666027e-01
+ 9.94876623e-01 9.96434093e-01 1.00000000e+00 4.11403744e-04
+ 1.00000000e+00 2.27482320e-04 7.69192517e-01 1.00000000e+00
+ 2.25270793e-04 6.71951413e-01 4.47607636e-01 9.36811864e-01
+ 9.75247502e-01 9.88032579e-01 9.80682850e-01 9.90758479e-01
+ 9.67666268e-01 9.95957792e-01 9.95897949e-01 9.96781468e-01
+ 9.96814668e-01 9.96312201e-01 1.00000000e+00 2.25270793e-04
+ 2.65063465e-01 9.62264717e-01 9.28047955e-01 5.45478046e-01
+ 9.87898648e-01 9.76336956e-01 9.83526111e-01 9.93392646e-01
+ 9.93167639e-01 9.93883669e-01 9.94483173e-01 9.94121611e-01
+ 9.96559322e-01 1.00000000e+00 2.25270793e-04 6.71951413e-01
+ 4.49283689e-01 6.93729162e-01 5.80034733e-01 9.15761888e-01
+ 8.58850300e-01 9.01636422e-01 9.54008281e-01 9.73017395e-01
+ 9.71520543e-01 9.89612877e-01 9.94511247e-01 9.81952071e-01
+ 9.92530644e-01]
+[[0L, 3L, 6L, 9L, 13L, 16L, 19L, 22L, 27L], [0L, 16L, 32L, 48L, 64L, 80L, 96L, 112L, 128L, 144L, 146L, 162L, 178L, 194L, 210L, 226L, 242L, 258L, 274L, 290L, 306L, 322L, 338L, 340L, 343L, 358L, 373L, 389L]]
+['<s> &quot; AIDS is an absolute taboo subject , &quot; said <unk> <unk> , &quot; because', '<s> In 2012 , over three million tourists from around the world visited Israel . <e>', '<s> A courageous <unk> <unk> to help girls being bothered at <unk> underground station and was']
+['<s> &quot; He &apos;s been in football for over a year , and gained some success', '<s> They are people , who can fully live life and <unk> , assuming , of', '<s> But there is match to play and an opponent , Bosnia to conquer . <e>']
+['<s> &quot; He &apos;s been in football for over a year , and gained some success', '<s> In 2012 , over three million tourists from around the world visited Israel . <e>', '<s> They are people , who can fully live life and <unk> , assuming , of']
+['<s> &quot;', '<s> In , who can fully live life and <unk> , assuming , of course ,', '<s> In 2012 , over can fully live life and <unk> , assuming , of course', '<s> A courageous <unk> to help girls being bothered at <unk> underground station and was beaten']
+['<s> &quot; He &apos;s been in football for over a year , and gained some success', '<s> They are people , who can fully live life and <unk> , assuming , of', '<s> But there is match to play and an opponent , Bosnia to conquer . <e>']
+['<s> &quot; He &apos;s been in football for over a year , and gained some success', '<s> In 2012 , over three million tourists from around the world visited Israel . <e>', '<s> They are people , who can fully live life and <unk> , assuming , of']
+['<s> &quot; He &apos;s been in football for over a year , and gained some success', '<s> They are people , who can fully live life and <unk> , assuming , of', '<s> But there is match to play and an opponent , Bosnia to conquer . <e>']
+['<s> &quot;', '<s> In ,', '<s> A , over three million tourists from around the world visited Israel . <e>', '<s> A courageous <unk> to play and an opponent , Bosnia to conquer . <e>', '<s> A , <unk> to help girls being bothered at <unk> underground station and was beaten']

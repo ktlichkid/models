@@ -33,7 +33,7 @@ batch_size = 8
 max_length = 15
 topk_size = 50
 trg_dic_size = 10000
-beam_size = 2
+beam_size = 3
 
 decoder_size = hidden_dim
 
@@ -312,7 +312,7 @@ def decode_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            wmt14.train(dict_size), buf_size=1000),
+            wmt14.test(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
         print "One batch data:"
