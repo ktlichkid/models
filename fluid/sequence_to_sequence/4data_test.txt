@@ -1,0 +1,36 @@
+One batch data:
+<s> ( Si un commerçant calcule mal la rotation d&apos; un produit , il risque de perdre un gros profit sur la marge adaptée à l&apos; intensité du commerce . ) <e>
+<s> ( If the outlet makes a mistake in calculating the turnover velocity of a product , it stands to take a major hit on its profits with a price gap adjusted to turnover intensity . )
+( If the outlet makes a mistake in calculating the turnover velocity of a product , it stands to take a major hit on its profits with a price gap adjusted to turnover intensity . ) <e>
+One batch over
+[1.         0.4304356  0.87870646 0.96799433 0.94286853 0.9537805
+ 0.9673089  0.9598676  0.9683841  0.96169084 0.978403  ]
+[[0L, 1L], [0L, 11L]]
+['<s> ( If the outlet makes a mistake in calculating the']
+One batch data:
+<s> Un accord a été signé également concernant les aides à fournir aux pays en voie de développement . <e>
+<s> One agreement reached was on support to developing nations .
+One agreement reached was on support to developing nations . <e>
+One batch over
+[1.         0.9739885  0.97830987 0.97773576 0.9777616  0.98432124
+ 0.977517   0.986525   0.97602534 0.9788376  0.99407166]
+[[0L, 1L], [0L, 11L]]
+['<s> One agreement reached was on support to developing nations .']
+One batch data:
+<s> Cela veut dire que la date de la fin de la grève , à partir du jour du vote au parlement sur la loi relative aux caisses de la santé , n&apos; est pas définie . <e>
+<s> What this means is that they have not set a termination date for the <unk> , beginning as of the day parliament adopts the health insurance bill .
+What this means is that they have not set a termination date for the <unk> , beginning as of the day parliament adopts the health insurance bill . <e>
+One batch over
+[1.         0.5726733  0.91467345 0.9509302  0.96834344 0.9558886
+ 0.9649505  0.9662887  0.964035   0.96953243 0.98125654]
+[[0L, 1L], [0L, 11L]]
+['<s> What this means is that they have not set a']
+One batch data:
+<s> Le prix des immeubles de la capitale augmente sans cesse du fait d&apos; une demande de plus en plus forte . <e>
+<s> Real estate prices in Sofia , the capital , are rising steadily , as is demand .
+Real estate prices in Sofia , the capital , are rising steadily , as is demand . <e>
+One batch over
+[1.         0.85755783 0.9545474  0.96239024 0.97565985 0.96476495
+ 0.97778726 0.98181576 0.9637658  0.9838902  0.9657439 ]
+[[0L, 1L], [0L, 11L]]
+['<s> Real estate prices in Sofia , the capital , are']

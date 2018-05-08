@@ -29,11 +29,11 @@ src_dict, trg_dict = wmt14.get_dict(dict_size)
 hidden_dim = 512
 word_dim = 512
 IS_SPARSE = True
-batch_size = 4
-max_length = 4
+batch_size = 1
+max_length = 10
 topk_size = 50
 trg_dic_size = 10000
-beam_size = 4
+beam_size = 1
 
 decoder_size = hidden_dim
 
@@ -292,7 +292,7 @@ def decode_main():
 #    model_path = os.path.join(model_save_dir, str(0))
 #    if not os.path.isdir(model_path):
 #        os.makedirs(model_path)
-    model_path = os.path.join(model_save_dir, str(9999))
+    model_path = os.path.join(model_save_dir, str(5000))
     fluid.io.load_inference_model(dirname=model_path,
                                   executor=exe,
                                   model_filename='test_save',
