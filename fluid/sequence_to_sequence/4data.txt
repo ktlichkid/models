@@ -1,81 +1,33 @@
 One batch data:
-<s> Soit . <e>
-<s> Let is be so .
-Let is be so . <e>
-<s> &quot; Il faut penser à de nouveaux instruments <unk> , de planification , car les actuels &#91; en référence au Plan Général <unk> ( <unk> ) &#93; peuvent provoquer des authentiques désastres &quot; . <e>
-<s> &quot; We must think of new urban planning tools , because the current &#91; in reference to the General Metropolitan Plan ( GMP ) &#93; can lead to a real disaster . &quot;
-&quot; We must think of new urban planning tools , because the current &#91; in reference to the General Metropolitan Plan ( GMP ) &#93; can lead to a real disaster . &quot; <e>
-<s> <unk> <unk> a déclaré : &quot; En concert , nous voulons collecter de l&apos; énergie positive . &quot; <e>
-<s> Simon <unk> : At the concerts we want a fusion of positive energy
-Simon <unk> : At the concerts we want a fusion of positive energy <e>
-<s> Comment <unk> cette progression ? <e>
-<s> How do you explain this progression ?
-How do you explain this progression ? <e>
+<s> ( Si un commerçant calcule mal la rotation d&apos; un produit , il risque de perdre un gros profit sur la marge adaptée à l&apos; intensité du commerce . ) <e>
+<s> ( If the outlet makes a mistake in calculating the turnover velocity of a product , it stands to take a major hit on its profits with a price gap adjusted to turnover intensity . )
+( If the outlet makes a mistake in calculating the turnover velocity of a product , it stands to take a major hit on its profits with a price gap adjusted to turnover intensity . ) <e>
+<s> Un accord a été signé également concernant les aides à fournir aux pays en voie de développement . <e>
+<s> One agreement reached was on support to developing nations .
+One agreement reached was on support to developing nations . <e>
+<s> Cela veut dire que la date de la fin de la grève , à partir du jour du vote au parlement sur la loi relative aux caisses de la santé , n&apos; est pas définie . <e>
+<s> What this means is that they have not set a termination date for the <unk> , beginning as of the day parliament adopts the health insurance bill .
+What this means is that they have not set a termination date for the <unk> , beginning as of the day parliament adopts the health insurance bill . <e>
+<s> Le prix des immeubles de la capitale augmente sans cesse du fait d&apos; une demande de plus en plus forte . <e>
+<s> Real estate prices in Sofia , the capital , are rising steadily , as is demand .
+Real estate prices in Sofia , the capital , are rising steadily , as is demand . <e>
 One batch over
-[1.0000000e+00 2.3017492e-04 1.0000000e+00 2.3110716e-04 2.9161403e-01
- 7.0349228e-01 4.4771817e-01 6.2225056e-01 6.2140381e-01 6.1659026e-01
- 9.8160398e-01 9.7585076e-01 9.9276561e-01 9.9546355e-01 9.9701107e-01
- 9.9662197e-01 1.0000000e+00 2.2851973e-04 1.1281136e-01 7.6768023e-01
- 7.4953592e-01 7.7346355e-01 9.0124643e-01 9.8075128e-01 9.9001688e-01
- 9.9736941e-01 9.9552494e-01 9.9625385e-01 9.9600285e-01 9.9598414e-01
- 9.9683523e-01 9.9615103e-01 1.0000000e+00 2.2851973e-04 3.0288628e-01
- 9.4587159e-01 9.5278913e-01 6.2620693e-01 9.3690759e-01 9.8464334e-01
- 9.8821998e-01 9.9458528e-01 9.9567902e-01 9.9606597e-01 9.9622083e-01
- 9.9584371e-01 9.9690634e-01 9.9610054e-01 1.0000000e+00 2.2851973e-04
- 3.0288628e-01 9.4587159e-01 9.5278913e-01 6.2620693e-01 9.3690759e-01
- 9.8464334e-01 9.8821998e-01 9.9458528e-01 9.9567902e-01 9.9606597e-01
- 9.9622083e-01 9.9584371e-01 9.9690634e-01 1.1132379e-03 1.0000000e+00
- 2.2913516e-04 8.0746806e-01 9.7317713e-01 9.7587299e-01 9.7850806e-01
- 9.9275500e-01 9.7261387e-01 9.9049312e-01 9.9546731e-01 9.9462205e-01
- 9.9674916e-01 9.9707174e-01 9.9621987e-01 9.9507266e-01 9.9676430e-01
- 1.0000000e+00 2.4977937e-01 9.9665296e-01 9.9796754e-01 9.9781048e-01
- 9.9735790e-01 9.9756026e-01 9.9669445e-01 9.9672842e-01 9.9695879e-01
- 9.9688596e-01 9.9719268e-01 1.0000000e+00 2.4983703e-01 9.9561572e-01
- 9.9667144e-01 9.9599940e-01 9.9750274e-01 9.9523026e-01 9.9664056e-01
- 9.9754542e-01 9.9708635e-01 9.9716514e-01 9.9592847e-01 9.9604458e-01
- 9.9558449e-01 9.9528968e-01 9.9549907e-01 1.0000000e+00 2.4980295e-01
- 9.9613374e-01 9.9747807e-01 9.9666923e-01 9.9745232e-01 9.9725723e-01
- 9.9739766e-01 9.9730647e-01 9.9745578e-01 9.9645066e-01 9.9633133e-01
- 9.9735886e-01 9.9728572e-01 9.9628532e-01 9.9693871e-01 1.0000000e+00
- 2.4979939e-01 9.9590838e-01 9.9705768e-01 9.9712545e-01 9.9698359e-01
- 9.9507183e-01 9.9466431e-01 9.9586380e-01 9.9713337e-01 9.9672228e-01
- 9.9710470e-01 9.9718827e-01 9.9622428e-01 9.9509412e-01 9.9671042e-01
- 1.0000000e+00 2.4979939e-01 9.9590838e-01 9.9705768e-01 9.9712545e-01
- 9.9698359e-01 9.9507183e-01 9.9466431e-01 9.9586380e-01 9.9713337e-01
- 9.9672228e-01 9.9710470e-01 9.9718827e-01 1.0305754e-03 9.9091971e-01
- 9.9647564e-01 1.0000000e+00 2.4981107e-01 9.9665391e-01 9.9796647e-01
- 9.9781156e-01 9.9735600e-01 9.9756086e-01 9.9669433e-01 9.9672830e-01
- 9.9695891e-01 9.9688607e-01 9.9719274e-01 1.0000000e+00 2.4983917e-01
- 9.9561357e-01 9.9667466e-01 9.9600023e-01 9.9750346e-01 9.9522650e-01
- 9.9664128e-01 9.9754614e-01 9.9708611e-01 9.9716502e-01 9.9592847e-01
- 9.9604481e-01 9.9558437e-01 9.9528968e-01 9.9549907e-01 1.0000000e+00
- 2.4982345e-01 9.9613023e-01 9.9747699e-01 9.9666899e-01 9.9745244e-01
- 9.9725735e-01 9.9739754e-01 9.9730647e-01 9.9745589e-01 9.9645066e-01
- 9.9633133e-01 9.9735874e-01 9.9728572e-01 9.9628520e-01 9.9693871e-01
- 1.0000000e+00 2.4974126e-01 9.9591202e-01 9.9705815e-01 9.9712449e-01
- 9.9698406e-01 9.9507278e-01 9.9466431e-01 9.9586344e-01 9.9713337e-01
- 9.9672240e-01 9.9710482e-01 9.9718827e-01 9.9622428e-01 9.9509412e-01
- 9.9671042e-01 1.0000000e+00 2.4974126e-01 9.9591202e-01 9.9705815e-01
- 9.9712449e-01 9.9698406e-01 9.9507278e-01 9.9466431e-01 9.9586344e-01
- 9.9713337e-01 9.9672240e-01 9.9710482e-01 9.9718827e-01 1.0305542e-03
- 9.9091959e-01 9.9647552e-01 1.0000000e+00 6.6573295e-04 1.5626779e-01
- 3.3324558e-01 1.9946750e-01 1.0000000e+00 6.6184084e-04 6.1273074e-01
- 9.8067975e-01 8.6225784e-01 3.4269279e-01 9.5265615e-01 9.2537016e-01
- 9.9405575e-01 1.0000000e+00 6.6184084e-04 6.1273074e-01 9.8067975e-01
- 8.6225784e-01 5.8528084e-01 8.3137089e-01 9.8045176e-01 9.7810680e-01
- 9.9342221e-01 9.9523866e-01 9.9578804e-01 9.9613613e-01 9.9588639e-01
- 9.9689013e-01 9.9608338e-01 1.0000000e+00 6.7138782e-04 7.2175711e-01
- 9.5356041e-01 8.9347959e-01 9.5607907e-01 9.2478549e-01 9.5276165e-01
- 9.6672964e-01 9.9297088e-01 9.9105799e-01 9.9398577e-01 9.9641669e-01
- 9.9695075e-01 9.9598098e-01 9.9705374e-01 1.0000000e+00 6.6085032e-04
- 9.4705302e-01 9.8829705e-01 9.9061900e-01 9.9281549e-01 9.9521655e-01
- 9.9125499e-01 9.9465710e-01 9.9674511e-01 1.8617930e-03 9.9370086e-01
- 9.9606508e-01 9.9575752e-01 9.9481988e-01 9.9642628e-01 1.0000000e+00
- 6.6085032e-04 9.4705302e-01 9.8829705e-01 9.9061900e-01 9.9281549e-01
- 9.9521655e-01 9.9125499e-01 9.9465710e-01 9.9674511e-01 9.9635857e-01
- 9.9704838e-01 9.9716789e-01 9.9623752e-01 9.9508697e-01 9.9672925e-01]
-[[0L, 6L, 11L, 16L, 22L], [0L, 2L, 16L, 32L, 48L, 64L, 80L, 92L, 108L, 124L, 140L, 156L, 168L, 184L, 200L, 216L, 232L, 237L, 246L, 262L, 278L, 294L, 310L]]
-['<s> One', '<s> What this means is that was on support to developing nations . <e>', '<s> ( to the turnover velocity of a product , it stands to take a major', '<s> ( If the turnover velocity of a product , it stands to take a major', '<s> ( If the turnover velocity of a product , it stands to take a price', '<s> Real estate prices in Sofia , the capital , are rising steadily , as is']
-['<s> One agreement reached was on support to developing nations . <e>', '<s> ( If the outlet makes a mistake in calculating the turnover velocity of a product', '<s> What this means is that they have not set a termination date for the <unk>', '<s> Real estate prices in Sofia , the capital , are rising steadily , as is', '<s> Real estate prices in Sofia , the capital , are rising steadily a as is']
-['<s> One agreement reached was on support to developing nations . <e>', '<s> ( If the outlet makes a mistake in calculating the turnover velocity of a product', '<s> What this means is that they have not set a termination date for the <unk>', '<s> Real estate prices in Sofia , the capital , are rising steadily , as is', '<s> Real estate prices in Sofia , the capital , are rising steadily a as is']
-['<s> One agreement reached was', '<s> ( If the turnover intensity . ) <e>', '<s> ( If the turnover velocity of a product , it stands to take a major', '<s> What this means is that they have not set a termination date for the <unk>', '<s> Real estate prices in Sofia , the capital , the rising steadily , as is', '<s> Real estate prices in Sofia , the capital , are rising steadily , as is']
+[1.         0.24983649 0.9956151  0.9966712  0.9959994  1.
+ 0.24981028 0.996134   0.99747795 0.99666935 1.         0.24977884
+ 0.9966532  0.99796754 0.9978103  1.         0.24979313 0.99590826
+ 0.9970577  0.9971257  1.         0.24984132 0.99561465 0.996673
+ 0.996      1.         0.24981248 0.9961319  0.9974776  0.9966691
+ 1.         0.24979581 0.9966539  0.9979672  0.99781096 1.
+ 0.24976747 0.99591005 0.9970578  0.99712497 1.         0.24983512
+ 0.9956157  0.9966713  0.9959994  1.         0.24980247 0.99613386
+ 0.99747795 0.9966695  1.         0.2497796  0.99665284 0.99796754
+ 0.9978103  1.         0.24980152 0.9959084  0.99705756 0.99712545
+ 1.         0.2498414  0.9956151  0.99667203 0.99599963 1.
+ 0.2498102  0.9961331  0.9974778  0.99666923 1.         0.24978541
+ 0.9966538  0.9979674  0.9978106  1.         0.2497809  0.99590886
+ 0.9970577  0.9971252 ]
+[[0L, 4L, 8L, 12L, 16L], [0L, 5L, 10L, 15L, 20L, 25L, 30L, 35L, 40L, 45L, 50L, 55L, 60L, 65L, 70L, 75L, 80L]]
+['<s> ( If the outlet', '<s> What this means is', '<s> One agreement reached was', '<s> Real estate prices in']
+['<s> ( If the outlet', '<s> What this means is', '<s> One agreement reached was', '<s> Real estate prices in']
+['<s> ( If the outlet', '<s> What this means is', '<s> One agreement reached was', '<s> Real estate prices in']
+['<s> ( If the outlet', '<s> What this means is', '<s> One agreement reached was', '<s> Real estate prices in']
