@@ -29,8 +29,8 @@ src_dict, trg_dict = wmt14.get_dict(dict_size)
 hidden_dim = 512
 word_dim = 512
 IS_SPARSE = True
-batch_size = 10
-max_length = 8
+batch_size = 1
+max_length = 18
 topk_size = 50
 trg_dic_size = 10000
 beam_size = 2
@@ -222,7 +222,7 @@ def train_main():
                 break
             batch_id += 1
 
-        if pass_id % 1000 == 0:
+        if (pass_id + 1) % 1000 == 0:
             model_path = os.path.join(model_save_dir, str(pass_id))
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
@@ -292,7 +292,7 @@ def decode_main():
 #    model_path = os.path.join(model_save_dir, str(0))
 #    if not os.path.isdir(model_path):
 #        os.makedirs(model_path)
-    model_path = os.path.join(model_save_dir, str(9000))
+    model_path = os.path.join(model_save_dir, str(9999))
     fluid.io.load_inference_model(dirname=model_path,
                                   executor=exe,
                                   model_filename='test_save',
@@ -312,7 +312,7 @@ def decode_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            wmt14.test(dict_size), buf_size=1000),
+            wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
         print data
@@ -344,5 +344,5 @@ def decode_main():
 
 
 if __name__ == '__main__':
-    train_main()
-    # decode_main()
+    #train_main()
+    decode_main()
