@@ -292,11 +292,11 @@ def decode_main():
 #    model_path = os.path.join(model_save_dir, str(0))
 #    if not os.path.isdir(model_path):
 #        os.makedirs(model_path)
-#    model_path = os.path.join(model_save_dir, str(9000))
-#    fluid.io.load_inference_model(dirname=model_path,
-#                                  executor=exe,
-#                                  model_filename='test_save',
-#                                  params_filename=None)
+    model_path = os.path.join(model_save_dir, str(9000))
+    fluid.io.load_inference_model(dirname=model_path,
+                                  executor=exe,
+                                  model_filename='test_save',
+                                  params_filename=None)
 
 #    fluid.io.load_persistables(executor=exe,
 #                               dirname=model_path,
@@ -312,7 +312,7 @@ def decode_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            wmt14.train(dict_size), buf_size=1000),
+            wmt14.test(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
         print data
@@ -344,5 +344,5 @@ def decode_main():
 
 
 if __name__ == '__main__':
-    # train_main()
-    decode_main()
+    train_main()
+    # decode_main()
