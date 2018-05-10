@@ -117,39 +117,23 @@ def decoder_decode(state_cell):
 
     with decoder.block():
         prev_ids = decoder.read_array(init=init_ids, is_ids=True)
-        #pd.Print(prev_ids, message="0. prev_ids: ")
         prev_scores = decoder.read_array(init=init_scores, is_scores=True)
-        #pd.Print(prev_scores, message="prev_scores: ")
         prev_ids_embedding = embedding(prev_ids)
-        #pd.Print(prev_ids_embedding, message="prev_scores: ")
         prev_state = decoder.state_cell.get_state('h')
-        #pd.Print(prev_state, message="prev_state: ")
         prev_state_expanded = pd.sequence_expand(prev_state, prev_scores)
-        #pd.Print(prev_state_expanded, message="prev_state_expanded: ")
         decoder.state_cell.set_state('h', prev_state_expanded)
         decoder.state_cell.compute_state(inputs={'x': prev_ids_embedding})
         current_state = decoder.state_cell.get_state('h')
-        #pd.Print(current_state, message="current_state: ")
         current_state_with_lod = pd.lod_reset(x=current_state, y=prev_scores)
-        #pd.Print(current_state_with_lod, message="current_state_with_lod: ")
-        # copy lod from prev_ids to current_state
         scores = pd.fc(input=current_state_with_lod,
                        size=target_dict_dim,
                        act='softmax')
-        #pd.Print(scores, message="scores: ")
         topk_scores, topk_indices = pd.topk(scores, k=50)
-        #pd.Print(topk_scores, message="topk_scores: ")
-        #pd.Print(topk_indices, message="topk_indices: ")
         selected_ids, selected_scores = pd.beam_search(
             prev_ids, topk_indices, topk_scores, beam_size, end_id=1, level=0)
-        #pd.Print(selected_ids, message="selected_ids: ")
-        #pd.Print(selected_scores, message="selected_scores: ")
         decoder.state_cell.update_states()
-        #pd.Print(prev_ids, message="1. prev_ids: ")
         decoder.update_array(prev_ids, selected_ids)
-        #pd.Print(prev_ids, message="2. prev_ids: ")
         decoder.update_array(prev_scores, selected_scores)
-        #pd.Print(prev_ids, message="3. prev_ids: ")
         cond_var = pd.has_data(selected_ids)
         if not np.array(cond_var.get_tensor())[0]:
             decoder.break_while_loop()
