@@ -5,7 +5,7 @@ from paddle.fluid.framework import Variable
 from paddle.fluid import framework, unique_name
 from paddle.fluid.layer_helper import LayerHelper
 import paddle.fluid.core as core
-
+import numpy as np
 
 class DecoderType:
     TRAINING = 1
@@ -331,6 +331,11 @@ class BeamSearchDecoder(object):
     @property
     def type(self):
         return self._type
+
+    def break_while_loop(self):
+        cond_tensor = self._cond.get_tensor()
+        cond_tensor.set([False], core.CPUPlace())
+        print np.array(self._cond.get_tensor())
 
     # init must be provided
     def read_array(self, init, is_ids=False, is_scores=False):
