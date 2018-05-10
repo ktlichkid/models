@@ -142,7 +142,6 @@ def decoder_decode(state_cell):
         #pd.Print(topk_indices, message="topk_indices: ")
         selected_ids, selected_scores = pd.beam_search(
             prev_ids, topk_indices, topk_scores, beam_size, end_id=1, level=0)
-
         #pd.Print(selected_ids, message="selected_ids: ")
         #pd.Print(selected_scores, message="selected_scores: ")
         decoder.state_cell.update_states()
@@ -151,6 +150,9 @@ def decoder_decode(state_cell):
         #pd.Print(prev_ids, message="2. prev_ids: ")
         decoder.update_array(prev_scores, selected_scores)
         #pd.Print(prev_ids, message="3. prev_ids: ")
+        cond_var = pd.has_data(selected_ids)
+        if not np.array(cond_var.get_tensor())[0]:
+            decoder.break_while_loop()
 
     translation_ids, translation_scores = decoder()
 
