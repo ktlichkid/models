@@ -333,9 +333,10 @@ class BeamSearchDecoder(object):
         return self._type
 
     def break_while_loop(self):
-        cond_tensor = self._cond.get_tensor()
+        cond_tensor = self._cond.Get()
+        print np.array(cond_tensor)
         cond_tensor.set([False], core.CPUPlace())
-        print np.array(self._cond.get_tensor())
+        print np.array(self._cond.Get())
 
     # init must be provided
     def read_array(self, init, is_ids=False, is_scores=False):

@@ -29,7 +29,7 @@ src_dict, trg_dict = wmt14.get_dict(dict_size)
 hidden_dim = 512
 word_dim = 512
 IS_SPARSE = True
-batch_size = 1
+batch_size = 4
 max_length = 10
 topk_size = 50
 trg_dic_size = 10000
@@ -134,8 +134,11 @@ def decoder_decode(state_cell):
         decoder.state_cell.update_states()
         decoder.update_array(prev_ids, selected_ids)
         decoder.update_array(prev_scores, selected_scores)
+        pd.Print(selected_ids, message="selected_ids: ")
+        pd.Print(prev_ids, message="prev_ids: ")
         cond_var = pd.has_data(selected_ids)
-        if not np.array(cond_var.get_tensor())[0]:
+        pd.Print(cond_var, message="cond_var")
+        if not np.array(cond_var.Get())[0]:
             decoder.break_while_loop()
 
     translation_ids, translation_scores = decoder()
@@ -333,7 +336,8 @@ def decode_main():
         result = []
         for i in xrange(len(lod_list_1) - 1):
             sentence_list = [trg_dict[token] 
-                             for token in token_array[lod_list_1[i]:lod_list_1[i+1]]]
+                             for token in 
+                             token_array[lod_list_1[i]:lod_list_1[i+1]]]
             sentence = " ".join(sentence_list)
             result.append(sentence)
         lod_list_0 = result_ids.lod()[0]
