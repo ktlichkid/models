@@ -318,12 +318,15 @@ class BeamSearchDecoder(object):
         with self._while_op.block():
             yield
 
-            layers.increment(x=self._counter, value=1.0, in_place=True)
+            ie = layers.IfElse(self._cond)
 
-            for value, array in self._array_link:
-                layers.array_write(x=value, i=self._counter, array=array)
+            with ie.true_block():
+                layers.increment(x=self._counter, value=1.0, in_place=True)
 
-            layers.less_than(x=self._counter, y=self._max_len, cond=self._cond)
+                for value, array in self._array_link:
+                    layers.array_write(x=value, i=self._counter, array=array)
+
+                layers.less_than(x=self._counter, y=self._max_len, cond=self._cond)
 
         self._status = BeamSearchDecoder.AFTER_BEAM_SEARCH_DECODER
         self._state_cell.leave_decoder(self)
@@ -332,11 +335,8 @@ class BeamSearchDecoder(object):
     def type(self):
         return self._type
 
-    def break_while_loop(self):
-        cond_tensor = self._cond.Get()
-        print np.array(cond_tensor)
-        cond_tensor.set([False], core.CPUPlace())
-        print np.array(self._cond.Get())
+    def break_while_loop(self, selected_ids):
+        layers.has_data(selected_ids, self._cond)
 
     # init must be provided
     def read_array(self, init, is_ids=False, is_scores=False):

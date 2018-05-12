@@ -131,15 +131,19 @@ def decoder_decode(state_cell):
         topk_scores, topk_indices = pd.topk(scores, k=50)
         selected_ids, selected_scores = pd.beam_search(
             prev_ids, topk_indices, topk_scores, beam_size, end_id=1, level=0)
-        decoder.state_cell.update_states()
-        decoder.update_array(prev_ids, selected_ids)
-        decoder.update_array(prev_scores, selected_scores)
-        pd.Print(selected_ids, message="selected_ids: ")
-        pd.Print(prev_ids, message="prev_ids: ")
+
         cond_var = pd.has_data(selected_ids)
-        pd.Print(cond_var, message="cond_var")
-        if not np.array(cond_var.Get())[0]:
-            decoder.break_while_loop()
+        ie = pd.IfElse(cond_var)
+
+        with ie.true_block():
+            decoder.state_cell.update_states()
+            decoder.update_array(prev_ids, selected_ids)
+            decoder.update_array(prev_scores, selected_scores)
+            pd.Print(selected_ids, message="selected_ids: ")
+            pd.Print(prev_ids, message="prev_ids: ")
+
+        with ie.false_block():
+            decoder.break_while_loop(selected_ids)
 
     translation_ids, translation_scores = decoder()
 
