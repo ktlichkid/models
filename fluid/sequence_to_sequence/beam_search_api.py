@@ -319,12 +319,18 @@ class BeamSearchDecoder(object):
             yield
             #ie = layers.IfElse(self._cond)
             #with ie.true_block():
-            layers.increment(x=self._counter, value=1.0, in_place=True)
+            with layers.Switch() as switch:
+                with switch.case(self._cond):
+                    layers.Print(self._cond, message="True block")
+                    layers.increment(x=self._counter, value=1.0, in_place=True)
 
-            for value, array in self._array_link:
-                layers.array_write(x=value, i=self._counter, array=array)
+                    for value, array in self._array_link:
+                        layers.array_write(x=value, i=self._counter, array=array)
 
-            layers.less_than(x=self._counter, y=self._max_len, cond=self._cond)
+                    layers.less_than(
+                        x=self._counter, y=self._max_len, cond=self._cond)
+                with switch.default():
+                    layers.Print(self._cond, message="False block")
 
         self._status = BeamSearchDecoder.AFTER_BEAM_SEARCH_DECODER
         self._state_cell.leave_decoder(self)
