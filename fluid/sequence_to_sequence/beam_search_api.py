@@ -339,7 +339,7 @@ class BeamSearchDecoder(object):
     def type(self):
         return self._type
 
-    def break_while_loop(self, selected_ids):
+    def fetch_empty_var(self, selected_ids):
         layers.has_data(selected_ids, self._cond)
 
     # init must be provided
