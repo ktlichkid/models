@@ -317,11 +317,8 @@ class BeamSearchDecoder(object):
 
         with self._while_op.block():
             yield
-            #ie = layers.IfElse(self._cond)
-            #with ie.true_block():
             with layers.Switch() as switch:
                 with switch.case(self._cond):
-                    layers.Print(self._cond, message="True block")
                     layers.increment(x=self._counter, value=1.0, in_place=True)
 
                     for value, array in self._array_link:
@@ -330,7 +327,7 @@ class BeamSearchDecoder(object):
                     layers.less_than(
                         x=self._counter, y=self._max_len, cond=self._cond)
                 with switch.default():
-                    layers.Print(self._cond, message="False block")
+                    layers.Print(self._cond, message="Loop end due to no further output")
 
         self._status = BeamSearchDecoder.AFTER_BEAM_SEARCH_DECODER
         self._state_cell.leave_decoder(self)
