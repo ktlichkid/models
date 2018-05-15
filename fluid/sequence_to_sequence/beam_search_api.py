@@ -326,8 +326,6 @@ class BeamSearchDecoder(object):
 
                     layers.less_than(
                         x=self._counter, y=self._max_len, cond=self._cond)
-                with switch.default():
-                    layers.Print(self._cond, message="Loop end due to now further output")
 
         self._status = BeamSearchDecoder.AFTER_BEAM_SEARCH_DECODER
         self._state_cell.leave_decoder(self)

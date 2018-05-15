@@ -30,7 +30,7 @@ hidden_dim = 512
 word_dim = 512
 IS_SPARSE = True
 batch_size = 4
-max_length = 10
+max_length = 100
 topk_size = 50
 trg_dic_size = 10000
 beam_size = 1
@@ -139,17 +139,7 @@ def decoder_decode(state_cell):
                 decoder.update_array(prev_scores, selected_scores)
             with switch.default():
                 decoder.fetch_empty_var(selected_ids)
-
-        #cond_var = pd.has_data(selected_ids)
-        #ie = pd.IfElse(cond_var)
-
-        #with ie.true_block():
-        #pd.Print(selected_ids, message="selected_ids: ")
-        #pd.Print(prev_ids, message="prev_ids: ")
-
-        #with ie.false_block():
-            #decoder.break_while_loop(selected_ids)
-
+                
     translation_ids, translation_scores = decoder()
 
     return translation_ids, translation_scores
