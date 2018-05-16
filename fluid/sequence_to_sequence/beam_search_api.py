@@ -334,8 +334,12 @@ class BeamSearchDecoder(object):
     def type(self):
         return self._type
 
-    def fetch_empty_var(self, selected_ids):
-        layers.has_data(selected_ids, self._cond)
+    def break_while_loop(self):
+        self._cond = layers.assign(np.array([0]), self._cond)
+        self._cond = layers.cast(self._cond, 'bool')
+
+        #layers.cast
+        #layers.has_data(selected_ids, self._cond)
 
     # init must be provided
     def read_array(self, init, is_ids=False, is_scores=False):

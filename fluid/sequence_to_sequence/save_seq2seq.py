@@ -133,13 +133,14 @@ def decoder_decode(state_cell):
             prev_ids, topk_indices, topk_scores, beam_size, end_id=1, level=0)
 
         with pd.Switch() as switch:
-            with switch.case(pd.has_data(selected_ids)):
+            with switch.case(pd.is_empty(selected_ids)):
+                decoder.break_while_loop()
+            with switch.default():
                 decoder.state_cell.update_states()
                 decoder.update_array(prev_ids, selected_ids)
                 decoder.update_array(prev_scores, selected_scores)
-            with switch.default():
-                decoder.fetch_empty_var(selected_ids)
-                
+
+
     translation_ids, translation_scores = decoder()
 
     return translation_ids, translation_scores
