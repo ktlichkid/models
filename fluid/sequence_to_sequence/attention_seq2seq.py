@@ -8,7 +8,7 @@ import argparse
 import time
 import distutils.util
 
-import paddle.v2
+import paddle
 import paddle.fluid as fluid
 import paddle.fluid.core as core
 import paddle.fluid.framework as framework
@@ -340,14 +340,14 @@ def train():
 
     fluid.memory_optimize(fluid.default_main_program(), print_log=False)
 
-    train_batch_generator = paddle.v2.batch(
-        paddle.v2.reader.shuffle(
-            paddle.v2.dataset.wmt14.train(args.dict_size), buf_size=1000),
+    train_batch_generator = paddle.batch(
+        paddle.reader.shuffle(
+            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
-    test_batch_generator = paddle.v2.batch(
-        paddle.v2.reader.shuffle(
-            paddle.v2.dataset.wmt14.test(args.dict_size), buf_size=1000),
+    test_batch_generator = paddle.batch(
+        paddle.reader.shuffle(
+            paddle.dataset.wmt14.test(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
@@ -419,9 +419,9 @@ def infer():
 
     fluid.memory_optimize(fluid.default_main_program(), print_log=False)
 
-    test_batch_generator = paddle.v2.batch(
-        paddle.v2.reader.shuffle(
-            paddle.v2.dataset.wmt14.test(args.dict_size), buf_size=1000),
+    test_batch_generator = paddle.batch(
+        paddle.reader.shuffle(
+            paddle.dataset.wmt14.test(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
