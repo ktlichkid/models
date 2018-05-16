@@ -135,6 +135,7 @@ def decoder_decode(state_cell):
         with pd.Switch() as switch:
             with switch.case(pd.is_empty(selected_ids)):
                 decoder.break_while_loop()
+#                pd.Print(selected_ids, message="should be empty")
             with switch.default():
                 decoder.state_cell.update_states()
                 decoder.update_array(prev_ids, selected_ids)
