@@ -240,7 +240,7 @@ def decode_main():
 #    model_path = os.path.join(model_save_dir, str(0))
 #    if not os.path.isdir(model_path):
 #        os.makedirs(model_path)
-    model_path = os.path.join(model_save_dir, str(5000))
+    model_path = os.path.join(model_save_dir, str(10000))
 #    fluid.io.load_inference_model(dirname=model_path,
 #                                  executor=exe,
 #                                  model_filename='test_save',
@@ -307,5 +307,5 @@ def decode_main():
         #break
 
 if __name__ == '__main__':
-    train_main()
-    #decode_main()
+    #train_main()
+    decode_main()
