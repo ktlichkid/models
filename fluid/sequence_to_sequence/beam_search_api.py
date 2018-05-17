@@ -336,12 +336,7 @@ class BeamSearchDecoder(object):
         return self._type
 
     def early_stop(self):
-        #self._cond = layers.assign(np.array([0], dtype='int32'), self._cond)
-        #self._cond = layers.cast(self._cond, 'bool')
-        layers.is_empty(self._counter, self._cond)
-
-        #layers.cast
-        #layers.has_data(selected_ids, self._cond)
+        layers.fill_constant(shape=[1], value=0, dtype='bool', force_cpu=True, out=self._cond)
 
     # init must be provided
     def read_array(self, init, is_ids=False, is_scores=False):
