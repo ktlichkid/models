@@ -29,7 +29,7 @@ src_dict, trg_dict = wmt14.get_dict(dict_size)
 hidden_dim = 512
 word_dim = 512
 IS_SPARSE = True
-batch_size = 4
+batch_size = 1
 max_length = 100
 topk_size = 50
 trg_dic_size = 10000
@@ -135,7 +135,6 @@ def decoder_decode(state_cell):
         with pd.Switch() as switch:
             with switch.case(pd.is_empty(selected_ids)):
                 decoder.early_stop()
-#                pd.Print(selected_ids, message="should be empty")
             with switch.default():
                 decoder.state_cell.update_states()
                 decoder.update_array(prev_ids, selected_ids)
@@ -190,7 +189,7 @@ def train_main():
 
     exe.run(framework.default_startup_program())
 
-    for pass_id in xrange(5001):
+    for pass_id in xrange(10001):
         batch_id = 0
         for data in train_data():
             word_data = to_lodtensor(map(lambda x: x[0], data), place)
@@ -217,58 +216,17 @@ def train_main():
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
 
-            fluid.io.save_inference_model(dirname=model_path,
-                            feeded_var_names=['src_word_id'],
-                            target_vars=[rnn_out],
-                            executor=exe,
-                            main_program=framework.default_main_program(),
-                            model_filename='test_save',
-                            params_filename=None)
-
-        # if pass_id % 10 == 0:
-        #     model_path_0 = os.path.join(model_save_dir, str(0))
-        #     if not os.path.isdir(model_path_0):
-        #         os.makedirs(model_path_0)
-        #     fluid.io.save_inference_model(dirname=model_path_0,
-        #                    feeded_var_names=['src_word_id'],
-        #                    target_vars=[rnn_out],
-        #                    executor=exe,
-        #                    main_program=framework.default_main_program(),
-        #                    model_filename='test_save',
-        #                    params_filename=None)
-        #
-            # fluid.io.load_inference_model(dirname=model_path_0,
-            #               executor=exe,
-            #               model_filename='test_save',
-            #               params_filename=None)
-            #
-            # model_path_1 = os.path.join(model_save_dir, str(1))
-            # if not os.path.isdir(model_path_1):
-            #     os.makedirs(model_path_1)
-            #
-            # fluid.io.save_inference_model(dirname=model_path_1,
+            #fluid.io.save_inference_model(dirname=model_path,
             #                feeded_var_names=['src_word_id'],
             #                target_vars=[rnn_out],
             #                executor=exe,
             #                main_program=framework.default_main_program(),
             #                model_filename='test_save',
             #                params_filename=None)
-            #
-            # for data in train_data():
-            #     word_data = to_lodtensor(map(lambda x: x[0], data), place)
-            #     trg_word = to_lodtensor(map(lambda x: x[1], data), place)
-            #     trg_word_next = to_lodtensor(map(lambda x: x[2], data), place)
-            #     outs = exe.run(framework.default_main_program(),
-            #                feed={
-            #                    'src_word_id': word_data,
-            #                    'target_language_word': trg_word,
-            #                    'target_language_next_word': trg_word_next
-            #                },
-            #                fetch_list=[avg_cost])
-            #     avg_cost_val = np.array(outs[0])
-            #     print('pass_id=' + str(pass_id) + ' batch=' + str(batch_id) +
-            #           " avg_cost=" + str(avg_cost_val))
-            #
+            fluid.io.save_persistables(executor=exe,
+                                       dirname=model_path,
+                                       main_program=framework.default_main_program())
+
 
 
 def decode_main():
@@ -283,14 +241,14 @@ def decode_main():
 #    if not os.path.isdir(model_path):
 #        os.makedirs(model_path)
     model_path = os.path.join(model_save_dir, str(5000))
-    fluid.io.load_inference_model(dirname=model_path,
-                                  executor=exe,
-                                  model_filename='test_save',
-                                  params_filename=None)
+#    fluid.io.load_inference_model(dirname=model_path,
+#                                  executor=exe,
+#                                  model_filename='test_save',
+#                                  params_filename=None)
 
-#    fluid.io.load_persistables(executor=exe,
-#                               dirname=model_path,
-#                               main_program=framework.default_main_program())
+    fluid.io.load_persistables(executor=exe,
+                               dirname=model_path,
+                               main_program=framework.default_main_program())
 
     init_ids_data = np.array([0 for _ in range(batch_size)], dtype='int64')
     init_scores_data = np.array(
