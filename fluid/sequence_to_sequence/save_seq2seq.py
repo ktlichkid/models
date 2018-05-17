@@ -307,5 +307,5 @@ def decode_main():
         #break
 
 if __name__ == '__main__':
-    #train_main()
-    decode_main()
+    train_main()
+    #decode_main()
