@@ -7,6 +7,7 @@ import numpy as np
 import argparse
 import time
 import distutils.util
+import os
 
 import paddle
 import paddle.fluid as fluid
@@ -14,6 +15,8 @@ import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 from paddle.fluid.executor import Executor
 from beam_search_api import *
+
+import wmt14
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
@@ -34,7 +37,7 @@ parser.add_argument(
 parser.add_argument(
     "--batch_size",
     type=int,
-    default=16,
+    default=1,
     help="The sequence number of a mini-batch data. (default: %(default)d)")
 parser.add_argument(
     "--dict_size",
@@ -45,7 +48,7 @@ parser.add_argument(
 parser.add_argument(
     "--pass_num",
     type=int,
-    default=2,
+    default=10000,
     help="The pass number to train. (default: %(default)d)")
 parser.add_argument(
     "--learning_rate",
@@ -57,12 +60,12 @@ parser.add_argument(
 parser.add_argument(
     "--beam_size",
     type=int,
-    default=3,
+    default=1,
     help="The width for beam searching. (default: %(default)d)")
 parser.add_argument(
     "--use_gpu",
     type=distutils.util.strtobool,
-    default=False,
+    default=True,
     help="Whether to use gpu. (default: %(default)d)")
 parser.add_argument(
     "--max_length",
@@ -342,12 +345,12 @@ def train():
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
+            wmt14.train(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.test(args.dict_size), buf_size=1000),
+            wmt14.test(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
@@ -376,7 +379,7 @@ def train():
 
         return total_loss / count
 
-    for pass_id in xrange(args.pass_num):
+    for pass_id in xrange(args.pass_num + 1):
         pass_start_time = time.time()
         words_seen = 0
         for batch_id, data in enumerate(train_batch_generator()):
@@ -405,6 +408,15 @@ def train():
         print("pass_id=%d, test_loss: %f, words/s: %f, sec/pass: %f" %
               (pass_id, test_loss, words_per_sec, time_consumed))
 
+        if pass_id % 1000 == 0:
+            model_path = os.path.join("model_attention", str(pass_id))
+            if not os.path.isdir(model_path):
+                os.makedirs(model_path)
+
+            fluid.io.save_persistables(executor=exe,
+                                       dirname=model_path,
+                                       main_program=framework.default_main_program())
+
 
 def infer():
     translation_ids, translation_scores, feeding_list = seq_to_seq_net(
@@ -421,12 +433,17 @@ def infer():
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.test(args.dict_size), buf_size=1000),
+            wmt14.train(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
     exe = Executor(place)
     exe.run(framework.default_startup_program())
+
+    model_path = os.path.join("model_attention", str(10000))
+    fluid.io.load_persistables(executor=exe,
+                               dirname=model_path,
+                               main_program=framework.default_main_program())
 
     for batch_id, data in enumerate(test_batch_generator()):
         batch_size = len(data)
@@ -447,7 +464,7 @@ def infer():
                              return_numpy=False)
 
         print(fetch_outs[0].lod())
-        break
+        #break
 
 
 if __name__ == '__main__':
