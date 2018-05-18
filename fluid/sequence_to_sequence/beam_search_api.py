@@ -319,6 +319,7 @@ class BeamSearchDecoder(object):
             yield
             with layers.Switch() as switch:
                 with switch.case(self._cond):
+                    # layers.Print(self._cond)
                     layers.increment(x=self._counter, value=1.0, in_place=True)
 
                     for value, array in self._array_link:
@@ -334,8 +335,8 @@ class BeamSearchDecoder(object):
     def type(self):
         return self._type
 
-    def fetch_empty_var(self, selected_ids):
-        layers.has_data(selected_ids, self._cond)
+    def early_stop(self):
+        layers.fill_constant(shape=[1], value=0, dtype='bool', force_cpu=True, out=self._cond)
 
     # init must be provided
     def read_array(self, init, is_ids=False, is_scores=False):
