@@ -37,7 +37,7 @@ parser.add_argument(
 parser.add_argument(
     "--batch_size",
     type=int,
-    default=1,
+    default=4,
     help="The sequence number of a mini-batch data. (default: %(default)d)")
 parser.add_argument(
     "--dict_size",
@@ -53,7 +53,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.0002,
+    default=0.0001,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -350,7 +350,7 @@ def train():
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            wmt14.test(args.dict_size), buf_size=1000),
+            wmt14.train(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
