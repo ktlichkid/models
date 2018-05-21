@@ -66,7 +66,7 @@ parser.add_argument(
 parser.add_argument(
     "--use_gpu",
     type=distutils.util.strtobool,
-    default=True,
+    default=False,
     help="Whether to use gpu. (default: %(default)d)")
 parser.add_argument(
     "--max_length",
@@ -289,15 +289,15 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 beam_size,
                 end_id=1,
                 level=0)
-            with layers.Switch() as switch:
-                with switch.case(layers.is_empty(selected_ids)):
-                    decoder.early_stop()
-                with switch.default():
-                    decoder.state_cell.update_states()
-                    decoder.update_array(prev_ids, selected_ids)
-                    decoder.update_array(prev_scores, selected_scores)
-                    decoder.update_array(encoder_vec, encoder_vec_expanded)
-                    decoder.update_array(encoder_proj, encoder_proj_expanded)
+            # with layers.Switch() as switch:
+            #     with switch.case(layers.is_empty(selected_ids)):
+            #         decoder.early_stop()
+            #     with switch.default():
+            decoder.state_cell.update_states()
+            decoder.update_array(prev_ids, selected_ids)
+            decoder.update_array(prev_scores, selected_scores)
+            decoder.update_array(encoder_vec, encoder_vec_expanded)
+            decoder.update_array(encoder_proj, encoder_proj_expanded)
 
         translation_ids, translation_scores = decoder()
 
@@ -445,10 +445,10 @@ def infer():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join("model_attention", str(10000))
-    fluid.io.load_persistables(executor=exe,
-                               dirname=model_path,
-                               main_program=framework.default_main_program())
+#    model_path = os.path.join("model_attention", str(10000))
+#    fluid.io.load_persistables(executor=exe,
+#                               dirname=model_path,
+#                               main_program=framework.default_main_program())
 
     for batch_id, data in enumerate(test_batch_generator()):
         batch_size = len(data)
