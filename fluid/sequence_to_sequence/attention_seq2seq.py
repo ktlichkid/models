@@ -11,6 +11,7 @@ import os
 
 import paddle
 import paddle.fluid as fluid
+import paddle.fluid.layers as layers
 import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 from paddle.fluid.executor import Executor
@@ -288,11 +289,15 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 beam_size,
                 end_id=1,
                 level=0)
-            decoder.state_cell.update_states()
-            decoder.update_array(prev_ids, selected_ids)
-            decoder.update_array(prev_scores, selected_scores)
-            decoder.update_array(encoder_vec, encoder_vec_expanded)
-            decoder.update_array(encoder_proj, encoder_proj_expanded)
+            with layers.Switch() as switch:
+                with switch.case(layers.is_empty(selected_ids)):
+                    decoder.early_stop()
+                with switch.default():
+                    decoder.state_cell.update_states()
+                    decoder.update_array(prev_ids, selected_ids)
+                    decoder.update_array(prev_scores, selected_scores)
+                    decoder.update_array(encoder_vec, encoder_vec_expanded)
+                    decoder.update_array(encoder_proj, encoder_proj_expanded)
 
         translation_ids, translation_scores = decoder()
 
