@@ -38,7 +38,7 @@ parser.add_argument(
 parser.add_argument(
     "--batch_size",
     type=int,
-    default=4,
+    default=1,
     help="The sequence number of a mini-batch data. (default: %(default)d)")
 parser.add_argument(
     "--dict_size",
@@ -54,7 +54,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.0001,
+    default=0.001,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -140,6 +140,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     encoded_proj = fluid.layers.fc(input=encoded_vector,
                                    size=decoder_size,
                                    bias_attr=False)
+    layers.Print(encoded_proj, message="very beginning")
 
     backward_first = fluid.layers.sequence_pool(
         input=src_reversed, pool_type='first')
@@ -255,11 +256,18 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         decoder = BeamSearchDecoder(state_cell, max_len=max_length)
 
         with decoder.block():
+            #layers.Print(encoded_proj, message="in loop")
             encoder_vec = decoder.read_array(init=encoded_vector)
+            #layers.Print(encoded_vector, message="encoded_vector")
+            #layers.Print(encoded_proj, message="before")
             encoder_proj = decoder.read_array(init=encoded_proj)
+            layers.Print(encoder_proj, message="after")
             prev_ids = decoder.read_array(init=init_ids, is_ids=True)
+            #layers.Print(prev_ids, message="prev_ids")
             prev_scores = decoder.read_array(init=init_scores, is_scores=True)
+            #layers.Print(prev_scores, message="prev_scores")
             prev_ids_embedding = embedding(prev_ids)
+            #layers.Print(prev_ids_embedding, message="prev_ids_embedding")
             prev_h = decoder.state_cell.get_state('h')
             prev_c = decoder.state_cell.get_state('c')
             prev_h_expanded = fluid.layers.sequence_expand(prev_h, prev_scores)
@@ -293,11 +301,21 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             #     with switch.case(layers.is_empty(selected_ids)):
             #         decoder.early_stop()
             #     with switch.default():
+    
+            layers.Print(selected_ids, message="selected_ids")
+            layers.Print(selected_scores, message="selected_scores")
+            layers.Print(encoder_vec_expanded, message="encoder_vec")
+            layers.Print(encoder_proj_expanded, message="encoder_proj")
             decoder.state_cell.update_states()
             decoder.update_array(prev_ids, selected_ids)
             decoder.update_array(prev_scores, selected_scores)
             decoder.update_array(encoder_vec, encoder_vec_expanded)
             decoder.update_array(encoder_proj, encoder_proj_expanded)
+            layers.Print(prev_ids, message="prev_ids")
+            layers.Print(prev_scores, message="prev_scores")
+            layers.Print(encoder_vec, message="encoder_vec")
+            layers.Print(encoder_proj, message="encoder_proj")
+
 
         translation_ids, translation_scores = decoder()
 
@@ -413,7 +431,7 @@ def train():
         print("pass_id=%d, test_loss: %f, words/s: %f, sec/pass: %f" %
               (pass_id, test_loss, words_per_sec, time_consumed))
 
-        if pass_id % 1000 == 0:
+        if pass_id % 100 == 0:
             model_path = os.path.join("model_attention", str(pass_id))
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
@@ -445,10 +463,10 @@ def infer():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-#    model_path = os.path.join("model_attention", str(10000))
-#    fluid.io.load_persistables(executor=exe,
-#                               dirname=model_path,
-#                               main_program=framework.default_main_program())
+    model_path = os.path.join("model_attention", str(150))
+    fluid.io.load_persistables(executor=exe,
+                               dirname=model_path,
+                               main_program=framework.default_main_program())
 
     for batch_id, data in enumerate(test_batch_generator()):
         batch_size = len(data)
