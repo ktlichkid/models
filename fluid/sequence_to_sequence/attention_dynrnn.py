@@ -15,7 +15,7 @@ import paddle.fluid.layers as layers
 import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 from paddle.fluid.executor import Executor
-from beam_search_api import *
+#from beam_search_api import *
 
 import wmt14
 
@@ -23,17 +23,17 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--embedding_dim",
     type=int,
-    default=512,
+    default=64,
     help="The dimension of embedding table. (default: %(default)d)")
 parser.add_argument(
     "--encoder_size",
     type=int,
-    default=512,
+    default=64,
     help="The size of encoder bi-rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--decoder_size",
     type=int,
-    default=512,
+    default=64,
     help="The size of decoder rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--batch_size",
@@ -54,7 +54,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.001,
+    default=0.01,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -360,11 +360,11 @@ def train():
                   (pass_id, batch_id, avg_cost_val))
 
         pass_end_time = time.time()
-        test_loss = do_validation()
+#        test_loss = do_validation()
         time_consumed = pass_end_time - pass_start_time
         words_per_sec = words_seen / time_consumed
-        print("pass_id=%d, test_loss: %f, words/s: %f, sec/pass: %f" %
-              (pass_id, test_loss, words_per_sec, time_consumed))
+        print("pass_id=%d, words/s: %f, sec/pass: %f" %
+              (pass_id, words_per_sec, time_consumed))
 
         if pass_id % 100 == 0:
             model_path = os.path.join("model_attention", str(pass_id))
