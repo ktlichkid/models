@@ -193,6 +193,13 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
         rnn = fluid.layers.DynamicRNN()
 
+        cell_init = fluid.layers.fill_constant_batch_size_like(
+            input=decoder_boot,
+            value=0.0,
+            shape=[-1, decoder_size],
+            dtype='float32')
+        cell_init.stop_gradient = False
+
         with rnn.block():
             current_word = rnn.step_input(target_embedding)
             encoder_vec = rnn.static_input(encoder_vec)
