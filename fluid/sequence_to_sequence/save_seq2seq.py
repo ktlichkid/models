@@ -29,9 +29,9 @@ src_dict, trg_dict = wmt14.get_dict(dict_size)
 hidden_dim = 512
 word_dim = 512
 IS_SPARSE = True
-batch_size = 1
+batch_size = 4
 max_length = 100
-topk_size = 50
+topk_size = 1
 trg_dic_size = 10000
 beam_size = 1
 
@@ -39,7 +39,7 @@ decoder_size = hidden_dim
 
 place = core.CUDAPlace(0)
 
-model_save_dir = 'model'
+model_save_dir = 'model_en'
 
 
 def encoder():
@@ -56,11 +56,14 @@ def encoder():
     fc1 = pd.fc(input=src_embedding, size=hidden_dim * 4, act='tanh')
     lstm_hidden0, lstm_0 = pd.dynamic_lstm(input=fc1, size=hidden_dim * 4)
     encoder_out = pd.sequence_last_step(input=lstm_hidden0)
+#    pd.Print(encoder_out, message="encoder_out",
+#             print_tensor_name=False,
+#             print_tensor_shape=False, print_tensor_lod=False)
     return encoder_out
 
 
 def decoder_state_cell(context):
-    h = InitState(init=context)
+    h = InitState(init=context, need_reorder=True)
     state_cell = StateCell(
         cell_size=decoder_size, inputs={'x': None}, states={'h': h})
 
@@ -129,8 +132,12 @@ def decoder_decode(state_cell):
                        size=target_dict_dim,
                        act='softmax')
         topk_scores, topk_indices = pd.topk(scores, k=50)
+        accu_scores = pd.elementwise_add(
+            x=pd.log(x=layers.softmax(topk_scores)),
+            y=pd.reshape(prev_scores, shape=[-1]),
+            axis=0)
         selected_ids, selected_scores = pd.beam_search(
-            prev_ids, topk_indices, topk_scores, beam_size, end_id=1, level=0)
+            prev_ids, topk_indices, accu_scores, beam_size, end_id=1, level=0)
 
         with pd.Switch() as switch:
             with switch.case(pd.is_empty(selected_ids)):
@@ -177,7 +184,7 @@ def train_main():
     cost = pd.cross_entropy(input=rnn_out, label=label)
     avg_cost = pd.mean(x=cost)
 
-    optimizer = fluid.optimizer.Adagrad(learning_rate=1e-3)
+    optimizer = fluid.optimizer.Adagrad(learning_rate=1e-2)
     optimizer.minimize(avg_cost)
 
     train_data = paddle.batch(
@@ -207,11 +214,11 @@ def train_main():
             if pass_id % 100 == 0:
                 print('pass_id=' + str(pass_id) + ' batch=' + str(batch_id) +
                      " avg_cost=" + str(avg_cost_val))
-            if batch_id > 500:
-                break
+#            if batch_id > 500:
+#                break
             batch_id += 1
 
-        if pass_id % 1000 == 0:
+        if pass_id % 500 == 0:
             model_path = os.path.join(model_save_dir, str(pass_id))
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
@@ -240,7 +247,7 @@ def decode_main():
 #    model_path = os.path.join(model_save_dir, str(0))
 #    if not os.path.isdir(model_path):
 #        os.makedirs(model_path)
-    model_path = os.path.join(model_save_dir, str(10000))
+    model_path = os.path.join(model_save_dir, str(500))
 #    fluid.io.load_inference_model(dirname=model_path,
 #                                  executor=exe,
 #                                  model_filename='test_save',
@@ -263,21 +270,20 @@ def decode_main():
             wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
-        print "One batch data:"
+#        print "One batch, expected result:"
         for tup in data:
-            for i in range(len(tup)):
+            for i in range(2, len(tup)):
                 if i == 0:
                     words = [src_dict[tup[i][j]] for j in xrange(len(tup[i]))]
                 else:
                     words = [trg_dict[tup[i][j]] for j in xrange(len(tup[i]))]
                 sentence = " ".join(words)
                 print sentence
-        print "One batch over"
         init_ids = set_init_lod(init_ids_data, init_lod, place)
         init_scores = set_init_lod(init_scores_data, init_lod, place)
 
         src_word_data = to_lodtensor(map(lambda x: x[0], data), place)
-
+#        print "source lod: ", src_word_data.lod()
         result_ids, result_scores = exe.run(
             framework.default_main_program(),
             feed={
@@ -287,9 +293,9 @@ def decode_main():
             },
             fetch_list=[translation_ids, translation_scores],
             return_numpy=False)
-
-        print(np.array(result_scores))
-        print result_scores.lod()
+#        print(np.array(context))
+#        print(np.array(result_scores))
+#        print result_scores.lod()
         lod_list_1 = result_ids.lod()[1]
         token_array = np.array(result_ids)
         result = []
@@ -302,6 +308,7 @@ def decode_main():
         lod_list_0 = result_ids.lod()[0]
         final_result = [result[lod_list_0[i]:lod_list_0[i+1]] 
                         for i in xrange(len(lod_list_0) - 1)]
+        print "Actual result:"
         for paragraph in final_result:
             print paragraph
         #break
