@@ -18,18 +18,17 @@ import paddle.fluid as fluid
 import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 import paddle.fluid.layers as pd
-import wmt14
 from paddle.fluid.executor import Executor
 from beam_search_api import *
 import os
 
 dict_size = 30000
 source_dict_dim = target_dict_dim = dict_size
-src_dict, trg_dict = wmt14.get_dict(dict_size)
-hidden_dim = 512
-word_dim = 512
+src_dict, trg_dict = paddle.dataset.wmt14.get_dict(dict_size)
+hidden_dim = 1024
+word_dim = 1024
 IS_SPARSE = True
-batch_size = 4
+batch_size = 32
 max_length = 100
 topk_size = 1
 trg_dic_size = 10000
@@ -39,7 +38,7 @@ decoder_size = hidden_dim
 
 place = core.CUDAPlace(0)
 
-model_save_dir = 'model_en'
+model_save_dir = 'model_wmt14'
 
 
 def encoder():
@@ -184,19 +183,19 @@ def train_main():
     cost = pd.cross_entropy(input=rnn_out, label=label)
     avg_cost = pd.mean(x=cost)
 
-    optimizer = fluid.optimizer.Adagrad(learning_rate=1e-2)
+    optimizer = fluid.optimizer.Adagrad(learning_rate=1e-3)
     optimizer.minimize(avg_cost)
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            wmt14.train(dict_size), buf_size=1000),
+            paddle.dataset.wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
 
     exe = Executor(place)
 
     exe.run(framework.default_startup_program())
 
-    for pass_id in xrange(10001):
+    for pass_id in xrange(101):
         batch_id = 0
         for data in train_data():
             word_data = to_lodtensor(map(lambda x: x[0], data), place)
@@ -211,14 +210,14 @@ def train_main():
                            },
                            fetch_list=[avg_cost])
             avg_cost_val = np.array(outs[0])
-            if pass_id % 100 == 0:
+            if pass_id % 1 == 0:
                 print('pass_id=' + str(pass_id) + ' batch=' + str(batch_id) +
                      " avg_cost=" + str(avg_cost_val))
 #            if batch_id > 500:
 #                break
             batch_id += 1
 
-        if pass_id % 500 == 0:
+        if pass_id % 1 == 0:
             model_path = os.path.join(model_save_dir, str(pass_id))
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
@@ -247,7 +246,7 @@ def decode_main():
 #    model_path = os.path.join(model_save_dir, str(0))
 #    if not os.path.isdir(model_path):
 #        os.makedirs(model_path)
-    model_path = os.path.join(model_save_dir, str(500))
+    model_path = os.path.join(model_save_dir, str(100))
 #    fluid.io.load_inference_model(dirname=model_path,
 #                                  executor=exe,
 #                                  model_filename='test_save',
@@ -267,10 +266,10 @@ def decode_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            wmt14.train(dict_size), buf_size=1000),
+            paddle.dataset.wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size)
     for _, data in enumerate(train_data()):
-#        print "One batch, expected result:"
+        print "One batch, expected result:"
         for tup in data:
             for i in range(2, len(tup)):
                 if i == 0:
@@ -311,7 +310,7 @@ def decode_main():
         print "Actual result:"
         for paragraph in final_result:
             print paragraph
-        #break
+        break
 
 if __name__ == '__main__':
     #train_main()
