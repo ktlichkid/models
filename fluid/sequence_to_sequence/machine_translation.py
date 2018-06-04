@@ -56,7 +56,7 @@ parser.add_argument(
     default=5,
     help='The first num of minibatch num to skip, for better performance test')
 parser.add_argument(
-    '--iterations', type=int, default=80, help='The number of minibatches.')
+    '--iterations', type=int, default=10000, help='The number of minibatches.')
 parser.add_argument(
     "--dict_size",
     type=int,
@@ -358,7 +358,7 @@ def train():
         # evaluation
         if args.with_test:
             test_loss = do_validation()
-        exit(0)
+        #exit(0)
 
 
 def infer():
