@@ -206,7 +206,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
         with rnn.block():
             current_word = rnn.step_input(target_embedding)
-            current_word = fluid.layers.reshape(input=current_word, shape=[1,64])
+            current_word = fluid.layers.reshape(x=current_word, shape=[1,64])
             # current_word = fluid.layers.Print(current_word)
             # encoder_vec = rnn.static_input(encoder_vec)
             # encoder_proj = rnn.static_input(encoder_proj)
