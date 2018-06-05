@@ -33,17 +33,17 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--embedding_dim",
     type=int,
-    default=512,
+    default=32,
     help="The dimension of embedding table. (default: %(default)d)")
 parser.add_argument(
     "--encoder_size",
     type=int,
-    default=512,
+    default=32,
     help="The size of encoder bi-rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--decoder_size",
     type=int,
-    default=512,
+    default=32,
     help="The size of decoder rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--batch_size",
@@ -71,7 +71,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.003,
+    default=0.01,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -191,7 +191,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                x=attention_weights, shape=[-1])
             scaled = fluid.layers.elementwise_mul(
                x=encoder_vec, y=weigths_reshape, axis=0)
-            context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
+            context = fluid.layers.sequence_pool(input=scaled, pool_type='average')
             #context = fluid.layers.sequence_pool(input=encoder_vec, pool_type='sum')
             return context
 
