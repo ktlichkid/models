@@ -98,7 +98,7 @@ parser.add_argument(
     action='store_true',
     help='If set, test the testset during training.')
 
-load_first = False
+load_first = True
 model_save_dir = "model_attention"
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
