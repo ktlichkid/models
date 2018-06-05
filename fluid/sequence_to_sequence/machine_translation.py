@@ -159,9 +159,9 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     encoded_vector = fluid.layers.concat(
         input=[src_forward, src_reversed], axis=1)
 
-    encoded_proj = fluid.layers.fc(input=encoded_vector,
-                                   size=decoder_size,
-                                   bias_attr=False)
+    # encoded_proj = fluid.layers.fc(input=encoded_vector,
+    #                                size=decoder_size,
+    #                                bias_attr=False)
 
     backward_first = fluid.layers.sequence_pool(
         input=src_reversed, pool_type='first')
@@ -171,28 +171,28 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                    bias_attr=False,
                                    act='tanh')
 
-    def lstm_decoder_with_attention(target_embedding, encoder_vec, encoder_proj,
+    def lstm_decoder_with_attention(target_embedding, encoder_vec,
                                     decoder_boot, decoder_size):
         def simple_attention(encoder_vec, encoder_proj, decoder_state):
-            #decoder_state_proj = fluid.layers.fc(input=decoder_state,
-            #                                     size=decoder_size,
-            #                                     bias_attr=False)
-            #decoder_state_expand = fluid.layers.sequence_expand(
-            #    x=decoder_state_proj, y=encoder_proj)
-            #concated = fluid.layers.concat(
-            #    input=[encoder_proj, decoder_state_expand], axis=1)
-            #attention_weights = fluid.layers.fc(input=concated,
-            #                                    size=1,
-            #                                    act='tanh',
-            #                                    bias_attr=False)
-            #attention_weights = fluid.layers.sequence_softmax(
-            #    input=attention_weights)
-            #weigths_reshape = fluid.layers.reshape(
-            #    x=attention_weights, shape=[-1])
-            #scaled = fluid.layers.elementwise_mul(
-            #    x=encoder_vec, y=weigths_reshape, axis=0)
-            #context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
-            context = fluid.layers.sequence_pool(input=encoder_vec, pool_type='sum')
+            decoder_state_proj = fluid.layers.fc(input=decoder_state,
+                                                size=decoder_size,
+                                                bias_attr=False)
+            decoder_state_expand = fluid.layers.sequence_expand(
+               x=decoder_state_proj, y=encoder_proj)
+            concated = fluid.layers.concat(
+               input=[encoder_proj, decoder_state_expand], axis=1)
+            attention_weights = fluid.layers.fc(input=concated,
+                                               size=1,
+                                               act='tanh',
+                                               bias_attr=False)
+            attention_weights = fluid.layers.sequence_softmax(
+               input=attention_weights)
+            weigths_reshape = fluid.layers.reshape(
+               x=attention_weights, shape=[-1])
+            scaled = fluid.layers.elementwise_mul(
+               x=encoder_vec, y=weigths_reshape, axis=0)
+            context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
+            #context = fluid.layers.sequence_pool(input=encoder_vec, pool_type='sum')
             return context
 
         rnn = fluid.layers.DynamicRNN()
@@ -207,10 +207,11 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         with rnn.block():
             current_word = rnn.step_input(target_embedding)
             encoder_vec = rnn.static_input(encoder_vec)
-            encoder_proj = rnn.static_input(encoder_proj)
+            # encoder_proj = rnn.static_input(encoder_proj)
             hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
             cell_mem = rnn.memory(init=cell_init)
-            context = simple_attention(encoder_vec, encoder_proj, hidden_mem)
+            # context = simple_attention(encoder_vec, encoder_proj, hidden_mem)
+            context = fluid.layers.sequence_pool(input=encoder_vec, pool_type='sum')
             decoder_inputs = fluid.layers.concat(
                 input=[context, current_word], axis=1)
             h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
@@ -233,7 +234,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             dtype='float32')
 
         prediction = lstm_decoder_with_attention(trg_embedding, encoded_vector,
-                                                 encoded_proj, decoder_boot,
+                                                 decoder_boot,
                                                  decoder_size)
         label = fluid.layers.data(
             name='label_sequence', shape=[1], dtype='int64', lod_level=1)
