@@ -156,8 +156,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     src_forward, src_reversed = bi_lstm_encoder(
         input_seq=src_embedding, gate_size=encoder_size)
 
-    encoded_vector = fluid.layers.concat(
-        input=[src_forward, src_reversed], axis=1)
+    # encoded_vector = fluid.layers.concat(
+    #     input=[src_forward, src_reversed], axis=1)
 
     # encoded_proj = fluid.layers.fc(input=encoded_vector,
     #                                size=decoder_size,
@@ -171,7 +171,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                    bias_attr=False,
                                    act='tanh')
 
-    def lstm_decoder_with_attention(target_embedding, encoder_vec,
+    def lstm_decoder_with_attention(target_embedding,
                                     decoder_boot, decoder_size):
         def simple_attention(encoder_vec, encoder_proj, decoder_state):
             decoder_state_proj = fluid.layers.fc(input=decoder_state,
@@ -206,12 +206,12 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
         with rnn.block():
             current_word = rnn.step_input(target_embedding)
-            encoder_vec = rnn.static_input(encoder_vec)
+            # encoder_vec = rnn.static_input(encoder_vec)
             # encoder_proj = rnn.static_input(encoder_proj)
             hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
             cell_mem = rnn.memory(init=cell_init)
             # context = simple_attention(encoder_vec, encoder_proj, hidden_mem)
-            context = fluid.layers.sequence_pool(input=encoder_vec, pool_type='sum')
+            context = fluid.layers.fill_constant(shape=[1,128], value=0.0, dtype='float')
             decoder_inputs = fluid.layers.concat(
                 input=[current_word, context], axis=1)
             h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
@@ -233,7 +233,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             size=[target_dict_dim, embedding_dim],
             dtype='float32')
 
-        prediction = lstm_decoder_with_attention(trg_embedding, encoded_vector,
+        prediction = lstm_decoder_with_attention(trg_embedding,
                                                  decoder_boot,
                                                  decoder_size)
         label = fluid.layers.data(
