@@ -33,17 +33,17 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--embedding_dim",
     type=int,
-    default=64,
+    default=512,
     help="The dimension of embedding table. (default: %(default)d)")
 parser.add_argument(
     "--encoder_size",
     type=int,
-    default=64,
+    default=512,
     help="The size of encoder bi-rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--decoder_size",
     type=int,
-    default=64,
+    default=512,
     help="The size of decoder rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--batch_size",
@@ -71,7 +71,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.01,
+    default=0.003,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -152,12 +152,12 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         size=[source_dict_dim, embedding_dim],
         dtype='float32')
     
-    encoded_vector, src_reversed = bi_lstm_encoder(
-#    src_forward, src_reversed = bi_lstm_encoder(
+#    encoded_vector, src_reversed = bi_lstm_encoder(
+    src_forward, src_reversed = bi_lstm_encoder(
         input_seq=src_embedding, gate_size=encoder_size)
 
-    # encoded_vector = fluid.layers.concat(
-    #     input=[src_forward, src_reversed], axis=1)
+    encoded_vector = fluid.layers.concat(
+        input=[src_forward, src_reversed], axis=1)
 
     # encoded_proj = fluid.layers.fc(input=encoded_vector,
     #                                size=decoder_size,
@@ -212,7 +212,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
             cell_mem = rnn.memory(init=cell_init)
             # context = simple_attention(encoder_vec, encoder_proj, hidden_mem)
-            context = fluid.layers.sequence_pool(encoder_vec, pool_type='last')
+            context = fluid.layers.sequence_pool(encoder_vec, pool_type='first')
             decoder_inputs = fluid.layers.concat(
                 input=[current_word, context], axis=1)
             h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
