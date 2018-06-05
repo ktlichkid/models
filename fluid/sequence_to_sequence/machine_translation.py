@@ -33,17 +33,17 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--embedding_dim",
     type=int,
-    default=512,
+    default=64,
     help="The dimension of embedding table. (default: %(default)d)")
 parser.add_argument(
     "--encoder_size",
     type=int,
-    default=512,
+    default=64,
     help="The size of encoder bi-rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--decoder_size",
     type=int,
-    default=512,
+    default=64,
     help="The size of decoder rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--batch_size",
@@ -71,7 +71,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.0002,
+    default=0.01,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -151,7 +151,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         input=src_word_idx,
         size=[source_dict_dim, embedding_dim],
         dtype='float32')
-
+    
+#    encoded_vector, src_reversed = bi_lstm_encoder(
     src_forward, src_reversed = bi_lstm_encoder(
         input_seq=src_embedding, gate_size=encoder_size)
 
@@ -173,24 +174,25 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     def lstm_decoder_with_attention(target_embedding, encoder_vec, encoder_proj,
                                     decoder_boot, decoder_size):
         def simple_attention(encoder_vec, encoder_proj, decoder_state):
-            decoder_state_proj = fluid.layers.fc(input=decoder_state,
-                                                 size=decoder_size,
-                                                 bias_attr=False)
-            decoder_state_expand = fluid.layers.sequence_expand(
-                x=decoder_state_proj, y=encoder_proj)
-            concated = fluid.layers.concat(
-                input=[encoder_proj, decoder_state_expand], axis=1)
-            attention_weights = fluid.layers.fc(input=concated,
-                                                size=1,
-                                                act='tanh',
-                                                bias_attr=False)
-            attention_weights = fluid.layers.sequence_softmax(
-                input=attention_weights)
-            weigths_reshape = fluid.layers.reshape(
-                x=attention_weights, shape=[-1])
-            scaled = fluid.layers.elementwise_mul(
-                x=encoder_vec, y=weigths_reshape, axis=0)
-            context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
+            #decoder_state_proj = fluid.layers.fc(input=decoder_state,
+            #                                     size=decoder_size,
+            #                                     bias_attr=False)
+            #decoder_state_expand = fluid.layers.sequence_expand(
+            #    x=decoder_state_proj, y=encoder_proj)
+            #concated = fluid.layers.concat(
+            #    input=[encoder_proj, decoder_state_expand], axis=1)
+            #attention_weights = fluid.layers.fc(input=concated,
+            #                                    size=1,
+            #                                    act='tanh',
+            #                                    bias_attr=False)
+            #attention_weights = fluid.layers.sequence_softmax(
+            #    input=attention_weights)
+            #weigths_reshape = fluid.layers.reshape(
+            #    x=attention_weights, shape=[-1])
+            #scaled = fluid.layers.elementwise_mul(
+            #    x=encoder_vec, y=weigths_reshape, axis=0)
+            #context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
+            context = fluid.layers.sequence_pool(input=encoder_vec, pool_type='sum')
             return context
 
         rnn = fluid.layers.DynamicRNN()
@@ -287,12 +289,12 @@ def train():
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
+            wmt14.train(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.test(args.dict_size), buf_size=1000),
+            wmt14.test(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
