@@ -217,6 +217,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 value=0.0,
                 shape=[-1, decoder_size],
                 dtype='float32')
+            context.stop_gradient = False
             decoder_inputs = fluid.layers.concat(
                 input=[current_word, context], axis=1)
             h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
