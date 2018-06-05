@@ -27,6 +27,7 @@ import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 from paddle.fluid.executor import Executor
 
+import os
 import wmt14
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -97,6 +98,8 @@ parser.add_argument(
     action='store_true',
     help='If set, test the testset during training.')
 
+load_first = False
+model_save_dir = "model_attention"
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
     def linear(inputs):
@@ -325,6 +328,13 @@ def train():
 
         return total_loss / count
 
+    if load_first:
+        model_path = os.path.join(model_save_dir, str(500))
+        fluid.io.load_persistables(
+            executor=exe,
+            dirname=model_path,
+            main_program=framework.default_main_program())
+
     iters, num_samples, start_time = 0, 0, time.time()
     for pass_id in xrange(args.pass_num):
         train_accs = []
@@ -354,6 +364,16 @@ def train():
             print(
                 "Pass = %d, Iter = %d, Loss = %f" % (pass_id, iters, loss)
             )  # The accuracy is the accumulation of batches, but not the current batch.
+
+        if pass_id % 500 == 0:
+            model_path = os.path.join(model_save_dir, str(pass_id))
+            if not os.path.isdir(model_path):
+                os.makedirs(model_path)
+
+            fluid.io.save_persistables(
+                executor=exe,
+                dirname=model_path,
+                main_program=framework.default_main_program())
 
         train_elapsed = time.time() - start_time
         examples_per_sec = num_samples / train_elapsed
