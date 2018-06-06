@@ -98,7 +98,7 @@ parser.add_argument(
     action='store_true',
     help='If set, test the testset during training.')
 
-load_first = True
+load_first = False
 model_save_dir = "model_attention"
 
 clip = fluid.clip.GradientClipByNorm(clip_norm=1.0)
