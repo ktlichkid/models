@@ -34,17 +34,17 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--embedding_dim",
     type=int,
-    default=32,
+    default=512,
     help="The dimension of embedding table. (default: %(default)d)")
 parser.add_argument(
     "--encoder_size",
     type=int,
-    default=32,
+    default=512,
     help="The size of encoder bi-rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--decoder_size",
     type=int,
-    default=32,
+    default=512,
     help="The size of decoder rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--batch_size",
@@ -84,7 +84,7 @@ parser.add_argument(
 parser.add_argument(
     '--device',
     type=str,
-    default='GPU',
+    default='CPU',
     choices=['CPU', 'GPU'],
     help="The device type.")
 parser.add_argument(
@@ -101,8 +101,8 @@ parser.add_argument(
 load_first = False
 model_save_dir = "model_attention"
 
-clip = fluid.clip.GradientClipByNorm(clip_norm=1.0)
-clip_attr = fluid.param_attr.ParamAttr(gradient_clip=clip)
+#clip = fluid.clip.GradientClipByNorm(clip_norm=1.0)
+#clip_attr = fluid.param_attr.ParamAttr(gradient_clip=clip)
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
     def linear(inputs):
@@ -194,7 +194,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                input=[encoder_proj, decoder_state_expand], axis=1)
             attention_weights = fluid.layers.fc(input=concated,
                                                size=1,
-                                               act='tanh',
+                                               #act='tanh',
                                                bias_attr=False)
             attention_weights = fluid.layers.sequence_softmax(
                input=attention_weights)
