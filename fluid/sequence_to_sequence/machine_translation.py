@@ -248,15 +248,15 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         with rnn.block():
             current_word = rnn.step_input(target_embedding)
             encoder_vec = rnn.static_input(encoder_vec)
-            #encoder_vec = fluid.layers.Print(encoder_vec, message="encoder_vec", summarize=10)
+            encoder_vec = fluid.layers.Print(encoder_vec, message="encoder_vec", summarize=10)
             encoder_proj = rnn.static_input(encoder_proj)
-            #encoder_proj = fluid.layers.Print(encoder_proj, message="encoder_proj", summarize=10)
+            encoder_proj = fluid.layers.Print(encoder_proj, message="encoder_proj", summarize=10)
             hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
             cell_mem = rnn.memory(init=cell_init)
             context = simple_attention(encoder_vec, encoder_proj, hidden_mem)
             decoder_inputs = fluid.layers.concat(
                 input=[context, current_word], axis=1)
-            #decoder_inputs = fluid.layers.Print(decoder_inputs, message="decoder_inputs", summarize=10)
+            decoder_inputs = fluid.layers.Print(decoder_inputs, message="decoder_inputs", summarize=10)
             h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
             rnn.update_memory(hidden_mem, h)
             rnn.update_memory(cell_mem, c)
@@ -264,7 +264,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                   size=target_dict_dim,
                                   bias_attr=True,
                                   act='softmax')
-            #out = fluid.layers.Print(out, message="out", summarize=10)
+            out = fluid.layers.Print(out, message="out", summarize=10)
             rnn.output(out)
         return rnn()
 
