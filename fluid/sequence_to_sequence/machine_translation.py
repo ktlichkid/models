@@ -212,7 +212,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             concated = fluid.layers.concat(
                input=[encoder_proj, decoder_state_expand], axis=1)
             concated = fluid.layers.Print(
-                cancated, message="concated", summarize=10)
+                concated, message="concated", summarize=10)
             attention_weights = fluid.layers.fc(input=concated,
                                                size=1,
                                                #act='tanh',
@@ -222,7 +222,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             attention_weights = fluid.layers.sequence_softmax(
                input=attention_weights)
             attention_weights = fluid.layers.Print(
-                attention_weights, message=="attention_weight_ss", summarize=10)
+                attention_weights, message="attention_weight_ss", summarize=10)
             weigths_reshape = fluid.layers.reshape(
                x=attention_weights, shape=[-1])
             weigths_reshape = fluid.layers.Print(
@@ -250,13 +250,14 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             encoder_vec = rnn.static_input(encoder_vec)
             encoder_vec = fluid.layers.Print(encoder_vec, message="encoder_vec", summarize=10)
             encoder_proj = rnn.static_input(encoder_proj)
-            encoder_proj = fluid.layer.Print(encder_proj, message="encoder_proj", summarize=10)
+            encoder_proj = fluid.layer.Print(encoder_proj, message="encoder_proj", summarize=10)
             hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
             cell_mem = rnn.memory(init=cell_init)
             context = simple_attention(encoder_vec, encoder_proj, hidden_mem)
             #context = fluid.layers.Print(context, summarize=10)
             decoder_inputs = fluid.layers.concat(
                 input=[context, current_word], axis=1)
+            decoder_inputs = fluid.layers.Print(decoder_inputs, message="decoder_inputs", summarize=10)
             h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
             rnn.update_memory(hidden_mem, h)
             rnn.update_memory(cell_mem, c)
@@ -264,6 +265,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                   size=target_dict_dim,
                                   bias_attr=True,
                                   act='softmax')
+            out = fluid.layers.Print(out, message="out", summarize=10)
             rnn.output(out)
         return rnn()
 
@@ -279,6 +281,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         prediction = lstm_decoder_with_attention(trg_embedding, encoded_vector,
                                                  encoded_proj, decoder_boot,
                                                  decoder_size)
+        prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
         label = fluid.layers.data(
             name='label_sequence', shape=[1], dtype='int64', lod_level=1)
         cost = fluid.layers.cross_entropy(input=prediction, label=label)
