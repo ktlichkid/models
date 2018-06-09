@@ -250,7 +250,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             encoder_vec = rnn.static_input(encoder_vec)
             encoder_vec = fluid.layers.Print(encoder_vec, message="encoder_vec", summarize=10)
             encoder_proj = rnn.static_input(encoder_proj)
-            encoder_proj = fluid.layer.Print(encoder_proj, message="encoder_proj", summarize=10)
+            encoder_proj = fluid.layers.Print(encoder_proj, message="encoder_proj", summarize=10)
             hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
             cell_mem = rnn.memory(init=cell_init)
             context = simple_attention(encoder_vec, encoder_proj, hidden_mem)
