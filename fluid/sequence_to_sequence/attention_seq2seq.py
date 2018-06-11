@@ -54,7 +54,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.001,
+    default=0.01,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -107,13 +107,13 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         # So the output size is 4 times of gate_size.
         input_forward_proj = fluid.layers.fc(input=input_seq,
                                              size=gate_size * 4,
-                                             act=None,
+                                             act='tanh',
                                              bias_attr=False)
         forward, _ = fluid.layers.dynamic_lstm(
             input=input_forward_proj, size=gate_size * 4, use_peepholes=False)
         input_reversed_proj = fluid.layers.fc(input=input_seq,
                                               size=gate_size * 4,
-                                              act=None,
+                                              act='tanh',
                                               bias_attr=False)
         reversed, _ = fluid.layers.dynamic_lstm(
             input=input_reversed_proj,
@@ -140,7 +140,6 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     encoded_proj = fluid.layers.fc(input=encoded_vector,
                                    size=decoder_size,
                                    bias_attr=False)
-    layers.Print(encoded_proj, message="very beginning")
 
     backward_first = fluid.layers.sequence_pool(
         input=src_reversed, pool_type='first')
@@ -179,7 +178,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             input=[encoder_proj, decoder_state_expand], axis=1)
         attention_weights = fluid.layers.fc(input=concated,
                                             size=1,
-                                            act='tanh',
+                                            #act='tanh',
                                             bias_attr=False)
         attention_weights = fluid.layers.sequence_softmax(
             input=attention_weights)
@@ -261,7 +260,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             #layers.Print(encoded_vector, message="encoded_vector")
             #layers.Print(encoded_proj, message="before")
             encoder_proj = decoder.read_array(init=encoded_proj)
-            layers.Print(encoder_proj, message="after")
+            #layers.Print(encoder_proj, message="after")
             prev_ids = decoder.read_array(init=init_ids, is_ids=True)
             #layers.Print(prev_ids, message="prev_ids")
             prev_scores = decoder.read_array(init=init_scores, is_scores=True)
