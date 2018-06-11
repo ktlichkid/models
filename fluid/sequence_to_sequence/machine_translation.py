@@ -102,8 +102,8 @@ load_first = False
 model_save_dir = "model_attention"
 save_model = False
 
-#clip = fluid.clip.GradientClipByValue(max=0)
-#clip_attr = fluid.param_attr.ParamAttr(gradient_clip=clip)
+clip = fluid.clip.GradientClipByValue(max=1e-8)
+clip_attr = fluid.param_attr.ParamAttr(gradient_clip=clip)
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
     def linear(inputs):
@@ -200,8 +200,12 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     def lstm_decoder_with_attention(target_embedding, encoder_vec, encoder_proj,
                                     decoder_boot, decoder_size):
         def simple_attention(encoder_vec, encoder_proj, decoder_state):
+            encoder_vec = fluid.layers.Print(encoder_vec, message="encoder_vec",
+                summarize=10)
             decoder_state_proj = fluid.layers.fc(input=decoder_state,
                                                 size=decoder_size,
+                                                act='tanh',
+                                                #param_attr=clip_attr,
                                                 bias_attr=False)
             decoder_state_proj = fluid.layers.Print(
                 decoder_state_proj, message="decoder_state_proj", summarize=10)
