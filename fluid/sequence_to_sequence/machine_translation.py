@@ -102,8 +102,8 @@ load_first = False
 model_save_dir = "model_attention"
 save_model = False
 
-clip = fluid.clip.GradientClipByValue(max=1e-8)
-clip_attr = fluid.param_attr.ParamAttr(gradient_clip=clip)
+#clip = fluid.clip.GradientClipByValue(max=1e-8)
+#clip_attr = fluid.param_attr.ParamAttr(gradient_clip=clip)
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
     def linear(inputs):
@@ -122,7 +122,7 @@ def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
 
     hidden_t = fluid.layers.elementwise_mul(
         x=output_gate, y=fluid.layers.tanh(x=cell_t))
-    hidden_t = fluid.layers.Print(hidden_t, message="hidden_t", summarize=10)
+    #hidden_t = fluid.layers.Print(hidden_t, message="hidden_t", summarize=10)
     return hidden_t, cell_t
 
 
@@ -136,30 +136,30 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         # So the output size is 4 times of gate_size.
         input_forward_proj = fluid.layers.fc(input=input_seq,
                                              size=gate_size * 4,
-                                             act='tanh',
+                                             #act='tanh',
                                              #param_attr=clip_attr,
                                              bias_attr=False)
-        input_forward_proj = fluid.layers.Print(
-            input_forward_proj, message="input_forward_proj", summarize=10)
+        #input_forward_proj = fluid.layers.Print(
+        #    input_forward_proj, message="input_forward_proj", summarize=10)
         forward, _ = fluid.layers.dynamic_lstm(
             input=input_forward_proj, size=gate_size * 4,
             #param_attr=clip_attr,
             use_peepholes=False)
-        forward = fluid.layers.Print(forward, message="forward", summarize=10)
+        #forward = fluid.layers.Print(forward, message="forward", summarize=10)
         input_reversed_proj = fluid.layers.fc(input=input_seq,
                                               size=gate_size * 4,
-                                              act='tanh',
+                                              #act='tanh',
                                               #param_attr=clip_attr,
                                               bias_attr=False)
-        input_reversed_proj = fluid.layers.Print(
-            input_reversed_proj, message="input_reversed_proj", summarize=10)
+        #input_reversed_proj = fluid.layers.Print(
+        #    input_reversed_proj, message="input_reversed_proj", summarize=10)
         reversed, _ = fluid.layers.dynamic_lstm(
             input=input_reversed_proj,
             size=gate_size * 4,
             #param_attr=clip_attr,
             is_reverse=True,
             use_peepholes=False)
-        reversed = fluid.layers.Print(reversed, message="reversed", summarize=10)
+        #reversed = fluid.layers.Print(reversed, message="reversed", summarize=10)
         return forward, reversed
 
     src_word_idx = fluid.layers.data(
@@ -176,67 +176,67 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
     encoded_vector = fluid.layers.concat(
         input=[src_forward, src_reversed], axis=1)
-    encoded_vector = fluid.layers.Print(
-        encoded_vector, message="encoded_vector,", summarize=10)
+    #encoded_vector = fluid.layers.Print(
+    #    encoded_vector, message="encoded_vector,", summarize=10)
 
     encoded_proj = fluid.layers.fc(input=encoded_vector,
                                    size=decoder_size,
                                    bias_attr=False)
-    encoded_proj = fluid.layers.Print(
-        encoded_proj, message="encoded_proj", summarize=10)
+    #encoded_proj = fluid.layers.Print(
+    #    encoded_proj, message="encoded_proj", summarize=10)
 
     backward_first = fluid.layers.sequence_pool(
         input=src_reversed, pool_type='first')
 
-    decoder_boot_tmp = fluid.layers.fc(input=backward_first,
+    decoder_boot = fluid.layers.fc(input=backward_first,
                                    size=decoder_size,
                                    bias_attr=False,
                                    #param_attr=clip_attr,
                                    act='tanh')
 
-    decoder_boot = fluid.layers.Print(
-        decoder_boot_tmp, message="decoder_boot", summarize=10)
+    #decoder_boot = fluid.layers.Print(
+    #    decoder_boot_tmp, message="decoder_boot", summarize=10)
 
     def lstm_decoder_with_attention(target_embedding, encoder_vec, encoder_proj,
                                     decoder_boot, decoder_size):
         def simple_attention(encoder_vec, encoder_proj, decoder_state):
-            encoder_vec = fluid.layers.Print(encoder_vec, message="encoder_vec",
-                summarize=10)
+            #encoder_vec = fluid.layers.Print(encoder_vec, message="encoder_vec",
+            #    summarize=10)
             decoder_state_proj = fluid.layers.fc(input=decoder_state,
                                                 size=decoder_size,
-                                                act='tanh',
+                                                #act='tanh',
                                                 #param_attr=clip_attr,
                                                 bias_attr=False)
-            decoder_state_proj = fluid.layers.Print(
-                decoder_state_proj, message="decoder_state_proj", summarize=10)
+            #decoder_state_proj = fluid.layers.Print(
+            #    decoder_state_proj, message="decoder_state_proj", summarize=10)
             decoder_state_expand = fluid.layers.sequence_expand(
                x=decoder_state_proj, y=encoder_proj)
-            decoder_state_expand = fluid.layers.Print(
-                decoder_state_expand, message="decoder_state_expand", summarize=10)
+            #decoder_state_expand = fluid.layers.Print(
+            #    decoder_state_expand, message="decoder_state_expand", summarize=10)
             concated = fluid.layers.concat(
                input=[encoder_proj, decoder_state_expand], axis=1)
-            concated = fluid.layers.Print(
-                concated, message="concated", summarize=10)
+            #concated = fluid.layers.Print(
+            #    concated, message="concated", summarize=10)
             attention_weights = fluid.layers.fc(input=concated,
                                                size=1,
-                                               #act='tanh',
+                                               act='tanh',
                                                bias_attr=False)
-            attention_weights = fluid.layers.Print(
-                attention_weights, message="attention_weight_fc", summarize=10)
+            #attention_weights = fluid.layers.Print(
+            #    attention_weights, message="attention_weight_fc", summarize=10)
             attention_weights = fluid.layers.sequence_softmax(
                input=attention_weights)
-            attention_weights = fluid.layers.Print(
-                attention_weights, message="attention_weight_ss", summarize=10)
+            #attention_weights = fluid.layers.Print(
+            #    attention_weights, message="attention_weight_ss", summarize=10)
             weigths_reshape = fluid.layers.reshape(
                x=attention_weights, shape=[-1])
-            weigths_reshape = fluid.layers.Print(
-                weigths_reshape, message="weights_reshape", summarize=10)
+            #weigths_reshape = fluid.layers.Print(
+            #    weigths_reshape, message="weights_reshape", summarize=10)
             scaled = fluid.layers.elementwise_mul(
                x=encoder_vec, y=weigths_reshape, axis=0)
-            scaled = fluid.layers.Print(
-                scaled, message="scaled", summarize=10)
-            context_tmp = fluid.layers.sequence_pool(input=scaled, pool_type='average')
-            context = fluid.layers.Print(context_tmp, message="context", summarize=10)
+            #scaled = fluid.layers.Print(
+            #    scaled, message="scaled", summarize=10)
+            context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
+            #context = fluid.layers.Print(context_tmp, message="context", summarize=10)
             return context
 
         rnn = fluid.layers.DynamicRNN()
@@ -261,19 +261,19 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             context = simple_attention(encoder_vec, encoder_proj, hidden_mem)
             decoder_inputs = fluid.layers.concat(
                 input=[context, current_word], axis=1)
-            decoder_inputs = fluid.layers.Print(decoder_inputs, message="decoder_inputs", summarize=10)
+            #decoder_inputs = fluid.layers.Print(decoder_inputs, message="decoder_inputs", summarize=10)
             h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
             #h = fluid.layers.Print(h, message='h', summarize=10)
             #c = fluid.layers.Print(c, message='c', summarize=10)
             rnn.update_memory(hidden_mem, h)
             rnn.update_memory(cell_mem, c)
-            out_tmp = fluid.layers.fc(input=h,
+            out = fluid.layers.fc(input=h,
                                   size=target_dict_dim,
                                   bias_attr=True,
-                                  act='tanh')
-            out = fluid.layers.Print(out_tmp, message="out", summarize=10)
-            out_s = fluid.layers.softmax(out)
-            rnn.output(out_s)
+                                  act='softmax')
+            #out = fluid.layers.Print(out_tmp, message="out", summarize=10)
+            #out = fluid.layers.softmax(out)
+            rnn.output(out)
         return rnn()
 
     if not is_generating:
@@ -288,7 +288,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         prediction = lstm_decoder_with_attention(trg_embedding, encoded_vector,
                                                  encoded_proj, decoder_boot,
                                                  decoder_size)
-        prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
+        #prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
         label = fluid.layers.data(
             name='label_sequence', shape=[1], dtype='int64', lod_level=1)
         cost = fluid.layers.cross_entropy(input=prediction, label=label)
@@ -323,7 +323,7 @@ def lodtensor_to_ndarray(lod_tensor):
 
 
 def train():
-    fluid.default_startup_program().random_seed = 111
+    #fluid.default_startup_program().random_seed = 111
 
     avg_cost, feeding_list = seq_to_seq_net(
         args.embedding_dim,
