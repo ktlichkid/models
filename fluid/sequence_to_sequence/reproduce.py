@@ -167,7 +167,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         cell_init.stop_gradient = False
 
         with rnn.block():
-            current_word = rnn.step_input(target_embedding)
+            #current_word = rnn.step_input(target_embedding)
             encoder_proj = rnn.static_input(encoder_proj)
             hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
             cell_mem = rnn.memory(init=cell_init)
@@ -187,16 +187,17 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 concated, message="concated", summarize=10)
             context = fluid.layers.sequence_pool(input=concated, pool_type='sum')
 
-            decoder_inputs = fluid.layers.concat(
-                input=[context, current_word], axis=1)
+            #decoder_inputs = fluid.layers.concat(
+            #    input=[context, current_word], axis=1)
             h, c = hidden_mem, cell_mem
             #h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
             rnn.update_memory(hidden_mem, h)
             rnn.update_memory(cell_mem, c)
-            out = fluid.layers.fc(input=h,
-                                  size=target_dict_dim,
-                                  bias_attr=True,
-                                  act='softmax')
+            out = context
+            # out = fluid.layers.fc(input=h,
+            #                       size=target_dict_dim,
+            #                       bias_attr=True,
+            #                       act='softmax')
             rnn.output(out)
         return rnn()
 
