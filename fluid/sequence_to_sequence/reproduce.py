@@ -102,24 +102,25 @@ load_first = False
 model_save_dir = "model_attention"
 save_model = False
 
+
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
     def linear(inputs):
         return fluid.layers.fc(input=inputs, size=size, bias_attr=True)
 
-    forget_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    input_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    output_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    cell_tilde = fluid.layers.tanh(x=linear([hidden_t_prev, x_t]))
+    # forget_gate = linear([hidden_t_prev, x_t])
+    # input_gate = linear([hidden_t_prev, x_t])
+    output_gate = linear([hidden_t_prev, x_t])
+    cell_tilde = linear([hidden_t_prev, x_t])
 
-    cell_t = fluid.layers.sums(input=[
-        fluid.layers.elementwise_mul(
-            x=forget_gate, y=cell_t_prev), fluid.layers.elementwise_mul(
-                x=input_gate, y=cell_tilde)
-    ])
+    # cell_t = fluid.layers.sums(input=[
+    #     fluid.layers.elementwise_mul(
+    #         x=forget_gate, y=cell_t_prev), fluid.layers.elementwise_mul(
+    #             x=input_gate, y=cell_tilde)
+    # ])
 
     hidden_t = fluid.layers.elementwise_mul(
-        x=output_gate, y=fluid.layers.tanh(x=cell_t))
-    return hidden_t, cell_t
+        x=output_gate, y=fluid.layers.tanh(x=cell_tilde))
+    return hidden_t, cell_tilde
 
 
 def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
@@ -158,7 +159,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             current_word = rnn.step_input(target_embedding)
             encoder_proj = rnn.static_input(encoder_proj)
             hidden_mem = rnn.memory(init=decoder_boot)
-            cell_mem = rnn.memory(init=cell_init)
+            #cell_mem = rnn.memory(init=cell_init)
 
             decoder_state_proj = hidden_mem
             decoder_state_proj = fluid.layers.Print(
@@ -167,18 +168,18 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                x=decoder_state_proj, y=encoder_proj)
             decoder_state_expand = fluid.layers.Print(
                 decoder_state_expand, message="decoder_state_expand", summarize=10)
-            #concated = fluid.layers.concat(
-            #   input=[encoder_proj, decoder_state_expand], axis=1)
-            #concated = fluid.layers.Print(
-            #    concated, message="concated", summarize=10)
-            context = fluid.layers.sequence_pool(input=decoder_state_expand, pool_type='sum')
+            concated = fluid.layers.concat(
+              input=[encoder_proj, decoder_state_expand], axis=1)
+            concated = fluid.layers.Print(
+               concated, message="concated", summarize=10)
+            context = fluid.layers.sequence_pool(input=concated, pool_type='sum')
 
             decoder_inputs = fluid.layers.concat(
                 input=[context, current_word], axis=1)
             #h, c = hidden_mem, cell_mem
-            h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
+            h, c = lstm_step(decoder_inputs, hidden_mem, None, decoder_size)
             rnn.update_memory(hidden_mem, h)
-            rnn.update_memory(cell_mem, c)
+            #rnn.update_memory(cell_mem, c)
             #out = context
             out = fluid.layers.fc(input=h,
                                   size=target_dict_dim,
