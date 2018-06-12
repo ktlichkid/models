@@ -38,7 +38,7 @@ parser.add_argument(
 parser.add_argument(
     "--batch_size",
     type=int,
-    default=1,
+    default=4,
     help="The sequence number of a mini-batch data. (default: %(default)d)")
 parser.add_argument(
     "--dict_size",
@@ -66,12 +66,12 @@ parser.add_argument(
 parser.add_argument(
     "--use_gpu",
     type=distutils.util.strtobool,
-    default=False,
+    default=True,
     help="Whether to use gpu. (default: %(default)d)")
 parser.add_argument(
     "--max_length",
     type=int,
-    default=10,
+    default=5,
     help="The maximum length of sequence when doing generation. "
     "(default: %(default)d)")
 
@@ -185,7 +185,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         weigths_reshape = fluid.layers.reshape(x=attention_weights, shape=[-1])
         scaled = fluid.layers.elementwise_mul(
             x=encoder_vec, y=weigths_reshape, axis=0)
-        context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
+        context = fluid.layers.sequence_pool(input=scaled, pool_type='average')
         return context
 
     @state_cell.state_updater
@@ -260,6 +260,11 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             #layers.Print(encoded_vector, message="encoded_vector")
             #layers.Print(encoded_proj, message="before")
             encoder_proj = decoder.read_array(init=encoded_proj)
+            with layers.Switch() as switch_1:
+                with switch_1.case(layers.is_empty(encoder_proj)):
+                    decoder.early_stop()
+                with switch_1.case(layers.is_empty(encoder_vec)):
+                    decoder.early_stop()
             #layers.Print(encoder_proj, message="after")
             prev_ids = decoder.read_array(init=init_ids, is_ids=True)
             #layers.Print(prev_ids, message="prev_ids")
@@ -296,24 +301,25 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 beam_size,
                 end_id=1,
                 level=0)
-            # with layers.Switch() as switch:
-            #     with switch.case(layers.is_empty(selected_ids)):
-            #         decoder.early_stop()
-            #     with switch.default():
-    
-            layers.Print(selected_ids, message="selected_ids")
-            layers.Print(selected_scores, message="selected_scores")
-            layers.Print(encoder_vec_expanded, message="encoder_vec")
-            layers.Print(encoder_proj_expanded, message="encoder_proj")
-            decoder.state_cell.update_states()
-            decoder.update_array(prev_ids, selected_ids)
-            decoder.update_array(prev_scores, selected_scores)
-            decoder.update_array(encoder_vec, encoder_vec_expanded)
-            decoder.update_array(encoder_proj, encoder_proj_expanded)
-            layers.Print(prev_ids, message="prev_ids")
-            layers.Print(prev_scores, message="prev_scores")
-            layers.Print(encoder_vec, message="encoder_vec")
-            layers.Print(encoder_proj, message="encoder_proj")
+            with layers.Switch() as switch:
+                with switch.case(layers.is_empty(selected_ids)):
+                    decoder.early_stop()
+                with switch.case(layers.is_empty(encoder_proj)):
+                    decoder.early_stop()
+                with switch.default():
+            #layers.Print(selected_ids, message="selected_ids")
+            #layers.Print(selected_scores, message="selected_scores")
+            #layers.Print(encoder_vec_expanded, message="encoder_vec")
+            #layers.Print(encoder_proj_expanded, message="encoder_proj")
+                    decoder.state_cell.update_states()
+                    decoder.update_array(prev_ids, selected_ids)
+                    decoder.update_array(prev_scores, selected_scores)
+                    decoder.update_array(encoder_vec, encoder_vec_expanded)
+                    decoder.update_array(encoder_proj, encoder_proj_expanded)
+            #layers.Print(prev_ids, message="prev_ids")
+            #layers.Print(prev_scores, message="prev_scores")
+            #layers.Print(encoder_vec, message="encoder_vec")
+            #layers.Print(encoder_proj, message="encoder_proj")
 
 
         translation_ids, translation_scores = decoder()
@@ -431,7 +437,7 @@ def train():
               (pass_id, test_loss, words_per_sec, time_consumed))
 
         if pass_id % 100 == 0:
-            model_path = os.path.join("model_attention", str(pass_id))
+            model_path = os.path.join("model_4data", str(pass_id))
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
 
@@ -462,7 +468,7 @@ def infer():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join("model_attention", str(150))
+    model_path = os.path.join("model_4data", str(600))
     fluid.io.load_persistables(executor=exe,
                                dirname=model_path,
                                main_program=framework.default_main_program())
