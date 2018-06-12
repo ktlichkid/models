@@ -177,7 +177,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
     def lstm_decoder_with_attention(target_embedding, encoder_vec, encoder_proj,
                                     decoder_boot, decoder_size):
-        def simple_attention(encoder_vec, encoder_proj, decoder_state):
+        def simple_attention(encoder_proj, decoder_state):
             decoder_state_proj = fluid.layers.fc(input=decoder_state,
                                                 size=decoder_size,
                                                 bias_attr=False)
@@ -205,11 +205,11 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
         with rnn.block():
             current_word = rnn.step_input(target_embedding)
-            encoder_vec = rnn.static_input(encoder_vec)
+            #encoder_vec = rnn.static_input(encoder_vec)
             encoder_proj = rnn.static_input(encoder_proj)
             hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
             cell_mem = rnn.memory(init=cell_init)
-            context = simple_attention(encoder_vec, encoder_proj, hidden_mem)
+            context = simple_attention(encoder_proj, hidden_mem)
             decoder_inputs = fluid.layers.concat(
                 input=[context, current_word], axis=1)
             h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
