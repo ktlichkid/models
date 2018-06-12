@@ -136,17 +136,17 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         forward, _ = fluid.layers.dynamic_lstm(
             input=input_forward_proj, size=gate_size * 4,
             use_peepholes=False)
-        input_reversed_proj = fluid.layers.fc(input=input_seq,
-                                              size=gate_size * 4,
-                                              #act='tanh',
-                                              #param_attr=clip_attr,
-                                              bias_attr=False)
-        reversed, _ = fluid.layers.dynamic_lstm(
-            input=input_reversed_proj,
-            size=gate_size * 4,
-            is_reverse=True,
-            use_peepholes=False)
-        return forward, reversed
+        # input_reversed_proj = fluid.layers.fc(input=input_seq,
+        #                                       size=gate_size * 4,
+        #                                       #act='tanh',
+        #                                       #param_attr=clip_attr,
+        #                                       bias_attr=False)
+        # reversed, _ = fluid.layers.dynamic_lstm(
+        #     input=input_reversed_proj,
+        #     size=gate_size * 4,
+        #     is_reverse=True,
+        #     use_peepholes=False)
+        return forward, None#reversed
 
     src_word_idx = fluid.layers.data(
         name='source_sequence', shape=[1], dtype='int64', lod_level=1)
@@ -156,19 +156,19 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         size=[source_dict_dim, embedding_dim],
         dtype='float32')
     
-#    encoded_vector, src_reversed = bi_lstm_encoder(
-    src_forward, src_reversed = bi_lstm_encoder(
+    encoded_vector, _ = bi_lstm_encoder(
+#    src_forward, src_reversed = bi_lstm_encoder(
         input_seq=src_embedding, gate_size=encoder_size)
 
-    encoded_vector = fluid.layers.concat(
-        input=[src_forward, src_reversed], axis=1)
+    # encoded_vector = fluid.layers.concat(
+    #     input=[src_forward, src_reversed], axis=1)
 
     encoded_proj = fluid.layers.fc(input=encoded_vector,
                                    size=decoder_size,
                                    bias_attr=False)
 
     backward_first = fluid.layers.sequence_pool(
-        input=src_reversed, pool_type='first')
+        input=encoded_vector, pool_type='last')
 
     decoder_boot = fluid.layers.fc(input=backward_first,
                                    size=decoder_size,
