@@ -258,9 +258,6 @@ def train():
         beam_size=args.beam_size,
         max_length=args.max_length)
 
-    # clone from default main program
-    inference_program = fluid.default_main_program().clone()
-
     optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
 
@@ -271,51 +268,14 @@ def train():
             wmt14.train(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
-    test_batch_generator = paddle.batch(
-        paddle.reader.shuffle(
-            wmt14.test(args.dict_size), buf_size=1000),
-        batch_size=args.batch_size)
-
     place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    def do_validation():
-        total_loss = 0.0
-        count = 0
-        for batch_id, data in enumerate(test_batch_generator()):
-            src_seq = to_lodtensor(map(lambda x: x[0], data), place)[0]
-            trg_seq = to_lodtensor(map(lambda x: x[1], data), place)[0]
-            lbl_seq = to_lodtensor(map(lambda x: x[2], data), place)[0]
-
-            fetch_outs = exe.run(inference_program,
-                                 feed={
-                                     feeding_list[0]: src_seq,
-                                     feeding_list[1]: trg_seq,
-                                     feeding_list[2]: lbl_seq
-                                 },
-                                 fetch_list=[avg_cost],
-                                 return_numpy=False)
-
-            total_loss += lodtensor_to_ndarray(fetch_outs[0])[0]
-            count += 1
-
-        return total_loss / count
-
-    if load_first:
-        model_path = os.path.join(model_save_dir, str(1))
-        fluid.io.load_persistables(
-            executor=exe,
-            dirname=model_path,
-            main_program=framework.default_main_program())
-
     iters, num_samples, start_time = 0, 0, time.time()
     for pass_id in xrange(args.pass_num):
-        train_accs = []
-        train_losses = []
         for batch_id, data in enumerate(train_batch_generator()):
             if iters == args.skip_batch_num:
-                start_time = time.time()
                 num_samples = 0
             if iters == args.iterations:
                 break
@@ -335,44 +295,14 @@ def train():
 
             iters += 1
             loss = np.array(fetch_outs[0])
-            print(
-                "Pass = %d, Iter = %d, Loss = %f" % (pass_id, iters, loss)
-            )  # The accuracy is the accumulation of batches, but not the current batch.
 
-        if pass_id % 1 == 0 and save_model:
-            model_path = os.path.join(model_save_dir, str(pass_id))
-            if not os.path.isdir(model_path):
-                os.makedirs(model_path)
-
-            fluid.io.save_persistables(
-                executor=exe,
-                dirname=model_path,
-                main_program=framework.default_main_program())
-
-        train_elapsed = time.time() - start_time
-        examples_per_sec = num_samples / train_elapsed
-        print('\nTotal examples: %d, total time: %.5f, %.5f examples/sed\n' %
-              (num_samples, train_elapsed, examples_per_sec))
-        # evaluation
-        if args.with_test:
-            test_loss = do_validation()
-        #exit(0)
 
 
 def infer():
     pass
 
-
-def print_arguments(args):
-    print('----------- seq2seq Configuration Arguments -----------')
-    for arg, value in sorted(vars(args).iteritems()):
-        print('%s: %s' % (arg, value))
-    print('------------------------------------------------')
-
-
 if __name__ == '__main__':
     args = parser.parse_args()
-    print_arguments(args)
     if args.infer_only:
         infer()
     else:
