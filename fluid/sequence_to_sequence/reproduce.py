@@ -134,15 +134,9 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         size=[source_dict_dim, embedding_dim],
         dtype='float32')
 
-    input_forward_proj = fluid.layers.fc(input=src_embedding,
-                                         size=encoder_size * 4,
+    encoded_vector = fluid.layers.fc(input=src_embedding,
+                                         size=encoder_size,
                                          bias_attr=False)
-
-    # encoded_vector, _ = fluid.layers.dynamic_lstm(
-    #     input=input_forward_proj, size=encoder_size * 4,
-    #     use_peepholes=False)
-
-    encoded_vector = input_forward_proj
 
     encoded_proj = fluid.layers.fc(input=encoded_vector,
                                    size=decoder_size,
