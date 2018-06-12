@@ -168,7 +168,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
         with rnn.block():
             #current_word = rnn.step_input(target_embedding)
-            encoder_proj = rnn.static_input(encoder_proj)
+            #encoder_proj = rnn.static_input(encoder_proj)
             hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
             cell_mem = rnn.memory(init=cell_init)
 
