@@ -191,17 +191,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                input=[encoder_proj, decoder_state_expand], axis=1)
             concated = fluid.layers.Print(
                 concated, message="concated", summarize=10)
-            attention_weights = fluid.layers.fc(input=concated,
-                                               size=1,
-                                               act='tanh',
-                                               bias_attr=False)
-            attention_weights = fluid.layers.sequence_softmax(
-               input=attention_weights)
-            weigths_reshape = fluid.layers.reshape(
-               x=attention_weights, shape=[-1])
-            scaled = fluid.layers.elementwise_mul(
-               x=encoder_vec, y=weigths_reshape, axis=0)
-            context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
+            context = fluid.layers.sequence_pool(input=concated, pool_type='sum')
             return context
 
         rnn = fluid.layers.DynamicRNN()
