@@ -160,9 +160,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             hidden_mem = rnn.memory(init=decoder_boot)
             cell_mem = rnn.memory(init=cell_init)
 
-            decoder_state_proj = fluid.layers.fc(input=hidden_mem,
-                                                size=decoder_size,
-                                                bias_attr=False)
+            decoder_state_proj = hidden_mem
             decoder_state_proj = fluid.layers.Print(
                 decoder_state_proj, message="decoder_state_proj", summarize=10)
             decoder_state_expand = fluid.layers.sequence_expand(
