@@ -134,21 +134,13 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         size=[source_dict_dim, embedding_dim],
         dtype='float32')
 
-    encoded_vector = fluid.layers.fc(input=src_embedding,
-                                         size=encoder_size,
-                                         bias_attr=False)
+    encoded_proj = fluid.layers.fc(input=src_embedding,
+                                     size=encoder_size,
+                                     bias_attr=False)
 
-    encoded_proj = encoded_vector
+    decoder_boot = fluid.layers.sequence_pool(
+        input=encoded_proj, pool_type='last')
 
-    backward_first = fluid.layers.sequence_pool(
-        input=encoded_vector, pool_type='last')
-
-    decoder_boot = backward_first
-
-        # fluid.layers.fc(input=backward_first,
-        #                            size=decoder_size,
-        #                            bias_attr=False,
-        #                            act='tanh')
 
     def lstm_decoder_with_attention(target_embedding, encoder_proj,
                                     decoder_boot, decoder_size):
