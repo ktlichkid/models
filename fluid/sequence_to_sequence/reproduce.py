@@ -189,7 +189,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
             decoder_inputs = fluid.layers.concat(
                 input=[context, current_word], axis=1)
-            h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
+            h, c = hidden_mem, cell_mem
+            #h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
             rnn.update_memory(hidden_mem, h)
             rnn.update_memory(cell_mem, c)
             out = fluid.layers.fc(input=h,
