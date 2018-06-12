@@ -126,28 +126,6 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                    target_dict_dim, is_generating, beam_size, max_length):
     """Construct a seq2seq network."""
 
-    def bi_lstm_encoder(input_seq, gate_size):
-        # Linear transformation part for input gate, output gate, forget gate
-        # and cell activation vectors need be done outside of dynamic_lstm.
-        # So the output size is 4 times of gate_size.
-        input_forward_proj = fluid.layers.fc(input=input_seq,
-                                             size=gate_size * 4,
-                                             bias_attr=False)
-        forward, _ = fluid.layers.dynamic_lstm(
-            input=input_forward_proj, size=gate_size * 4,
-            use_peepholes=False)
-        # input_reversed_proj = fluid.layers.fc(input=input_seq,
-        #                                       size=gate_size * 4,
-        #                                       #act='tanh',
-        #                                       #param_attr=clip_attr,
-        #                                       bias_attr=False)
-        # reversed, _ = fluid.layers.dynamic_lstm(
-        #     input=input_reversed_proj,
-        #     size=gate_size * 4,
-        #     is_reverse=True,
-        #     use_peepholes=False)
-        return forward, None#reversed
-
     src_word_idx = fluid.layers.data(
         name='source_sequence', shape=[1], dtype='int64', lod_level=1)
 
@@ -155,13 +133,14 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         input=src_word_idx,
         size=[source_dict_dim, embedding_dim],
         dtype='float32')
-    
-    encoded_vector, _ = bi_lstm_encoder(
-#    src_forward, src_reversed = bi_lstm_encoder(
-        input_seq=src_embedding, gate_size=encoder_size)
 
-    # encoded_vector = fluid.layers.concat(
-    #     input=[src_forward, src_reversed], axis=1)
+    input_forward_proj = fluid.layers.fc(input=src_embedding,
+                                         size=encoder_size * 4,
+                                         bias_attr=False)
+
+    encoded_vector, _ = fluid.layers.dynamic_lstm(
+        input=input_forward_proj, size=encoder_size * 4,
+        use_peepholes=False)
 
     encoded_proj = fluid.layers.fc(input=encoded_vector,
                                    size=decoder_size,
@@ -175,10 +154,25 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                    bias_attr=False,
                                    act='tanh')
 
-    def lstm_decoder_with_attention(target_embedding, encoder_vec, encoder_proj,
+    def lstm_decoder_with_attention(target_embedding, encoder_proj,
                                     decoder_boot, decoder_size):
-        def simple_attention(encoder_proj, decoder_state):
-            decoder_state_proj = fluid.layers.fc(input=decoder_state,
+
+        rnn = fluid.layers.DynamicRNN()
+
+        cell_init = fluid.layers.fill_constant_batch_size_like(
+            input=decoder_boot,
+            value=0.0,
+            shape=[-1, decoder_size],
+            dtype='float32')
+        cell_init.stop_gradient = False
+
+        with rnn.block():
+            current_word = rnn.step_input(target_embedding)
+            encoder_proj = rnn.static_input(encoder_proj)
+            hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
+            cell_mem = rnn.memory(init=cell_init)
+
+            decoder_state_proj = fluid.layers.fc(input=hidden_mem,
                                                 size=decoder_size,
                                                 bias_attr=False)
             decoder_state_proj = fluid.layers.Print(
@@ -192,24 +186,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             concated = fluid.layers.Print(
                 concated, message="concated", summarize=10)
             context = fluid.layers.sequence_pool(input=concated, pool_type='sum')
-            return context
 
-        rnn = fluid.layers.DynamicRNN()
-
-        cell_init = fluid.layers.fill_constant_batch_size_like(
-            input=decoder_boot,
-            value=0.0,
-            shape=[-1, decoder_size],
-            dtype='float32')
-        cell_init.stop_gradient = False
-
-        with rnn.block():
-            current_word = rnn.step_input(target_embedding)
-            #encoder_vec = rnn.static_input(encoder_vec)
-            encoder_proj = rnn.static_input(encoder_proj)
-            hidden_mem = rnn.memory(init=decoder_boot, need_reorder=True)
-            cell_mem = rnn.memory(init=cell_init)
-            context = simple_attention(encoder_proj, hidden_mem)
             decoder_inputs = fluid.layers.concat(
                 input=[context, current_word], axis=1)
             h, c = lstm_step(decoder_inputs, hidden_mem, cell_mem, decoder_size)
@@ -231,7 +208,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             size=[target_dict_dim, embedding_dim],
             dtype='float32')
 
-        prediction = lstm_decoder_with_attention(trg_embedding, encoded_vector,
+        prediction = lstm_decoder_with_attention(trg_embedding,
                                                  encoded_proj, decoder_boot,
                                                  decoder_size)
         prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
