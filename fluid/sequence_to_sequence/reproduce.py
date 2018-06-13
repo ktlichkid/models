@@ -51,6 +51,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         input=trg_word_idx,
         size=[target_dict_dim, embedding_dim],
         dtype='float32')
+    trg_embedding = fluid.layers.sequence_pool(input = trg_embedding, pool_type="sum")
+
     trg_embedding = fluid.layers.Print(trg_embedding, message="trg_embedding", summarize=10)
 
     label = fluid.layers.data(
