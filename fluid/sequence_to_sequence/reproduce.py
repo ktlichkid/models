@@ -62,7 +62,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         size=[target_dict_dim, embedding_dim],
         dtype='float32'
     )
-    label_embedding = fluid.layers.Print(label_embedding, message="label", summarize=10)
+#    label_embedding = fluid.layers.Print(label_embedding, message="label", summarize=10)
 
     encoded_proj = fluid.layers.fc(input=src_embedding,
                                    size=encoder_size,
