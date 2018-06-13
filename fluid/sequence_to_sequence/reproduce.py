@@ -37,22 +37,17 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
     src_word_idx = fluid.layers.data(
         name='source_sequence', shape=[1], dtype='int64', lod_level=1)
-
     src_embedding = fluid.layers.embedding(
         input=src_word_idx,
         size=[source_dict_dim, embedding_dim],
         dtype='float32')
 
-    label = fluid.layers.data(
-        name='label_sequence', shape=[1], dtype='int64', lod_level=1)
-    label_embedding = fluid.layers.embedding(
-        input=label,
-        size=[target_dict_dim, embedding_dim],
-        dtype='float32')
-    label_proj = fluid.layers.fc(input=label_embedding,
-                                 size=encoder_size,
-                                 bias_attr=False)
-    #label_proj = fluid.layers.Print(label_proj, message="label", summarize=10)
+    # label = fluid.layers.data(
+    #     name='label_sequence', shape=[1], dtype='int64', lod_level=1)
+    # label_embedding = fluid.layers.embedding(
+    #     input=label,
+    #     size=[target_dict_dim, embedding_dim],
+    #     dtype='float32')
 
     encoded_proj = fluid.layers.fc(input=src_embedding,
                                    size=encoder_size,
@@ -65,8 +60,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     decoder_state_proj = fluid.layers.Print(
         decoder_state_proj, message="decoder_state_proj", summarize=10)
     decoder_state_expand = fluid.layers.sequence_expand(
-       x=decoder_state_proj, y=label_proj)
-    label_proj = fluid.layers.Print(label_proj)
+       x=decoder_state_proj, y=encoded_proj)
+#    label_proj = fluid.layers.Print(label_proj)
     decoder_state_expand = fluid.layers.Print(
         decoder_state_expand, message="decoder_state_expand", summarize=10)
 
@@ -76,7 +71,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                           act='softmax')
 
     prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
-    cost = fluid.layers.cross_entropy(input=prediction, label=label)
+    cost = fluid.layers.cross_entropy(input=prediction, label=src_word_idx)
     avg_cost = fluid.layers.mean(x=cost)
 
     feeding_list = ["source_sequence", "label_sequence"]
