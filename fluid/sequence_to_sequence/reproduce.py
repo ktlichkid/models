@@ -155,12 +155,7 @@ def lodtensor_to_ndarray(lod_tensor):
 def train():
     fluid.default_startup_program().random_seed = 111
 
-    avg_cost, feeding_list = seq_to_seq_net(
-        args.embedding_dim,
-        args.encoder_size,
-        args.decoder_size,
-        args.dict_size,
-        args.dict_size)
+    avg_cost, feeding_list = seq_to_seq_net(32, 32, 32, 30000, 30000)
 
     optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
