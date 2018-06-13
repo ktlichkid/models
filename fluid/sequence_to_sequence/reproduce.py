@@ -99,7 +99,8 @@ def train():
                              },
                              fetch_list=[avg_cost, prediction.name+"@GRAD",
                                          decoder_state_expand.name+"@GRAD",
-                                         decoder_state_proj.name+"@GRAD"])
+                                         decoder_state_proj.name+"@GRAD",
+                                         encoded_proj.name+"@GRAD"])
         print(fetch_outs)
 
 
