@@ -75,22 +75,16 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
            x=decoder_state_proj, y=encoder_proj)
         decoder_state_expand = fluid.layers.Print(
             decoder_state_expand, message="decoder_state_expand", summarize=10)
-        concated = fluid.layers.concat(
-          input=[encoder_proj, decoder_state_expand], axis=1)
+
+        concated = decoder_state_expand
+          #   fluid.layers.concat(
+          # input=[encoder_proj, decoder_state_expand], axis=1)
         concated = fluid.layers.Print(
            concated, message="concated", summarize=10)
         context = fluid.layers.sequence_pool(input=concated, pool_type='sum')
-
         decoder_inputs = fluid.layers.concat(
             input=[context, current_word], axis=1)
-
-        output_gate = fluid.layers.fc(input=[hidden_mem, decoder_inputs], size=decoder_size, bias_attr=True)
- #       cell_tilde = fluid.layers.fc(input=[hidden_mem, decoder_inputs], size=decoder_size, bias_attr=True)
-
-        h = output_gate
-
-#        h = fluid.layers.elementwise_mul(
-#            x=output_gate, y=cell_tilde)
+        h = fluid.layers.fc(input=[hidden_mem, decoder_inputs], size=decoder_size, bias_attr=True)
 
         rnn.update_memory(hidden_mem, h)
         out = fluid.layers.fc(input=h,
