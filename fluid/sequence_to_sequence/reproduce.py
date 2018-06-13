@@ -114,6 +114,17 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         size=[source_dict_dim, embedding_dim],
         dtype='float32')
 
+    trg_word_idx = fluid.layers.data(
+        name='target_sequence', shape=[1], dtype='int64', lod_level=1)
+
+    trg_embedding = fluid.layers.embedding(
+        input=trg_word_idx,
+        size=[target_dict_dim, embedding_dim],
+        dtype='float32')
+
+    label = fluid.layers.data(
+        name='label_sequence', shape=[1], dtype='int64', lod_level=1)
+
     encoded_proj = fluid.layers.fc(input=src_embedding,
                                      size=encoder_size,
                                      bias_attr=False)
@@ -163,21 +174,47 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             rnn.output(out)
         return rnn()
 
-#    if not is_generating:
-    trg_word_idx = fluid.layers.data(
-        name='target_sequence', shape=[1], dtype='int64', lod_level=1)
 
-    trg_embedding = fluid.layers.embedding(
-        input=trg_word_idx,
-        size=[target_dict_dim, embedding_dim],
-        dtype='float32')
+    rnn = fluid.layers.DynamicRNN()
 
-    prediction = lstm_decoder_with_attention(trg_embedding,
-                                             encoded_proj, decoder_boot,
-                                             decoder_size)
+    with rnn.block():
+        current_word = rnn.step_input(trg_embedding)
+        encoder_proj = rnn.static_input(encoded_proj)
+        hidden_mem = rnn.memory(init=decoder_boot)
+
+        decoder_state_proj = hidden_mem
+        decoder_state_proj = fluid.layers.Print(
+            decoder_state_proj, message="decoder_state_proj", summarize=10)
+        decoder_state_expand = fluid.layers.sequence_expand(
+           x=decoder_state_proj, y=encoder_proj)
+        decoder_state_expand = fluid.layers.Print(
+            decoder_state_expand, message="decoder_state_expand", summarize=10)
+        concated = fluid.layers.concat(
+          input=[encoder_proj, decoder_state_expand], axis=1)
+        concated = fluid.layers.Print(
+           concated, message="concated", summarize=10)
+        context = fluid.layers.sequence_pool(input=concated, pool_type='sum')
+
+        decoder_inputs = fluid.layers.concat(
+            input=[context, current_word], axis=1)
+
+        output_gate = fluid.layers.fc(input=[hidden_mem, decoder_inputs], size=decoder_size, bias_attr=True)
+        cell_tilde = fluid.layers.fc(input=[hidden_mem, decoder_inputs], size=decoder_size, bias_attr=True)
+
+        hidden_t = fluid.layers.elementwise_mul(
+            x=output_gate, y=fluid.layers.tanh(x=cell_tilde))
+        h = hidden_t
+
+        rnn.update_memory(hidden_mem, h)
+        out = fluid.layers.fc(input=h,
+                              size=target_dict_dim,
+                              bias_attr=True,
+                              act='softmax')
+        rnn.output(out)
+
+    prediction = rnn()
+
     prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
-    label = fluid.layers.data(
-        name='label_sequence', shape=[1], dtype='int64', lod_level=1)
     cost = fluid.layers.cross_entropy(input=prediction, label=label)
     avg_cost = fluid.layers.mean(x=cost)
 
