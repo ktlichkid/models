@@ -102,7 +102,7 @@ def train():
                              feed={
                                  feeding_list[0]: src_seq
                              },
-                             fetch_list=[avg_cost, decoder_state_proj.name+"@GRAD"])
+                             fetch_list=[avg_cost, prediction.name+"@GRAD"])
         print(fetch_outs)
 
 
