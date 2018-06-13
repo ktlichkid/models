@@ -37,14 +37,6 @@ def to_lodtensor(data, place):
     return lod_t, lod[-1]
 
 
-def lodtensor_to_ndarray(lod_tensor):
-    dims = lod_tensor.get_dims()
-    ndarray = np.zeros(shape=dims).astype('float32')
-    for i in xrange(np.product(dims)):
-        ndarray.ravel()[i] = lod_tensor.get_float_element(i)
-    return ndarray
-
-
 def train():
     fluid.default_startup_program().random_seed = 111
 
@@ -93,6 +85,14 @@ def train():
         batch_size=16)
 
     place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
+
+    data = [[0], [19], [16], [1]]
+    lod = [0, 4]
+    lod_t = core.LoDTensor()
+    lod_t.set(np.array(data), place)
+    lod_t.set_lod([lod])
+
+#    place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
@@ -101,7 +101,7 @@ def train():
 
         fetch_outs = exe.run(framework.default_main_program(),
                              feed={
-                                 feeding_list[0]: src_seq
+                                 feeding_list[0]: lod_t
                              },
                              fetch_list=[avg_cost, prediction.name+"@GRAD", decoder_state_expand.name+"@GRAD"])
         print(fetch_outs)
