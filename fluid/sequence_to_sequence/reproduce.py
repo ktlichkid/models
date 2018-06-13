@@ -44,16 +44,16 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         dtype='float32')
     src_embedding = fluid.layers.Print(src_embedding, message="src_embedding", summarize=10)
 
-    trg_word_idx = fluid.layers.data(
-        name='target_sequence', shape=[1], dtype='int64', lod_level=1)
-
-    trg_embedding = fluid.layers.embedding(
-        input=trg_word_idx,
-        size=[target_dict_dim, embedding_dim],
-        dtype='float32')
-    trg_embedding = fluid.layers.sequence_pool(input = trg_embedding, pool_type="sum")
-
-    trg_embedding = fluid.layers.Print(trg_embedding, message="trg_embedding", summarize=10)
+    # trg_word_idx = fluid.layers.data(
+    #     name='target_sequence', shape=[1], dtype='int64', lod_level=1)
+    #
+    # trg_embedding = fluid.layers.embedding(
+    #     input=trg_word_idx,
+    #     size=[target_dict_dim, embedding_dim],
+    #     dtype='float32')
+    # trg_embedding = fluid.layers.sequence_pool(input = trg_embedding, pool_type="sum")
+    #
+    # trg_embedding = fluid.layers.Print(trg_embedding, message="trg_embedding", summarize=10)
 
     label = fluid.layers.data(
         name='label_sequence', shape=[1], dtype='int64', lod_level=1)
@@ -157,8 +157,8 @@ def train():
         fetch_outs = exe.run(framework.default_main_program(),
                              feed={
                                  feeding_list[0]: src_seq,
-                                 feeding_list[1]: trg_seq,
-                                 feeding_list[2]: lbl_seq
+                                 #feeding_list[1]: trg_seq,
+                                 feeding_list[1]: lbl_seq
                              },
                              fetch_list=[avg_cost])
 
