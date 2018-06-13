@@ -1,25 +1,9 @@
-#   Copyright (c) 2018 PaddlePaddle Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-"""seq2seq model for fluid."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import numpy as np
 import argparse
-import time
-import distutils.util
 
 import paddle
 import paddle.fluid as fluid
@@ -27,7 +11,6 @@ import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 from paddle.fluid.executor import Executor
 
-import os
 import wmt14
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -52,55 +35,22 @@ parser.add_argument(
     default=16,
     help="The sequence number of a mini-batch data. (default: %(default)d)")
 parser.add_argument(
-    '--skip_batch_num',
-    type=int,
-    default=5,
-    help='The first num of minibatch num to skip, for better performance test')
-parser.add_argument(
-    '--iterations', type=int, default=10000, help='The number of minibatches.')
-parser.add_argument(
     "--dict_size",
     type=int,
     default=30000,
     help="The dictionary capacity. Dictionaries of source sequence and "
     "target dictionary have same capacity. (default: %(default)d)")
 parser.add_argument(
-    "--pass_num",
-    type=int,
-    default=1,
-    help="The pass number to train. (default: %(default)d)")
-parser.add_argument(
     "--learning_rate",
     type=float,
     default=0.01,
     help="Learning rate used to train the model. (default: %(default)f)")
-parser.add_argument(
-    "--infer_only", action='store_true', help="If set, run forward only.")
-parser.add_argument(
-    "--beam_size",
-    type=int,
-    default=1,
-    help="The width for beam searching. (default: %(default)d)")
 parser.add_argument(
     '--device',
     type=str,
     default='CPU',
     choices=['CPU', 'GPU'],
     help="The device type.")
-parser.add_argument(
-    "--max_length",
-    type=int,
-    default=250,
-    help="The maximum length of sequence when doing generation. "
-    "(default: %(default)d)")
-parser.add_argument(
-    '--with_test',
-    action='store_true',
-    help='If set, test the testset during training.')
-
-load_first = False
-model_save_dir = "model_attention"
-save_model = False
 
 
 def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
