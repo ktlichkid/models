@@ -72,7 +72,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.01,
+    default=0.1,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
