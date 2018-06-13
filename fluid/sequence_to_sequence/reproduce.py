@@ -105,7 +105,6 @@ save_model = False
 
 def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                    target_dict_dim, is_generating, beam_size, max_length):
-    """Construct a seq2seq network."""
 
     src_word_idx = fluid.layers.data(
         name='source_sequence', shape=[1], dtype='int64', lod_level=1)
@@ -154,7 +153,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
             hidden_t = fluid.layers.elementwise_mul(
                 x=output_gate, y=fluid.layers.tanh(x=cell_tilde))
-            h, c = hidden_t, cell_tilde
+            h = hidden_t
 
             rnn.update_memory(hidden_mem, h)
             out = fluid.layers.fc(input=h,
@@ -164,27 +163,27 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             rnn.output(out)
         return rnn()
 
-    if not is_generating:
-        trg_word_idx = fluid.layers.data(
-            name='target_sequence', shape=[1], dtype='int64', lod_level=1)
+#    if not is_generating:
+    trg_word_idx = fluid.layers.data(
+        name='target_sequence', shape=[1], dtype='int64', lod_level=1)
 
-        trg_embedding = fluid.layers.embedding(
-            input=trg_word_idx,
-            size=[target_dict_dim, embedding_dim],
-            dtype='float32')
+    trg_embedding = fluid.layers.embedding(
+        input=trg_word_idx,
+        size=[target_dict_dim, embedding_dim],
+        dtype='float32')
 
-        prediction = lstm_decoder_with_attention(trg_embedding,
-                                                 encoded_proj, decoder_boot,
-                                                 decoder_size)
-        prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
-        label = fluid.layers.data(
-            name='label_sequence', shape=[1], dtype='int64', lod_level=1)
-        cost = fluid.layers.cross_entropy(input=prediction, label=label)
-        avg_cost = fluid.layers.mean(x=cost)
+    prediction = lstm_decoder_with_attention(trg_embedding,
+                                             encoded_proj, decoder_boot,
+                                             decoder_size)
+    prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
+    label = fluid.layers.data(
+        name='label_sequence', shape=[1], dtype='int64', lod_level=1)
+    cost = fluid.layers.cross_entropy(input=prediction, label=label)
+    avg_cost = fluid.layers.mean(x=cost)
 
-        feeding_list = ["source_sequence", "target_sequence", "label_sequence"]
+    feeding_list = ["source_sequence", "target_sequence", "label_sequence"]
 
-        return avg_cost, feeding_list
+    return avg_cost, feeding_list
 
 
 def to_lodtensor(data, place):
@@ -262,9 +261,9 @@ def train():
             loss = np.array(fetch_outs[0])
 
 
-
 def infer():
     pass
+
 
 if __name__ == '__main__':
     args = parser.parse_args()
