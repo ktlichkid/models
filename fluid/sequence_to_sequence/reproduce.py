@@ -103,16 +103,6 @@ model_save_dir = "model_attention"
 save_model = False
 
 
-def lstm_step(x_t, hidden_t_prev, size):
-
-    output_gate = fluid.layers.fc(input=[hidden_t_prev, x_t], size=size, bias_attr=True)
-    cell_tilde = fluid.layers.fc(input=[hidden_t_prev, x_t], size=size, bias_attr=True)
-
-    hidden_t = fluid.layers.elementwise_mul(
-        x=output_gate, y=fluid.layers.tanh(x=cell_tilde))
-    return hidden_t, cell_tilde
-
-
 def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                    target_dict_dim, is_generating, beam_size, max_length):
     """Construct a seq2seq network."""
