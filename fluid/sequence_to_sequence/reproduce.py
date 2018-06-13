@@ -15,31 +15,10 @@ import wmt14
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
-    "--embedding_dim",
-    type=int,
-    default=32,
-    help="The dimension of embedding table. (default: %(default)d)")
-parser.add_argument(
-    "--encoder_size",
-    type=int,
-    default=32,
-    help="The size of encoder bi-rnn unit. (default: %(default)d)")
-parser.add_argument(
-    "--decoder_size",
-    type=int,
-    default=32,
-    help="The size of decoder rnn unit. (default: %(default)d)")
-parser.add_argument(
     "--batch_size",
     type=int,
     default=16,
     help="The sequence number of a mini-batch data. (default: %(default)d)")
-parser.add_argument(
-    "--dict_size",
-    type=int,
-    default=30000,
-    help="The dictionary capacity. Dictionaries of source sequence and "
-    "target dictionary have same capacity. (default: %(default)d)")
 parser.add_argument(
     "--learning_rate",
     type=float,
