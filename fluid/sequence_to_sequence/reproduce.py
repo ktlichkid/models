@@ -50,7 +50,7 @@ def train():
 
     src_word_idx = fluid.layers.data(
         name='source_sequence', shape=[1], dtype='int64', lod_level=1)
-    src_word_idx = fluid.layers.Print(src_word_idx)
+#    src_word_idx = fluid.layers.Print(src_word_idx)
     src_embedding = fluid.layers.embedding(
         input=src_word_idx,
         size=[30000, 32],
@@ -103,7 +103,7 @@ def train():
                              feed={
                                  feeding_list[0]: src_seq
                              },
-                             fetch_list=[prediction.name+"@GRAD", decoder_state_expand.name+"@GRAD"])
+                             fetch_list=[avg_cost, prediction.name+"@GRAD", decoder_state_expand.name+"@GRAD"])
         print(fetch_outs)
 
 
