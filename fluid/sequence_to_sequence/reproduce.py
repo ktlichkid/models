@@ -54,7 +54,7 @@ parser.add_argument(
 
 
 def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
-                   target_dict_dim, is_generating, beam_size, max_length):
+                   target_dict_dim):
 
     src_word_idx = fluid.layers.data(
         name='source_sequence', shape=[1], dtype='int64', lod_level=1)
@@ -160,10 +160,7 @@ def train():
         args.encoder_size,
         args.decoder_size,
         args.dict_size,
-        args.dict_size,
-        False,
-        beam_size=args.beam_size,
-        max_length=args.max_length)
+        args.dict_size)
 
     optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
