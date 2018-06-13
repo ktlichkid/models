@@ -56,7 +56,7 @@ def train():
 
     decoder_state_expand = fluid.layers.sequence_expand(
        x=decoder_state_proj, y=encoded_proj)
-    decoder_state_expand = fluid.layers.Print(decoder_state_expand)
+#    decoder_state_expand = fluid.layers.Print(decoder_state_expand)
 
     prediction = fluid.layers.fc(input=decoder_state_expand,
                           size=30000,
@@ -97,7 +97,9 @@ def train():
                              feed={
                                  feeding_list[0]: lod_t
                              },
-                             fetch_list=[avg_cost, prediction.name+"@GRAD", decoder_state_expand.name+"@GRAD"])
+                             fetch_list=[avg_cost, prediction.name+"@GRAD",
+                                         decoder_state_expand.name+"@GRAD",
+                                         decoder_state_proj.name+"@GRAD"])
         print(fetch_outs)
 
 
