@@ -58,6 +58,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     encoded_proj = fluid.layers.fc(input=src_embedding,
                                    size=encoder_size,
                                    bias_attr=False)
+    encoded_proj = fluid.layers.Print(encoded_proj, message="encoded_proj", summarize=10)
 
     decoder_boot = fluid.layers.sequence_pool(
         input=encoded_proj, pool_type='last')
@@ -78,6 +79,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     context = fluid.layers.Print(context, message="context", summarize=10)
     decoder_inputs = fluid.layers.concat(
         input=[context, trg_embedding], axis=1)
+    decoder_inputs = fluid.layers.Print(decoder_inputs, message="decoder_inputs", summarize=10)
     h = fluid.layers.fc(input=[decoder_boot, decoder_inputs], size=decoder_size, bias_attr=True)
 
     out = fluid.layers.fc(input=h,
