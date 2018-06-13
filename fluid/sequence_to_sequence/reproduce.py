@@ -92,7 +92,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
     prediction = out
 
-#    prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
+    prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
     cost = fluid.layers.cross_entropy(input=prediction, label=label)
     avg_cost = fluid.layers.mean(x=cost)
 
