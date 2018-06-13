@@ -143,7 +143,7 @@ def train():
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            wmt14.train(args.dict_size), buf_size=1000),
+            wmt14.train(30000), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
