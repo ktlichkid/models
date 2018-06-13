@@ -74,7 +74,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     cost = fluid.layers.cross_entropy(input=prediction, label=src_word_idx)
     avg_cost = fluid.layers.mean(x=cost)
 
-    feeding_list = ["source_sequence", "label_sequence"]
+    feeding_list = ["source_sequence"]
 
     return avg_cost, feeding_list
 
@@ -128,9 +128,9 @@ def train():
 
         fetch_outs = exe.run(framework.default_main_program(),
                              feed={
-                                 feeding_list[0]: src_seq,
+                                 feeding_list[0]: src_seq
                                  #feeding_list[1]: trg_seq,
-                                 feeding_list[1]: lbl_seq
+                                 #feeding_list[1]: lbl_seq
                              },
                              fetch_list=[avg_cost])
 
