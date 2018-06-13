@@ -39,27 +39,26 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         name='source_sequence', shape=[1], dtype='int64', lod_level=1)
     src_embedding = fluid.layers.embedding(
         input=src_word_idx,
-        size=[source_dict_dim, embedding_dim],
+        size=[30000, 32],
         dtype='float32')
 
     encoded_proj = fluid.layers.fc(input=src_embedding,
-                                   size=encoder_size,
+                                   size=32,
                                    bias_attr=False)
     encoded_proj = fluid.layers.Print(encoded_proj, message="encoded_proj", summarize=10)
 
     decoder_state_proj = fluid.layers.sequence_pool(
         input=encoded_proj, pool_type='last')
-
     decoder_state_proj = fluid.layers.Print(
         decoder_state_proj, message="decoder_state_proj", summarize=10)
+
     decoder_state_expand = fluid.layers.sequence_expand(
        x=decoder_state_proj, y=encoded_proj)
-
     decoder_state_expand = fluid.layers.Print(
         decoder_state_expand, message="decoder_state_expand", summarize=10)
 
     prediction = fluid.layers.fc(input=decoder_state_expand,
-                          size=target_dict_dim,
+                          size=30000,
                           bias_attr=True,
                           act='softmax')
 
@@ -98,7 +97,40 @@ def lodtensor_to_ndarray(lod_tensor):
 def train():
     fluid.default_startup_program().random_seed = 111
 
-    avg_cost, feeding_list = seq_to_seq_net(32, 32, 32, 30000, 30000)
+    src_word_idx = fluid.layers.data(
+        name='source_sequence', shape=[1], dtype='int64', lod_level=1)
+    src_embedding = fluid.layers.embedding(
+        input=src_word_idx,
+        size=[30000, 32],
+        dtype='float32')
+
+    encoded_proj = fluid.layers.fc(input=src_embedding,
+                                   size=32,
+                                   bias_attr=False)
+    encoded_proj = fluid.layers.Print(encoded_proj, message="encoded_proj", summarize=10)
+
+    decoder_state_proj = fluid.layers.sequence_pool(
+        input=encoded_proj, pool_type='last')
+    decoder_state_proj = fluid.layers.Print(
+        decoder_state_proj, message="decoder_state_proj", summarize=10)
+
+    decoder_state_expand = fluid.layers.sequence_expand(
+       x=decoder_state_proj, y=encoded_proj)
+    decoder_state_expand = fluid.layers.Print(
+        decoder_state_expand, message="decoder_state_expand", summarize=10)
+
+    prediction = fluid.layers.fc(input=decoder_state_expand,
+                          size=30000,
+                          bias_attr=True,
+                          act='softmax')
+
+    prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
+    cost = fluid.layers.cross_entropy(input=prediction, label=src_word_idx)
+    avg_cost = fluid.layers.mean(x=cost)
+
+    feeding_list = ["source_sequence"]
+
+#    avg_cost, feeding_list = seq_to_seq_net(32, 32, 32, 30000, 30000)
 
     optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
