@@ -97,16 +97,12 @@ def train():
 
     for batch_id, data in enumerate(train_batch_generator()):
         src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
-#        trg_seq, word_num = to_lodtensor(map(lambda x: x[1], data), place)
-#        lbl_seq, _ = to_lodtensor(map(lambda x: x[2], data), place)
 
         fetch_outs = exe.run(framework.default_main_program(),
                              feed={
                                  feeding_list[0]: src_seq
-                                 #feeding_list[1]: trg_seq,
-                                 #feeding_list[1]: lbl_seq
                              },
-                             fetch_list=[avg_cost])
+                             fetch_list=[avg_cost, decoder_state_expand.name+"@GRAD"])
         print(fetch_outs)
 
 
