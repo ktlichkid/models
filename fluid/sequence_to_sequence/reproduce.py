@@ -56,7 +56,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     trg_embedding = fluid.layers.Print(trg_embedding, message="trg_embedding", summarize=10)
 
     label = fluid.layers.data(
-        name='label_sequence', shape=[1], dtype='float32', lod_level=1)
+        name='label_sequence', shape=[1], dtype='int64', lod_level=1)
     label = fluid.layers.Print(label, message="label", summarize=10)
 
     encoded_proj = fluid.layers.fc(input=src_embedding,
@@ -71,22 +71,22 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     decoder_state_proj = fluid.layers.Print(
         decoder_state_proj, message="decoder_state_proj", summarize=10)
     decoder_state_expand = fluid.layers.sequence_expand(
-       x=decoder_state_proj, y=encoded_proj)
+       x=decoder_state_proj, y=label)
     decoder_state_expand = fluid.layers.Print(
         decoder_state_expand, message="decoder_state_expand", summarize=10)
 
-    concated = fluid.layers.concat(
-      input=[encoded_proj, decoder_state_expand], axis=1)
-    concated = fluid.layers.Print(
-       concated, message="concated", summarize=10)
-    context = fluid.layers.sequence_pool(input=concated, pool_type='sum')
-    context = fluid.layers.Print(context, message="context", summarize=10)
-    decoder_inputs = fluid.layers.concat(
-        input=[context, trg_embedding], axis=1)
-    decoder_inputs = fluid.layers.Print(decoder_inputs, message="decoder_inputs", summarize=10)
-    h = fluid.layers.fc(input=[decoder_boot, decoder_inputs], size=decoder_size, bias_attr=True)
+    # concated = fluid.layers.concat(
+    #   input=[encoded_proj, decoder_state_expand], axis=1)
+    # concated = fluid.layers.Print(
+    #    concated, message="concated", summarize=10)
+    # context = fluid.layers.sequence_pool(input=concated, pool_type='sum')
+    # context = fluid.layers.Print(context, message="context", summarize=10)
+    # decoder_inputs = fluid.layers.concat(
+    #     input=[context, trg_embedding], axis=1)
+    # decoder_inputs = fluid.layers.Print(decoder_inputs, message="decoder_inputs", summarize=10)
+    # h = fluid.layers.fc(input=[decoder_boot, decoder_inputs], size=decoder_size, bias_attr=True)
 
-    out = fluid.layers.fc(input=h,
+    out = fluid.layers.fc(input=decoder_state_expand,
                           size=target_dict_dim,
                           bias_attr=True,
                           act='softmax')
