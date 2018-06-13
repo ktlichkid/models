@@ -15,60 +15,11 @@ import wmt14
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
-    "--batch_size",
-    type=int,
-    default=16,
-    help="The sequence number of a mini-batch data. (default: %(default)d)")
-parser.add_argument(
-    "--learning_rate",
-    type=float,
-    default=0.01,
-    help="Learning rate used to train the model. (default: %(default)f)")
-parser.add_argument(
     '--device',
     type=str,
     default='CPU',
     choices=['CPU', 'GPU'],
     help="The device type.")
-
-
-def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
-                   target_dict_dim):
-
-    src_word_idx = fluid.layers.data(
-        name='source_sequence', shape=[1], dtype='int64', lod_level=1)
-    src_embedding = fluid.layers.embedding(
-        input=src_word_idx,
-        size=[30000, 32],
-        dtype='float32')
-
-    encoded_proj = fluid.layers.fc(input=src_embedding,
-                                   size=32,
-                                   bias_attr=False)
-    encoded_proj = fluid.layers.Print(encoded_proj, message="encoded_proj", summarize=10)
-
-    decoder_state_proj = fluid.layers.sequence_pool(
-        input=encoded_proj, pool_type='last')
-    decoder_state_proj = fluid.layers.Print(
-        decoder_state_proj, message="decoder_state_proj", summarize=10)
-
-    decoder_state_expand = fluid.layers.sequence_expand(
-       x=decoder_state_proj, y=encoded_proj)
-    decoder_state_expand = fluid.layers.Print(
-        decoder_state_expand, message="decoder_state_expand", summarize=10)
-
-    prediction = fluid.layers.fc(input=decoder_state_expand,
-                          size=30000,
-                          bias_attr=True,
-                          act='softmax')
-
-    prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
-    cost = fluid.layers.cross_entropy(input=prediction, label=src_word_idx)
-    avg_cost = fluid.layers.mean(x=cost)
-
-    feeding_list = ["source_sequence"]
-
-    return avg_cost, feeding_list
 
 
 def to_lodtensor(data, place):
@@ -130,9 +81,7 @@ def train():
 
     feeding_list = ["source_sequence"]
 
-#    avg_cost, feeding_list = seq_to_seq_net(32, 32, 32, 30000, 30000)
-
-    optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
+    optimizer = fluid.optimizer.Adam(learning_rate=0.01)
     optimizer.minimize(avg_cost)
 
     fluid.memory_optimize(fluid.default_main_program())
@@ -140,7 +89,7 @@ def train():
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
             wmt14.train(30000), buf_size=1000),
-        batch_size=args.batch_size)
+        batch_size=16)
 
     place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
     exe = Executor(place)
@@ -148,8 +97,8 @@ def train():
 
     for batch_id, data in enumerate(train_batch_generator()):
         src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
-        trg_seq, word_num = to_lodtensor(map(lambda x: x[1], data), place)
-        lbl_seq, _ = to_lodtensor(map(lambda x: x[2], data), place)
+#        trg_seq, word_num = to_lodtensor(map(lambda x: x[1], data), place)
+#        lbl_seq, _ = to_lodtensor(map(lambda x: x[2], data), place)
 
         fetch_outs = exe.run(framework.default_main_program(),
                              feed={
