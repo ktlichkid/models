@@ -49,6 +49,9 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         input=label,
         size=[target_dict_dim, embedding_dim],
         dtype='float32')
+    label_proj = fluid.layers.fc(input=label_embedding,
+                                 size=encoder_size,
+                                 bias_attr=False)
 #    label_embedding = fluid.layers.Print(label_embedding, message="label", summarize=10)
 
     encoded_proj = fluid.layers.fc(input=src_embedding,
@@ -63,7 +66,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 #    decoder_state_proj = fluid.layers.Print(
 #        decoder_state_proj, message="decoder_state_proj", summarize=10)
     decoder_state_expand = fluid.layers.sequence_expand(
-       x=decoder_state_proj, y=label_embedding)
+       x=decoder_state_proj, y=label_proj)
 #    decoder_state_expand = fluid.layers.Print(
 #        decoder_state_expand, message="decoder_state_expand", summarize=10)
 
