@@ -66,6 +66,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         decoder_state_proj, message="decoder_state_proj", summarize=10)
     decoder_state_expand = fluid.layers.sequence_expand(
        x=decoder_state_proj, y=label_proj)
+    label_proj = fluid.layers.Print(label_proj)
     decoder_state_expand = fluid.layers.Print(
         decoder_state_expand, message="decoder_state_expand", summarize=10)
 
