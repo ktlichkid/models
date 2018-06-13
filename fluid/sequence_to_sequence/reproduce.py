@@ -42,7 +42,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         input=src_word_idx,
         size=[source_dict_dim, embedding_dim],
         dtype='float32')
-    src_embedding = fluid.layers.Print(src_embedding, message=src_embedding, summarize=10)
+    src_embedding = fluid.layers.Print(src_embedding, message="src_embedding", summarize=10)
 
     trg_word_idx = fluid.layers.data(
         name='target_sequence', shape=[1], dtype='int64', lod_level=1)
