@@ -50,24 +50,18 @@ def train():
     encoded_proj = fluid.layers.fc(input=src_embedding,
                                    size=32,
                                    bias_attr=False)
-    encoded_proj = fluid.layers.Print(encoded_proj, message="encoded_proj", summarize=10)
 
     decoder_state_proj = fluid.layers.sequence_pool(
         input=encoded_proj, pool_type='last')
-    decoder_state_proj = fluid.layers.Print(
-        decoder_state_proj, message="decoder_state_proj", summarize=10)
 
     decoder_state_expand = fluid.layers.sequence_expand(
        x=decoder_state_proj, y=encoded_proj)
-    decoder_state_expand = fluid.layers.Print(
-        decoder_state_expand, message="decoder_state_expand", summarize=10)
 
     prediction = fluid.layers.fc(input=decoder_state_expand,
                           size=30000,
                           bias_attr=True,
                           act='softmax')
 
-    prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
     cost = fluid.layers.cross_entropy(input=prediction, label=src_word_idx)
     avg_cost = fluid.layers.mean(x=cost)
 
