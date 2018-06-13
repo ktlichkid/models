@@ -56,7 +56,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     trg_embedding = fluid.layers.Print(trg_embedding, message="trg_embedding", summarize=10)
 
     label = fluid.layers.data(
-        name='label_sequence', shape=[1], dtype='int64', lod_level=1)
+        name='label_sequence', shape=[1], dtype='float32', lod_level=1)
     label = fluid.layers.Print(label, message="label", summarize=10)
 
     encoded_proj = fluid.layers.fc(input=src_embedding,
