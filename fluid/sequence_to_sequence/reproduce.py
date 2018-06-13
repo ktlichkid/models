@@ -52,30 +52,29 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     label_proj = fluid.layers.fc(input=label_embedding,
                                  size=encoder_size,
                                  bias_attr=False)
-#    label_embedding = fluid.layers.Print(label_embedding, message="label", summarize=10)
+    label_proj = fluid.layers.Print(label_proj, message="label", summarize=10)
 
     encoded_proj = fluid.layers.fc(input=src_embedding,
                                    size=encoder_size,
                                    bias_attr=False)
-#    encoded_proj = fluid.layers.Print(encoded_proj, message="encoded_proj", summarize=10)
+    encoded_proj = fluid.layers.Print(encoded_proj, message="encoded_proj", summarize=10)
 
     decoder_state_proj = fluid.layers.sequence_pool(
         input=encoded_proj, pool_type='last')
 
-#    decoder_state_proj = decoder_boot
-#    decoder_state_proj = fluid.layers.Print(
-#        decoder_state_proj, message="decoder_state_proj", summarize=10)
+    decoder_state_proj = fluid.layers.Print(
+        decoder_state_proj, message="decoder_state_proj", summarize=10)
     decoder_state_expand = fluid.layers.sequence_expand(
        x=decoder_state_proj, y=label_proj)
-#    decoder_state_expand = fluid.layers.Print(
-#        decoder_state_expand, message="decoder_state_expand", summarize=10)
+    decoder_state_expand = fluid.layers.Print(
+        decoder_state_expand, message="decoder_state_expand", summarize=10)
 
     prediction = fluid.layers.fc(input=decoder_state_expand,
                           size=target_dict_dim,
                           bias_attr=True,
                           act='softmax')
 
-#    prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
+    prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
     cost = fluid.layers.cross_entropy(input=prediction, label=label)
     avg_cost = fluid.layers.mean(x=cost)
 
