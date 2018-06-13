@@ -103,20 +103,10 @@ model_save_dir = "model_attention"
 save_model = False
 
 
-def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
-    def linear(inputs):
-        return fluid.layers.fc(input=inputs, size=size, bias_attr=True)
+def lstm_step(x_t, hidden_t_prev, size):
 
-    # forget_gate = linear([hidden_t_prev, x_t])
-    # input_gate = linear([hidden_t_prev, x_t])
-    output_gate = linear([hidden_t_prev, x_t])
-    cell_tilde = linear([hidden_t_prev, x_t])
-
-    # cell_t = fluid.layers.sums(input=[
-    #     fluid.layers.elementwise_mul(
-    #         x=forget_gate, y=cell_t_prev), fluid.layers.elementwise_mul(
-    #             x=input_gate, y=cell_tilde)
-    # ])
+    output_gate = fluid.layers.fc(input=[hidden_t_prev, x_t], size=size, bias_attr=True)
+    cell_tilde = fluid.layers.fc(input=[hidden_t_prev, x_t], size=size, bias_attr=True)
 
     hidden_t = fluid.layers.elementwise_mul(
         x=output_gate, y=fluid.layers.tanh(x=cell_tilde))
@@ -148,18 +138,10 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
         rnn = fluid.layers.DynamicRNN()
 
-        cell_init = fluid.layers.fill_constant_batch_size_like(
-            input=decoder_boot,
-            value=0.0,
-            shape=[-1, decoder_size],
-            dtype='float32')
-        cell_init.stop_gradient = False
-
         with rnn.block():
             current_word = rnn.step_input(target_embedding)
             encoder_proj = rnn.static_input(encoder_proj)
             hidden_mem = rnn.memory(init=decoder_boot)
-            #cell_mem = rnn.memory(init=cell_init)
 
             decoder_state_proj = hidden_mem
             decoder_state_proj = fluid.layers.Print(
@@ -176,11 +158,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
             decoder_inputs = fluid.layers.concat(
                 input=[context, current_word], axis=1)
-            #h, c = hidden_mem, cell_mem
-            h, c = lstm_step(decoder_inputs, hidden_mem, None, decoder_size)
+            h, c = lstm_step(decoder_inputs, hidden_mem, decoder_size)
             rnn.update_memory(hidden_mem, h)
-            #rnn.update_memory(cell_mem, c)
-            #out = context
             out = fluid.layers.fc(input=h,
                                   size=target_dict_dim,
                                   bias_attr=True,
