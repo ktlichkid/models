@@ -126,54 +126,11 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         name='label_sequence', shape=[1], dtype='int64', lod_level=1)
 
     encoded_proj = fluid.layers.fc(input=src_embedding,
-                                     size=encoder_size,
-                                     bias_attr=False)
+                                   size=encoder_size,
+                                   bias_attr=False)
 
     decoder_boot = fluid.layers.sequence_pool(
         input=encoded_proj, pool_type='last')
-
-
-    def lstm_decoder_with_attention(target_embedding, encoder_proj,
-                                    decoder_boot, decoder_size):
-
-        rnn = fluid.layers.DynamicRNN()
-
-        with rnn.block():
-            current_word = rnn.step_input(target_embedding)
-            encoder_proj = rnn.static_input(encoder_proj)
-            hidden_mem = rnn.memory(init=decoder_boot)
-
-            decoder_state_proj = hidden_mem
-            decoder_state_proj = fluid.layers.Print(
-                decoder_state_proj, message="decoder_state_proj", summarize=10)
-            decoder_state_expand = fluid.layers.sequence_expand(
-               x=decoder_state_proj, y=encoder_proj)
-            decoder_state_expand = fluid.layers.Print(
-                decoder_state_expand, message="decoder_state_expand", summarize=10)
-            concated = fluid.layers.concat(
-              input=[encoder_proj, decoder_state_expand], axis=1)
-            concated = fluid.layers.Print(
-               concated, message="concated", summarize=10)
-            context = fluid.layers.sequence_pool(input=concated, pool_type='sum')
-
-            decoder_inputs = fluid.layers.concat(
-                input=[context, current_word], axis=1)
-
-            output_gate = fluid.layers.fc(input=[hidden_mem, decoder_inputs], size=decoder_size, bias_attr=True)
-            cell_tilde = fluid.layers.fc(input=[hidden_mem, decoder_inputs], size=decoder_size, bias_attr=True)
-
-            hidden_t = fluid.layers.elementwise_mul(
-                x=output_gate, y=fluid.layers.tanh(x=cell_tilde))
-            h = hidden_t
-
-            rnn.update_memory(hidden_mem, h)
-            out = fluid.layers.fc(input=h,
-                                  size=target_dict_dim,
-                                  bias_attr=True,
-                                  act='softmax')
-            rnn.output(out)
-        return rnn()
-
 
     rnn = fluid.layers.DynamicRNN()
 
@@ -273,38 +230,20 @@ def train():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    iters, num_samples, start_time = 0, 0, time.time()
-    for pass_id in xrange(args.pass_num):
-        for batch_id, data in enumerate(train_batch_generator()):
-            if iters == args.skip_batch_num:
-                num_samples = 0
-            if iters == args.iterations:
-                break
-            src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
-            num_samples += word_num
-            trg_seq, word_num = to_lodtensor(map(lambda x: x[1], data), place)
-            num_samples += word_num
-            lbl_seq, _ = to_lodtensor(map(lambda x: x[2], data), place)
+    for batch_id, data in enumerate(train_batch_generator()):
+        src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
+        trg_seq, word_num = to_lodtensor(map(lambda x: x[1], data), place)
+        lbl_seq, _ = to_lodtensor(map(lambda x: x[2], data), place)
 
-            fetch_outs = exe.run(framework.default_main_program(),
-                                 feed={
-                                     feeding_list[0]: src_seq,
-                                     feeding_list[1]: trg_seq,
-                                     feeding_list[2]: lbl_seq
-                                 },
-                                 fetch_list=[avg_cost])
-
-            iters += 1
-            loss = np.array(fetch_outs[0])
-
-
-def infer():
-    pass
+        fetch_outs = exe.run(framework.default_main_program(),
+                             feed={
+                                 feeding_list[0]: src_seq,
+                                 feeding_list[1]: trg_seq,
+                                 feeding_list[2]: lbl_seq
+                             },
+                             fetch_list=[avg_cost])
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    if args.infer_only:
-        infer()
-    else:
-        train()
+    train()
