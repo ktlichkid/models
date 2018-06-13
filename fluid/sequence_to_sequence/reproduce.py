@@ -158,9 +158,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         output_gate = fluid.layers.fc(input=[hidden_mem, decoder_inputs], size=decoder_size, bias_attr=True)
         cell_tilde = fluid.layers.fc(input=[hidden_mem, decoder_inputs], size=decoder_size, bias_attr=True)
 
-        hidden_t = fluid.layers.elementwise_mul(
-            x=output_gate, y=fluid.layers.tanh(x=cell_tilde))
-        h = hidden_t
+        h = fluid.layers.elementwise_mul(
+            x=output_gate, y=cell_tilde)
 
         rnn.update_memory(hidden_mem, h)
         out = fluid.layers.fc(input=h,
