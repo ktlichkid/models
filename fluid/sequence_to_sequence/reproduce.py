@@ -69,7 +69,9 @@ def train():
     result = fluid.layers.create_global_var(
         shape=[4, 32], value=-1.0, dtype='float32', persistable=True)
 
-    with fluid.layers.Switch() as switch:
+    switch = fluid.layers.Switch()
+
+    with switch:
         with switch.case(cond):
             decoder_state_switch = fluid.layers.fc(
                 input=decoder_state_expand,
