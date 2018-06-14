@@ -99,18 +99,19 @@ def train():
 
     #print(framework.default_main_program())
 
-    for batch_id, data in enumerate(train_batch_generator()):
-        src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
+    for i in range(0, 10):
+        for batch_id, data in enumerate(train_batch_generator()):
+            src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
 
-        fetch_outs = exe.run(framework.default_main_program(),
-                             feed={
-                                 feeding_list[0]: lod_t
-                             },
-                             fetch_list=[avg_cost])
-                                         #decoder_state_expand.name+"@GRAD"])
-                                         #decoder_state_expand.name+"@GRAD"])
-        for out in fetch_outs:
-            print(out)
+            fetch_outs = exe.run(framework.default_main_program(),
+                                 feed={
+                                     feeding_list[0]: lod_t
+                                 },
+                                 fetch_list=[avg_cost])
+                                             #decoder_state_expand.name+"@GRAD"])
+                                             #decoder_state_expand.name+"@GRAD"])
+            for out in fetch_outs:
+                print(out)
 
 
 if __name__ == '__main__':
