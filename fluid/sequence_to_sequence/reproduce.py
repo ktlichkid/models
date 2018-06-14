@@ -66,6 +66,9 @@ def train():
         y=fluid.layers.fill_constant(
             shape=[1], dtype='int64', value=2))
 
+    result = fluid.layers.create_global_var(
+        shape=[4, 32], value=-1.0, dtype='float32', persistable=True)
+
     with fluid.layers.Switch() as switch:
         with switch.case(cond):
             decoder_state_switch = fluid.layers.fc(
@@ -73,8 +76,9 @@ def train():
                 size=32,
                 bias_attr=False,
                 act='tanh')
+            fluid.layers.assign(decoder_state_switch, result)
 
-    prediction = fluid.layers.fc(input=decoder_state_switch,
+    prediction = fluid.layers.fc(input=result,
                           size=30000,
                           bias_attr=True,
                           act='softmax')
