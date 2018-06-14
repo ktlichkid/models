@@ -62,8 +62,10 @@ def train():
         encoder_proj = rnn.static_input(encoded_proj)
         state_expand = fluid.layers.sequence_expand(
             x=word, y=encoder_proj)
+        concated = fluid.layers.concat(
+            input=[word, state_expand], axis=1)
         decoder_state_proj = fluid.layers.sequence_pool(
-            input=state_expand, pool_type="sum")
+            input=concated, pool_type="sum")
         out = fluid.layers.fc(
             input=decoder_state_proj,
             size=30000,
