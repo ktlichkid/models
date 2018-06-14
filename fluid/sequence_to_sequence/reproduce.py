@@ -66,21 +66,12 @@ def train():
         y=fluid.layers.fill_constant(
             shape=[1], dtype='int64', value=2))
 
-    result = fluid.layers.create_global_var(
-        shape=[4, 32], value=-1.0, dtype='float32', persistable=True)
-
     switch = fluid.layers.Switch()
-
     with switch:
         with switch.case(cond):
-            decoder_state_switch = fluid.layers.fc(
-                input=decoder_state_expand,
-                size=32,
-                bias_attr=False,
-                act='tanh')
-            result = fluid.layers.assign(decoder_state_switch, result)
+            fluid.layers.increment(x=counter, value=1.0, in_place=True)
 
-    prediction = fluid.layers.fc(input=result,
+    prediction = fluid.layers.fc(input=decoder_state_expand,
                           size=30000,
                           bias_attr=True,
                           act='softmax')
