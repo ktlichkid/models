@@ -52,28 +52,34 @@ def train():
                                    size=32,
                                    bias_attr=False)
 
-    decoder_state_proj = fluid.layers.sequence_pool(
-        input=encoded_proj, pool_type='last')
+    # decoder_state_proj = fluid.layers.sequence_pool(
+    #     input=encoded_proj, pool_type='last')
 
-    decoder_state_expand = fluid.layers.sequence_expand(
-       x=decoder_state_proj, y=encoded_proj)
+    rnn = fluid.layers.DynamicRNN()
 
-    counter = fluid.layers.zeros(shape=[1], dtype='int64')
-    counter.stop_gradient = True
-    cond = fluid.layers.less_than(
-        x=counter,
-        y=fluid.layers.fill_constant(
-            shape=[1], dtype='int64', value=2))
+    with rnn.block():
+        word = rnn.step_input(src_embedding)
+        encoder_proj = rnn.static_input(encoded_proj)
+        state_expand = fluid.layers.sequence_expand(
+            x=word, y=encoder_proj)
+        decoder_state_proj = fluid.layers.sequence_pool(
+            input=state_expand, pool_type="sum")
+        out = fluid.layers.fc(
+            input=decoder_state_proj,
+            size=30000,
+            bias_attr=True,
+            act='softmax')
+        rnn.output(out)
 
-    switch = fluid.layers.Switch()
-    with switch:
-        with switch.case(cond):
-            fluid.layers.increment(x=counter, value=1.0, in_place=True)
+    prediction = rnn()
 
-    prediction = fluid.layers.fc(input=decoder_state_expand,
-                          size=30000,
-                          bias_attr=True,
-                          act='softmax')
+    # decoder_state_expand = fluid.layers.sequence_expand(
+    #    x=decoder_state_proj, y=encoded_proj)
+    #
+    # prediction = fluid.layers.fc(input=decoder_state_expand,
+    #                       size=30000,
+    #                       bias_attr=True,
+    #                       act='softmax')
 
     cost = fluid.layers.cross_entropy(input=prediction, label=src_word_idx)
     avg_cost = fluid.layers.mean(x=cost)
