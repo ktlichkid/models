@@ -76,7 +76,7 @@ def train():
                 size=32,
                 bias_attr=False,
                 act='tanh')
-            fluid.layers.assign(decoder_state_switch, result)
+            result = fluid.layers.assign(decoder_state_switch, result)
 
     prediction = fluid.layers.fc(input=result,
                           size=30000,
