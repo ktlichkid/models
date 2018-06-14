@@ -1,0 +1,1906 @@
+sequence_expand_0.tmp_0
+print_1.tmp_0
+blocks {
+  idx: 0
+  parent_idx: -1
+  vars {
+    name: "moment2_3"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 32
+          dims: 30000
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "moment1_3"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 32
+          dims: 30000
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "moment1_2"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 30000
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "moment2_1"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 32
+          dims: 32
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "moment2_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 30000
+          dims: 32
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "beta2_pow_acc_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 1
+        }
+        lod_level: 0
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "beta1_pow_acc_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 1
+        }
+        lod_level: 0
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "embedding_0.w_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 30000
+          dims: 32
+        }
+      }
+    }
+  }
+  vars {
+    name: "fc_0.tmp_0@GRAD@RENAME@1"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+        lod_level: 1
+      }
+    }
+  }
+  vars {
+    name: "fc_0.w_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 32
+          dims: 32
+        }
+      }
+    }
+  }
+  vars {
+    name: "fc_0.tmp_0@GRAD@RENAME@0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+        }
+      }
+    }
+  }
+  vars {
+    name: "print_0.tmp_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+      }
+    }
+  }
+  vars {
+    name: "fc_1.w_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 32
+          dims: 30000
+        }
+      }
+    }
+  }
+  vars {
+    name: "learning_rate_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 1
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "fc_1.b_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 30000
+        }
+      }
+    }
+  }
+  vars {
+    name: "sequence_expand_0.tmp_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+        lod_level: 0
+      }
+    }
+  }
+  vars {
+    name: "print_0.tmp_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+        lod_level: 0
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "fc_1.tmp_2@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 30000
+        }
+        lod_level: 0
+      }
+    }
+  }
+  vars {
+    name: "sequence_pool_0.tmp_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "moment2_2"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 30000
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "fc_0.tmp_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+        lod_level: 1
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "sequence_expand_0.tmp_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+        lod_level: 0
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "fc_1.tmp_1"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 30000
+        }
+        lod_level: 0
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "source_sequence"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: INT64
+          dims: -1
+          dims: 1
+        }
+        lod_level: 1
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "embedding_0.tmp_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+        lod_level: 1
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "embedding_0.w_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 30000
+          dims: 32
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "embedding_0.tmp_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+      }
+    }
+  }
+  vars {
+    name: "cross_entropy_0.tmp_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 1
+        }
+        lod_level: 0
+      }
+    }
+  }
+  vars {
+    name: "print_1.tmp_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+        lod_level: 0
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "fc_1.w_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 32
+          dims: 30000
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "fc_0.w_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 32
+          dims: 32
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "fc_0.tmp_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+        lod_level: 0
+      }
+    }
+  }
+  vars {
+    name: "mean_0.tmp_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 1
+        }
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "moment1_1"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 32
+          dims: 32
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "print_1.tmp_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+      }
+    }
+  }
+  vars {
+    name: "fc_1.tmp_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 30000
+        }
+        lod_level: 0
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "sequence_pool_0.tmp_1"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+        }
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "cross_entropy_0.tmp_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 1
+        }
+        lod_level: 0
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "moment1_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 30000
+          dims: 32
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "sequence_pool_0.tmp_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 32
+        }
+        lod_level: 0
+      }
+    }
+  }
+  vars {
+    name: "fc_1.b_0"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 30000
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "fc_1.tmp_2"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 30000
+        }
+        lod_level: 0
+      }
+    }
+    persistable: false
+  }
+  vars {
+    name: "mean_0.tmp_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: 1
+        }
+      }
+    }
+    persistable: true
+  }
+  vars {
+    name: "fc_1.tmp_1@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 30000
+        }
+      }
+    }
+  }
+  vars {
+    name: "fc_1.tmp_0@GRAD"
+    type {
+      type: LOD_TENSOR
+      lod_tensor {
+        tensor {
+          data_type: FP32
+          dims: -1
+          dims: 30000
+        }
+      }
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Ids"
+      arguments: "source_sequence"
+    }
+    inputs {
+      parameter: "W"
+      arguments: "embedding_0.w_0"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "embedding_0.tmp_0"
+    }
+    type: "lookup_table"
+    attrs {
+      name: "is_sparse"
+      type: BOOLEAN
+      b: false
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "is_distributed"
+      type: BOOLEAN
+      b: false
+    }
+    attrs {
+      name: "padding_idx"
+      type: LONG
+      l: -1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "X"
+      arguments: "embedding_0.tmp_0"
+    }
+    inputs {
+      parameter: "Y"
+      arguments: "fc_0.w_0"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "fc_0.tmp_0"
+    }
+    type: "mul"
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "y_num_col_dims"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "x_num_col_dims"
+      type: INT
+      i: 1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "X"
+      arguments: "fc_0.tmp_0"
+    }
+    outputs {
+      parameter: "MaxIndex"
+      arguments: "sequence_pool_0.tmp_1"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "sequence_pool_0.tmp_0"
+    }
+    type: "sequence_pool"
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "pooltype"
+      type: STRING
+      s: "LAST"
+    }
+  }
+  ops {
+    inputs {
+      parameter: "In"
+      arguments: "sequence_pool_0.tmp_0"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "print_0.tmp_0"
+    }
+    type: "print"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "print_phase"
+      type: STRING
+      s: "BOTH"
+    }
+    attrs {
+      name: "print_tensor_shape"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_type"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_lod"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_name"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "message"
+      type: STRING
+      s: "proj"
+    }
+    attrs {
+      name: "first_n"
+      type: INT
+      i: -1
+    }
+    attrs {
+      name: "summarize"
+      type: INT
+      i: -1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "X"
+      arguments: "print_0.tmp_0"
+    }
+    inputs {
+      parameter: "Y"
+      arguments: "fc_0.tmp_0"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "sequence_pool_0.tmp_0"
+    }
+    type: "sequence_expand"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "ref_level"
+      type: INT
+      i: -1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "In"
+      arguments: "sequence_pool_0.tmp_0"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "print_1.tmp_0"
+    }
+    type: "print"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "print_phase"
+      type: STRING
+      s: "BOTH"
+    }
+    attrs {
+      name: "print_tensor_shape"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_type"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_lod"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_name"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "message"
+      type: STRING
+      s: "expand"
+    }
+    attrs {
+      name: "first_n"
+      type: INT
+      i: -1
+    }
+    attrs {
+      name: "summarize"
+      type: INT
+      i: -1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "X"
+      arguments: "print_1.tmp_0"
+    }
+    inputs {
+      parameter: "Y"
+      arguments: "fc_1.w_0"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "fc_1.tmp_0"
+    }
+    type: "mul"
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "y_num_col_dims"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "x_num_col_dims"
+      type: INT
+      i: 1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "X"
+      arguments: "fc_1.tmp_0"
+    }
+    inputs {
+      parameter: "Y"
+      arguments: "fc_1.b_0"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "fc_1.tmp_1"
+    }
+    type: "elementwise_add"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "axis"
+      type: INT
+      i: 1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "X"
+      arguments: "fc_1.tmp_1"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "fc_1.tmp_2"
+    }
+    type: "softmax"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "is_test"
+      type: BOOLEAN
+      b: false
+    }
+    attrs {
+      name: "use_mkldnn"
+      type: BOOLEAN
+      b: false
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "use_cudnn"
+      type: BOOLEAN
+      b: false
+    }
+    attrs {
+      name: "data_format"
+      type: STRING
+      s: "AnyLayout"
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Label"
+      arguments: "source_sequence"
+    }
+    inputs {
+      parameter: "X"
+      arguments: "fc_1.tmp_2"
+    }
+    outputs {
+      parameter: "Y"
+      arguments: "cross_entropy_0.tmp_0"
+    }
+    type: "cross_entropy"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "soft_label"
+      type: BOOLEAN
+      b: false
+    }
+  }
+  ops {
+    inputs {
+      parameter: "X"
+      arguments: "cross_entropy_0.tmp_0"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "mean_0.tmp_0"
+    }
+    type: "mean"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 256
+    }
+  }
+  ops {
+    outputs {
+      parameter: "Out"
+      arguments: "mean_0.tmp_0@GRAD"
+    }
+    type: "fill_constant"
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 257
+    }
+    attrs {
+      name: "dtype"
+      type: INT
+      i: 5
+    }
+    attrs {
+      name: "value"
+      type: FLOAT
+      f: 1.0
+    }
+    attrs {
+      name: "shape"
+      type: INTS
+      ints: 1
+    }
+    attrs {
+      name: "force_cpu"
+      type: INT
+      i: 0
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Out@GRAD"
+      arguments: "mean_0.tmp_0@GRAD"
+    }
+    inputs {
+      parameter: "X"
+      arguments: "cross_entropy_0.tmp_0"
+    }
+    outputs {
+      parameter: "X@GRAD"
+      arguments: "cross_entropy_0.tmp_0@GRAD"
+    }
+    type: "mean_grad"
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Label"
+      arguments: "source_sequence"
+    }
+    inputs {
+      parameter: "X"
+      arguments: "fc_1.tmp_2"
+    }
+    inputs {
+      parameter: "Y"
+      arguments: "cross_entropy_0.tmp_0"
+    }
+    inputs {
+      parameter: "Y@GRAD"
+      arguments: "cross_entropy_0.tmp_0@GRAD"
+    }
+    outputs {
+      parameter: "Label@GRAD"
+    }
+    outputs {
+      parameter: "X@GRAD"
+      arguments: "fc_1.tmp_2@GRAD"
+    }
+    type: "cross_entropy_grad"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "soft_label"
+      type: BOOLEAN
+      b: false
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Out"
+      arguments: "fc_1.tmp_2"
+    }
+    inputs {
+      parameter: "Out@GRAD"
+      arguments: "fc_1.tmp_2@GRAD"
+    }
+    inputs {
+      parameter: "X"
+      arguments: "fc_1.tmp_1"
+    }
+    outputs {
+      parameter: "X@GRAD"
+      arguments: "fc_1.tmp_1@GRAD"
+    }
+    type: "softmax_grad"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "is_test"
+      type: BOOLEAN
+      b: false
+    }
+    attrs {
+      name: "use_mkldnn"
+      type: BOOLEAN
+      b: false
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "use_cudnn"
+      type: BOOLEAN
+      b: false
+    }
+    attrs {
+      name: "data_format"
+      type: STRING
+      s: "AnyLayout"
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Out"
+      arguments: "fc_1.tmp_1"
+    }
+    inputs {
+      parameter: "Out@GRAD"
+      arguments: "fc_1.tmp_1@GRAD"
+    }
+    inputs {
+      parameter: "X"
+      arguments: "fc_1.tmp_0"
+    }
+    inputs {
+      parameter: "Y"
+      arguments: "fc_1.b_0"
+    }
+    outputs {
+      parameter: "X@GRAD"
+      arguments: "fc_1.tmp_2"
+    }
+    outputs {
+      parameter: "Y@GRAD"
+      arguments: "fc_1.b_0@GRAD"
+    }
+    type: "elementwise_add_grad"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+      strings: "fc_1.b_0"
+      strings: "fc_1.b_0@GRAD"
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "axis"
+      type: INT
+      i: 1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Out"
+      arguments: "fc_1.tmp_0"
+    }
+    inputs {
+      parameter: "Out@GRAD"
+      arguments: "fc_1.tmp_2"
+    }
+    inputs {
+      parameter: "X"
+      arguments: "print_1.tmp_0"
+    }
+    inputs {
+      parameter: "Y"
+      arguments: "fc_1.w_0"
+    }
+    outputs {
+      parameter: "X@GRAD"
+      arguments: "print_1.tmp_0@GRAD"
+    }
+    outputs {
+      parameter: "Y@GRAD"
+      arguments: "fc_1.w_0@GRAD"
+    }
+    type: "mul_grad"
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "y_num_col_dims"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+      strings: "fc_1.w_0"
+      strings: "fc_1.w_0@GRAD"
+    }
+    attrs {
+      name: "x_num_col_dims"
+      type: INT
+      i: 1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "In@GRAD"
+      arguments: "print_1.tmp_0@GRAD"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "print_1.tmp_0"
+    }
+    type: "print_grad"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "print_phase"
+      type: STRING
+      s: "BOTH"
+    }
+    attrs {
+      name: "print_tensor_shape"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_type"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_lod"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_name"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "message"
+      type: STRING
+      s: "expand"
+    }
+    attrs {
+      name: "first_n"
+      type: INT
+      i: -1
+    }
+    attrs {
+      name: "summarize"
+      type: INT
+      i: -1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Out"
+      arguments: "sequence_pool_0.tmp_0"
+    }
+    inputs {
+      parameter: "Out@GRAD"
+      arguments: "print_1.tmp_0"
+    }
+    inputs {
+      parameter: "X"
+      arguments: "print_0.tmp_0"
+    }
+    inputs {
+      parameter: "Y"
+      arguments: "fc_0.tmp_0"
+    }
+    outputs {
+      parameter: "X@GRAD"
+      arguments: "print_1.tmp_0@GRAD"
+    }
+    outputs {
+      parameter: "Y@GRAD"
+      arguments: "fc_0.tmp_0@GRAD@RENAME@0"
+    }
+    type: "sequence_expand_grad"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "ref_level"
+      type: INT
+      i: -1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "In@GRAD"
+      arguments: "print_1.tmp_0@GRAD"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "print_0.tmp_0"
+    }
+    type: "print_grad"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "print_phase"
+      type: STRING
+      s: "BOTH"
+    }
+    attrs {
+      name: "print_tensor_shape"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_type"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_lod"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "print_tensor_name"
+      type: BOOLEAN
+      b: true
+    }
+    attrs {
+      name: "message"
+      type: STRING
+      s: "proj"
+    }
+    attrs {
+      name: "first_n"
+      type: INT
+      i: -1
+    }
+    attrs {
+      name: "summarize"
+      type: INT
+      i: -1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Out@GRAD"
+      arguments: "print_0.tmp_0"
+    }
+    inputs {
+      parameter: "X"
+      arguments: "fc_0.tmp_0"
+    }
+    outputs {
+      parameter: "X@GRAD"
+      arguments: "fc_0.tmp_0@GRAD@RENAME@1"
+    }
+    type: "sequence_pool_grad"
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "pooltype"
+      type: STRING
+      s: "LAST"
+    }
+  }
+  ops {
+    inputs {
+      parameter: "X"
+      arguments: "fc_0.tmp_0@GRAD@RENAME@0"
+      arguments: "fc_0.tmp_0@GRAD@RENAME@1"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "fc_0.tmp_0@GRAD"
+    }
+    type: "sum"
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Out"
+      arguments: "fc_0.tmp_0"
+    }
+    inputs {
+      parameter: "Out@GRAD"
+      arguments: "fc_0.tmp_0@GRAD"
+    }
+    inputs {
+      parameter: "X"
+      arguments: "embedding_0.tmp_0"
+    }
+    inputs {
+      parameter: "Y"
+      arguments: "fc_0.w_0"
+    }
+    outputs {
+      parameter: "X@GRAD"
+      arguments: "fc_0.tmp_0@GRAD@RENAME@1"
+    }
+    outputs {
+      parameter: "Y@GRAD"
+      arguments: "fc_0.w_0@GRAD"
+    }
+    type: "mul_grad"
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "y_num_col_dims"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+      strings: "fc_0.w_0"
+      strings: "fc_0.w_0@GRAD"
+    }
+    attrs {
+      name: "x_num_col_dims"
+      type: INT
+      i: 1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Ids"
+      arguments: "source_sequence"
+    }
+    inputs {
+      parameter: "Out"
+      arguments: "embedding_0.tmp_0"
+    }
+    inputs {
+      parameter: "Out@GRAD"
+      arguments: "fc_0.tmp_0@GRAD@RENAME@1"
+    }
+    inputs {
+      parameter: "W"
+      arguments: "embedding_0.w_0"
+    }
+    outputs {
+      parameter: "Ids@GRAD"
+    }
+    outputs {
+      parameter: "W@GRAD"
+      arguments: "embedding_0.w_0@GRAD"
+    }
+    type: "lookup_table_grad"
+    attrs {
+      name: "is_sparse"
+      type: BOOLEAN
+      b: false
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 1
+    }
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+      strings: "embedding_0.w_0"
+      strings: "embedding_0.w_0@GRAD"
+    }
+    attrs {
+      name: "is_distributed"
+      type: BOOLEAN
+      b: false
+    }
+    attrs {
+      name: "padding_idx"
+      type: LONG
+      l: -1
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Beta1Pow"
+      arguments: "beta1_pow_acc_0"
+    }
+    inputs {
+      parameter: "Beta2Pow"
+      arguments: "beta2_pow_acc_0"
+    }
+    inputs {
+      parameter: "Grad"
+      arguments: "embedding_0.w_0@GRAD"
+    }
+    inputs {
+      parameter: "LearningRate"
+      arguments: "learning_rate_0"
+    }
+    inputs {
+      parameter: "Moment1"
+      arguments: "moment1_0"
+    }
+    inputs {
+      parameter: "Moment2"
+      arguments: "moment2_0"
+    }
+    inputs {
+      parameter: "Param"
+      arguments: "embedding_0.w_0"
+    }
+    outputs {
+      parameter: "Moment1Out"
+      arguments: "moment1_0"
+    }
+    outputs {
+      parameter: "Moment2Out"
+      arguments: "moment2_0"
+    }
+    outputs {
+      parameter: "ParamOut"
+      arguments: "embedding_0.w_0"
+    }
+    type: "adam"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+      strings: "embedding_0.w_0"
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 2
+    }
+    attrs {
+      name: "beta1"
+      type: FLOAT
+      f: 0.899999976158
+    }
+    attrs {
+      name: "beta2"
+      type: FLOAT
+      f: 0.999000012875
+    }
+    attrs {
+      name: "epsilon"
+      type: FLOAT
+      f: 9.99999993923e-09
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Beta1Pow"
+      arguments: "beta1_pow_acc_0"
+    }
+    inputs {
+      parameter: "Beta2Pow"
+      arguments: "beta2_pow_acc_0"
+    }
+    inputs {
+      parameter: "Grad"
+      arguments: "fc_0.w_0@GRAD"
+    }
+    inputs {
+      parameter: "LearningRate"
+      arguments: "learning_rate_0"
+    }
+    inputs {
+      parameter: "Moment1"
+      arguments: "moment1_1"
+    }
+    inputs {
+      parameter: "Moment2"
+      arguments: "moment2_1"
+    }
+    inputs {
+      parameter: "Param"
+      arguments: "fc_0.w_0"
+    }
+    outputs {
+      parameter: "Moment1Out"
+      arguments: "moment1_1"
+    }
+    outputs {
+      parameter: "Moment2Out"
+      arguments: "moment2_1"
+    }
+    outputs {
+      parameter: "ParamOut"
+      arguments: "fc_0.w_0"
+    }
+    type: "adam"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+      strings: "fc_0.w_0"
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 2
+    }
+    attrs {
+      name: "beta1"
+      type: FLOAT
+      f: 0.899999976158
+    }
+    attrs {
+      name: "beta2"
+      type: FLOAT
+      f: 0.999000012875
+    }
+    attrs {
+      name: "epsilon"
+      type: FLOAT
+      f: 9.99999993923e-09
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Beta1Pow"
+      arguments: "beta1_pow_acc_0"
+    }
+    inputs {
+      parameter: "Beta2Pow"
+      arguments: "beta2_pow_acc_0"
+    }
+    inputs {
+      parameter: "Grad"
+      arguments: "fc_1.b_0@GRAD"
+    }
+    inputs {
+      parameter: "LearningRate"
+      arguments: "learning_rate_0"
+    }
+    inputs {
+      parameter: "Moment1"
+      arguments: "moment1_2"
+    }
+    inputs {
+      parameter: "Moment2"
+      arguments: "moment2_2"
+    }
+    inputs {
+      parameter: "Param"
+      arguments: "fc_1.b_0"
+    }
+    outputs {
+      parameter: "Moment1Out"
+      arguments: "moment1_2"
+    }
+    outputs {
+      parameter: "Moment2Out"
+      arguments: "moment2_2"
+    }
+    outputs {
+      parameter: "ParamOut"
+      arguments: "fc_1.b_0"
+    }
+    type: "adam"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+      strings: "fc_1.b_0"
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 2
+    }
+    attrs {
+      name: "beta1"
+      type: FLOAT
+      f: 0.899999976158
+    }
+    attrs {
+      name: "beta2"
+      type: FLOAT
+      f: 0.999000012875
+    }
+    attrs {
+      name: "epsilon"
+      type: FLOAT
+      f: 9.99999993923e-09
+    }
+  }
+  ops {
+    inputs {
+      parameter: "Beta1Pow"
+      arguments: "beta1_pow_acc_0"
+    }
+    inputs {
+      parameter: "Beta2Pow"
+      arguments: "beta2_pow_acc_0"
+    }
+    inputs {
+      parameter: "Grad"
+      arguments: "fc_1.w_0@GRAD"
+    }
+    inputs {
+      parameter: "LearningRate"
+      arguments: "learning_rate_0"
+    }
+    inputs {
+      parameter: "Moment1"
+      arguments: "moment1_3"
+    }
+    inputs {
+      parameter: "Moment2"
+      arguments: "moment2_3"
+    }
+    inputs {
+      parameter: "Param"
+      arguments: "fc_1.w_0"
+    }
+    outputs {
+      parameter: "Moment1Out"
+      arguments: "moment1_3"
+    }
+    outputs {
+      parameter: "Moment2Out"
+      arguments: "moment2_3"
+    }
+    outputs {
+      parameter: "ParamOut"
+      arguments: "fc_1.w_0"
+    }
+    type: "adam"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+      strings: "fc_1.w_0"
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 2
+    }
+    attrs {
+      name: "beta1"
+      type: FLOAT
+      f: 0.899999976158
+    }
+    attrs {
+      name: "beta2"
+      type: FLOAT
+      f: 0.999000012875
+    }
+    attrs {
+      name: "epsilon"
+      type: FLOAT
+      f: 9.99999993923e-09
+    }
+  }
+  ops {
+    inputs {
+      parameter: "X"
+      arguments: "beta1_pow_acc_0"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "beta1_pow_acc_0"
+    }
+    type: "scale"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "scale"
+      type: FLOAT
+      f: 0.899999976158
+    }
+  }
+  ops {
+    inputs {
+      parameter: "X"
+      arguments: "beta2_pow_acc_0"
+    }
+    outputs {
+      parameter: "Out"
+      arguments: "beta2_pow_acc_0"
+    }
+    type: "scale"
+    attrs {
+      name: "op_role_var"
+      type: STRINGS
+    }
+    attrs {
+      name: "op_role"
+      type: INT
+      i: 0
+    }
+    attrs {
+      name: "scale"
+      type: FLOAT
+      f: 0.999000012875
+    }
+  }
+}
+
+1528948748	proj	Tensor[sequence_pool_0.tmp_0]
+	shape: [1,32,]
+	dtype: f
+	data: -8.26741e-05,-0.000329395,-0.0146538,-0.00289239,-0.00429367,-0.00833693,0.00858065,0.00434973,-0.00114654,0.00205132,-0.00502756,0.017895,-0.00337905,-0.00661709,-0.00938156,0.00380613,-0.00489395,-0.00209669,-0.00780755,0.0108444,-0.00127462,0.00313625,0.0106526,-0.00132757,0.00693396,-0.0131176,0.00773539,0.00690622,-0.000360636,-0.00505312,-0.0141454,-0.00562755,
+1528948748	expand	Tensor[sequence_pool_0.tmp_0]
+	shape: [4,32,]
+	dtype: f
+	data: -8.26741e-05,-0.000329395,-0.0146538,-0.00289239,-0.00429367,-0.00833693,0.00858065,0.00434973,-0.00114654,0.00205132,-0.00502756,0.017895,-0.00337905,-0.00661709,-0.00938156,0.00380613,-0.00489395,-0.00209669,-0.00780755,0.0108444,-0.00127462,0.00313625,0.0106526,-0.00132757,0.00693396,-0.0131176,0.00773539,0.00690622,-0.000360636,-0.00505312,-0.0141454,-0.00562755,-8.26741e-05,-0.000329395,-0.0146538,-0.00289239,-0.00429367,-0.00833693,0.00858065,0.00434973,-0.00114654,0.00205132,-0.00502756,0.017895,-0.00337905,-0.00661709,-0.00938156,0.00380613,-0.00489395,-0.00209669,-0.00780755,0.0108444,-0.00127462,0.00313625,0.0106526,-0.00132757,0.00693396,-0.0131176,0.00773539,0.00690622,-0.000360636,-0.00505312,-0.0141454,-0.00562755,-8.26741e-05,-0.000329395,-0.0146538,-0.00289239,-0.00429367,-0.00833693,0.00858065,0.00434973,-0.00114654,0.00205132,-0.00502756,0.017895,-0.00337905,-0.00661709,-0.00938156,0.00380613,-0.00489395,-0.00209669,-0.00780755,0.0108444,-0.00127462,0.00313625,0.0106526,-0.00132757,0.00693396,-0.0131176,0.00773539,0.00690622,-0.000360636,-0.00505312,-0.0141454,-0.00562755,-8.26741e-05,-0.000329395,-0.0146538,-0.00289239,-0.00429367,-0.00833693,0.00858065,0.00434973,-0.00114654,0.00205132,-0.00502756,0.017895,-0.00337905,-0.00661709,-0.00938156,0.00380613,-0.00489395,-0.00209669,-0.00780755,0.0108444,-0.00127462,0.00313625,0.0106526,-0.00132757,0.00693396,-0.0131176,0.00773539,0.00690622,-0.000360636,-0.00505312,-0.0141454,-0.00562755,
+1528948748	expand	Tensor[print_1.tmp_0@GRAD]
+	shape: [4,32,]
+	dtype: f
+	data: 0.00352545,0.00116383,0.00338475,-0.00198232,-0.000635033,-0.000895802,-0.00346618,-0.00317917,0.00282797,-9.30116e-05,-0.00246084,0.00173076,-0.00319329,0.00303554,0.00205783,-0.000507682,0.00175399,0.000166909,0.00249399,0.00256755,-0.00166887,-0.000748725,0.00325349,-0.00159811,-0.00283349,0.00342193,0.00225106,-0.00259213,-0.00169178,-0.00147701,0.000160358,0.00258283,0.00146627,-0.00287886,-0.0034379,-0.00197999,-0.0033537,0.00256598,0.00176317,0.00156244,-0.00243694,0.00230651,-8.63205e-05,0.0022864,-0.000611638,-0.00194652,-0.00258135,-0.00336968,-0.00103509,-0.00197668,0.000784312,0.00181026,0.000933908,0.00131478,0.00216071,0.000788617,-0.000863569,0.00085515,0.00293794,-0.00347583,-0.00235858,0.000861765,-0.00249411,-0.00186349,0.00137792,0.000290397,-0.000318068,0.00090215,0.000700862,-0.0024343,0.00352361,-0.00114954,-0.000860814,0.00154523,0.00295064,-0.00289743,-0.00276679,-0.00344623,0.00214194,0.000123469,-0.00075718,0.000592242,-0.00171021,0.00236825,0.00333277,-0.00188377,0.00164607,-0.00091064,0.00126997,0.000592686,0.000155436,0.00011469,0.00227016,-0.0030716,0.00259596,-0.00116804,0.000443349,-0.000331198,0.00122811,0.0033412,-0.00343851,-0.0026265,0.00200285,0.00336182,0.00232781,0.00249382,0.00103173,0.000582258,0.00202561,-0.000431581,0.00340271,-0.00289435,0.00100893,0.00252487,-0.0026193,-0.00352447,-0.00268135,-0.00121419,-0.00194548,-0.000760471,0.00342469,0.00260747,-8.28615e-05,0.00113302,-0.00133059,0.00258918,-0.000271163,0.000734964,
+1528948748	proj	Tensor[print_1.tmp_0@GRAD]
+	shape: [1,32,]
+	dtype: f
+	data: 0.00328754,-0.00291966,-0.00252786,0.00226335,-0.00609135,-0.00249482,0.00728963,0.00377473,-0.000969947,0.00634556,0.00389604,-2.87659e-05,-0.00135282,-0.00582433,0.0029633,-0.00614056,-0.00078334,0.00114043,-0.0035452,0.000654038,0.00158533,-0.00178317,0.0018613,-0.000882494,0.00383109,0.00405531,0.00301051,-0.00222813,-0.00141901,0.000379346,-0.000169319,-0.00229657,
+[10.3088875]
