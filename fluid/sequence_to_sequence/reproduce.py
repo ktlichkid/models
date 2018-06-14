@@ -52,9 +52,6 @@ def train():
                                    size=32,
                                    bias_attr=False)
 
-    # decoder_state_proj = fluid.layers.sequence_pool(
-    #     input=encoded_proj, pool_type='last')
-
     rnn = fluid.layers.DynamicRNN()
 
     with rnn.block():
@@ -75,20 +72,12 @@ def train():
 
     prediction = rnn()
 
-    # decoder_state_expand = fluid.layers.sequence_expand(
-    #    x=decoder_state_proj, y=encoded_proj)
-    #
-    # prediction = fluid.layers.fc(input=decoder_state_expand,
-    #                       size=30000,
-    #                       bias_attr=True,
-    #                       act='softmax')
-
     cost = fluid.layers.cross_entropy(input=prediction, label=src_word_idx)
     avg_cost = fluid.layers.mean(x=cost)
 
     feeding_list = ["source_sequence"]
 
-    optimizer = fluid.optimizer.Adam(learning_rate=1.0)
+    optimizer = fluid.optimizer.Adam(learning_rate=0.01)
     optimizer.minimize(avg_cost)
 
     fluid.memory_optimize(fluid.default_main_program())
