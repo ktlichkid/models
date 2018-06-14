@@ -56,15 +56,26 @@ def train():
 
     decoder_state_proj = fluid.layers.sequence_pool(
         input=encoded_proj, pool_type='last')
-#    decoder_state_proj = fluid.layers.Print(decoder_state, message="proj")
+#    decoder_state_proj = fluid.layers.Print(decoder_state_proj, message="proj")
 
     decoder_state_expand = fluid.layers.sequence_expand(
        x=decoder_state_proj, y=encoded_proj)
 #    print(decoder_state_expand.name)
-    #decoder_state_expanded = fluid.layers.Print(decoder_state_expand, message="expand")
+#    decoder_state_expand = fluid.layers.Print(decoder_state_expand, message="expand")
     #print(decoder_state_expanded.name)
 
-    prediction = fluid.layers.fc(input=decoder_state_expand,
+    decoder_state_concated = fluid.layers.concat(
+        input=[encoded_proj, decoder_state_expand], axis=1)
+#    decoder_state_concated = fluid.layers.Print(
+#        decoder_state_concated, message="concated", summarize=10)
+
+    decoder_repro = fluid.layers.fc(input=decoder_state_concated,
+                                    size=32,
+                                    bias_attr=True,
+                                    act='tanh')
+    decoder_repro = fluid.layers.Print(decoder_repro)
+
+    prediction = fluid.layers.fc(input=decoder_repro,
                           size=30000,
                           bias_attr=True,
                           act='softmax')
@@ -75,7 +86,7 @@ def train():
 
     feeding_list = ["source_sequence"]
 
-    optimizer = fluid.optimizer.Adam(learning_rate=0.01)
+    optimizer = fluid.optimizer.Adam(learning_rate=1.0)
     optimizer.minimize(avg_cost)
 
     fluid.memory_optimize(fluid.default_main_program())
@@ -99,7 +110,7 @@ def train():
 
     #print(framework.default_main_program())
 
-    for i in range(0, 10):
+    for i in range(0, 2):
         for batch_id, data in enumerate(train_batch_generator()):
             src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
 
