@@ -24,10 +24,10 @@ def train():
     fluid.default_startup_program().random_seed = 111
 
     test_data_1 = fluid.layers.data(
-        name='test_data_1', shape=[4], dtype='float', lod_level=1)
+        name='test_data_1', shape=[4], dtype='double', lod_level=1)
 
     test_data_2 = fluid.layers.data(
-        name='test_data_2', shape=[1], dtype='float', lod_level=1)
+        name='test_data_2', shape=[1], dtype='double', lod_level=1)
 
     data_1_expanded = fluid.layers.sequence_expand(
         x=test_data_1, y=test_data_2)
