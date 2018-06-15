@@ -50,8 +50,8 @@ def train():
 
     data_1 = [[1.3, 2.8, 17.2, 2.1]]
     data_2 = [[0.0], [19.0], [16.0], [1.0]]
-    lod_1 = [0, 1]
-    lod_2 = [0, 4]
+    lod_1 = [[0, 1]]
+    lod_2 = [[0, 4]]
     tensor_1 = core.LoDTensor()
     tensor_1.set(np.array(data_1), place)
     tensor_2 = core.LoDTensor()
