@@ -56,7 +56,7 @@ def train():
 
     feeding_list = ["source_sequence"]
 
-    optimizer = fluid.optimizer.Adam(learning_rate=0.01)
+    optimizer = fluid.optimizer.Adam(learning_rate=0.1)
     optimizer.minimize(avg_cost)
 
     fluid.memory_optimize(fluid.default_main_program())
