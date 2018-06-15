@@ -62,7 +62,7 @@ def train():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    #print(framework.default_main_program())
+    print(framework.default_main_program())
 
     for i in range(0, 2):
         fetch_outs = exe.run(framework.default_main_program(),
