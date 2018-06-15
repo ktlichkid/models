@@ -57,11 +57,6 @@ def train():
 
     fluid.memory_optimize(fluid.default_main_program())
 
-    train_batch_generator = paddle.batch(
-        paddle.reader.shuffle(
-            wmt14.train(30000), buf_size=1000),
-        batch_size=1)
-
     place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
 
     data = [[0], [19], [16], [1]]
