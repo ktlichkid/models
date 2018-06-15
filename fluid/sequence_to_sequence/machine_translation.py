@@ -211,10 +211,12 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             #    decoder_state_proj, message="decoder_state_proj", summarize=10)
             decoder_state_expand = fluid.layers.sequence_expand(
                x=decoder_state_proj, y=encoder_proj)
+            decoder_state_expanded = fluid.layers.fc(
+                input=decoder_state_expand, size=decoder_size*2, bias_attr=False)
             #decoder_state_expand = fluid.layers.Print(
             #    decoder_state_expand, message="decoder_state_expand", summarize=10)
             concated = fluid.layers.concat(
-               input=[encoder_proj, decoder_state_expand], axis=1)
+               input=[encoder_proj, decoder_state_expanded], axis=1)
             #concated = fluid.layers.Print(
             #    concated, message="concated", summarize=10)
             attention_weights = fluid.layers.fc(input=concated,
