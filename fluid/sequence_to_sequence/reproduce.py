@@ -42,15 +42,22 @@ def train():
 
     src_word_idx = fluid.layers.data(
         name='source_sequence', shape=[1], dtype='int64', lod_level=1)
+    src_word_idx = fluid.layers.Print(src_word_idx, message="src_word_ids")
 
     src_embedding = fluid.layers.embedding(
         input=src_word_idx,
-        size=[30000, 32],
+        size=[32, 32],
         dtype='float32')
+    src_embedding =fluid.layers.embedding(
+        src_embedding, message="src_embedding", summarize=10
+    )
 
     encoded_proj = fluid.layers.fc(input=src_embedding,
                                    size=32,
                                    bias_attr=False)
+    encoded_proj = fluid.layers.Print(
+        encoded_proj, message="encoded_proj", summarize=10
+    )
 
     rnn = fluid.layers.DynamicRNN()
 
@@ -82,10 +89,10 @@ def train():
 
     fluid.memory_optimize(fluid.default_main_program())
 
-    train_batch_generator = paddle.batch(
-        paddle.reader.shuffle(
-            wmt14.train(30000), buf_size=1000),
-        batch_size=1)
+    # train_batch_generator = paddle.batch(
+    #     paddle.reader.shuffle(
+    #         wmt14.train(30000), buf_size=1000),
+    #     batch_size=1)
 
     place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
 
@@ -101,15 +108,14 @@ def train():
     #print(framework.default_main_program())
 
     for i in range(0, 2):
-        for batch_id, data in enumerate(train_batch_generator()):
 
-            fetch_outs = exe.run(framework.default_main_program(),
-                                 feed={
-                                     feeding_list[0]: lod_t
-                                 },
-                                 fetch_list=[avg_cost])
-            for out in fetch_outs:
-                print(out)
+        fetch_outs = exe.run(framework.default_main_program(),
+                             feed={
+                                 feeding_list[0]: lod_t
+                             },
+                             fetch_list=[avg_cost])
+        for out in fetch_outs:
+            print(out)
 
 
 if __name__ == '__main__':
