@@ -4,14 +4,12 @@ from __future__ import print_function
 
 import numpy as np
 import argparse
-
 import paddle
 import paddle.fluid as fluid
 import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 from paddle.fluid.executor import Executor
 
-import wmt14
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
@@ -31,29 +29,23 @@ def train():
         input=src_word_idx,
         size=[30000, 32],
         dtype='float32')
-#    src_embdingding = fluid.layers.Print(src_embedding, message="src", summarize=10)
 
     encoded_proj = fluid.layers.fc(input=src_embedding,
                                    size=32,
                                    bias_attr=False)
-#    encoded_proj = fluid.layers.Print(encoded_proj, message="encoded_proj", summarize=10)
 
 
     decoder_state_proj = fluid.layers.sequence_pool(
         input=encoded_proj, pool_type='last')
-#    decoder_state_proj = fluid.layers.Print(decoder_state, message="proj")
 
     decoder_state_expand = fluid.layers.sequence_expand(
        x=decoder_state_proj, y=encoded_proj)
-#    print(decoder_state_expand.name)
     #decoder_state_expanded = fluid.layers.Print(decoder_state_expand, message="expand")
-    #print(decoder_state_expanded.name)
 
     prediction = fluid.layers.fc(input=decoder_state_expand,
                           size=30000,
                           bias_attr=True,
                           act='softmax')
-#    prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
 
     cost = fluid.layers.cross_entropy(input=prediction, label=src_word_idx)
     avg_cost = fluid.layers.mean(x=cost)
@@ -73,7 +65,6 @@ def train():
     lod_t.set(np.array(data), place)
     lod_t.set_lod([lod])
 
-#    place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
