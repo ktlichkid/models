@@ -48,7 +48,7 @@ def train():
         input=src_word_idx,
         size=[32, 32],
         dtype='float32')
-    src_embedding =fluid.layers.embedding(
+    src_embedding =fluid.layers.Print(
         src_embedding, message="src_embedding", summarize=10
     )
 
