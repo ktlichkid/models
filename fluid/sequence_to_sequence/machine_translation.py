@@ -72,7 +72,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.01,
+    default=0.3,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -207,12 +207,12 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                                 #act='tanh',
                                                 #param_attr=clip_attr,
                                                 bias_attr=False)
-            decoder_state_proj = fluid.layers.Print(
-                decoder_state_proj, message="decoder_state_proj", summarize=10)
+            #decoder_state_proj = fluid.layers.Print(
+            #    decoder_state_proj, message="decoder_state_proj", summarize=10)
             decoder_state_expand = fluid.layers.sequence_expand(
                x=decoder_state_proj, y=encoder_proj)
-            decoder_state_expand = fluid.layers.Print(
-                decoder_state_expand, message="decoder_state_expand", summarize=10)
+            #decoder_state_expand = fluid.layers.Print(
+            #    decoder_state_expand, message="decoder_state_expand", summarize=10)
             concated = fluid.layers.concat(
                input=[encoder_proj, decoder_state_expand], axis=1)
             #concated = fluid.layers.Print(

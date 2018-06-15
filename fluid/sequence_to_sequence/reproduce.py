@@ -61,7 +61,7 @@ def train():
     decoder_state_expand = fluid.layers.sequence_expand(
        x=decoder_state_proj, y=encoded_proj)
 #    print(decoder_state_expand.name)
-#    decoder_state_expand = fluid.layers.Print(decoder_state_expand, message="expand")
+    decoder_state_expand = fluid.layers.Print(decoder_state_expand, message="expand")
     #print(decoder_state_expanded.name)
 
     decoder_state_concated = fluid.layers.concat(
