@@ -22,21 +22,6 @@ parser.add_argument(
     help="The device type.")
 
 
-def to_lodtensor(data, place):
-    seq_lens = [len(seq) for seq in data]
-    cur_len = 0
-    lod = [cur_len]
-    for l in seq_lens:
-        cur_len += l
-        lod.append(cur_len)
-    flattened_data = np.concatenate(data, axis=0).astype("int64")
-    flattened_data = flattened_data.reshape([len(flattened_data), 1])
-    lod_t = core.LoDTensor()
-    lod_t.set(flattened_data, place)
-    lod_t.set_lod([lod])
-    return lod_t, lod[-1]
-
-
 def train():
     fluid.default_startup_program().random_seed = 111
 
@@ -91,16 +76,14 @@ def train():
     #print(framework.default_main_program())
 
     for i in range(0, 10):
-        for batch_id, data in enumerate(train_batch_generator()):
-            src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
 
-            fetch_outs = exe.run(framework.default_main_program(),
-                                 feed={
-                                     feeding_list[0]: lod_t
-                                 },
-                                 fetch_list=[avg_cost])
-            for out in fetch_outs:
-                print(out)
+        fetch_outs = exe.run(framework.default_main_program(),
+                             feed={
+                                 feeding_list[0]: lod_t
+                             },
+                             fetch_list=[avg_cost])
+        for out in fetch_outs:
+            print(out)
 
 
 if __name__ == '__main__':
