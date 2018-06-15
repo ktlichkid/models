@@ -42,7 +42,6 @@ def train():
 
     src_word_idx = fluid.layers.data(
         name='source_sequence', shape=[1], dtype='int64', lod_level=1)
-    src_word_idx = fluid.layers.Print(src_word_idx, message="src_word_ids")
 
     src_embedding = fluid.layers.embedding(
         input=src_word_idx,
