@@ -5,11 +5,13 @@ from __future__ import print_function
 import numpy as np
 import argparse
 
+import paddle
 import paddle.fluid as fluid
 import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 from paddle.fluid.executor import Executor
 
+import wmt14
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
@@ -23,54 +25,69 @@ parser.add_argument(
 def train():
     fluid.default_startup_program().random_seed = 111
 
-    test_data_1 = fluid.layers.data(
-        name='test_data_1', shape=[4], dtype='double', lod_level=1)
+    src_word_idx = fluid.layers.data(
+        name='source_sequence', shape=[1], dtype='int64', lod_level=1)
+    src_embedding = fluid.layers.embedding(
+        input=src_word_idx,
+        size=[30000, 32],
+        dtype='float32')
+#    src_embdingding = fluid.layers.Print(src_embedding, message="src", summarize=10)
 
-    test_data_2 = fluid.layers.data(
-        name='test_data_2', shape=[1], dtype='double', lod_level=1)
+    encoded_proj = fluid.layers.fc(input=src_embedding,
+                                   size=32,
+                                   bias_attr=False)
+#    encoded_proj = fluid.layers.Print(encoded_proj, message="encoded_proj", summarize=10)
 
-    data_1_expanded = fluid.layers.sequence_expand(
-        x=test_data_1, y=test_data_2)
 
-    data_1_fc = fluid.layers.fc(
-        input=data_1_expanded, size=32, act='softmax')
+    decoder_state_proj = fluid.layers.sequence_pool(
+        input=encoded_proj, pool_type='last')
+#    decoder_state_proj = fluid.layers.Print(decoder_state, message="proj")
 
-    cost = fluid.layers.cross_entropy(input=data_1_fc, label=test_data_2)
+    decoder_state_expand = fluid.layers.sequence_expand(
+       x=decoder_state_proj, y=encoded_proj)
+#    print(decoder_state_expand.name)
+    #decoder_state_expanded = fluid.layers.Print(decoder_state_expand, message="expand")
+    #print(decoder_state_expanded.name)
 
+    prediction = fluid.layers.fc(input=decoder_state_expand,
+                          size=30000,
+                          bias_attr=True,
+                          act='softmax')
+#    prediction = fluid.layers.Print(prediction, message="prediction", summarize=10)
+
+    cost = fluid.layers.cross_entropy(input=prediction, label=src_word_idx)
     avg_cost = fluid.layers.mean(x=cost)
 
-    feeding_list = ["test_data_1", "test_data_2"]
+    feeding_list = ["source_sequence"]
 
-    optimizer = fluid.optimizer.Adam(learning_rate=0.1)
+    optimizer = fluid.optimizer.Adam(learning_rate=0.01)
     optimizer.minimize(avg_cost)
 
     fluid.memory_optimize(fluid.default_main_program())
 
     place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
 
-    data_1 = [[1.0, 3.0, 17.0, 2.0]]
-    data_2 = [[0.0], [19.0], [16.0], [1.0]]
-    lod_1 = [[0, 1]]
-    lod_2 = [[0, 4]]
-    tensor_1 = core.LoDTensor()
-    tensor_1.set(np.array(data_1), place)
-    tensor_2 = core.LoDTensor()
-    tensor_2.set(np.array(data_2), place)
-    tensor_1.set_lod(lod_1)
-    tensor_2.set_lod(lod_2)
+    data = [[0], [19], [16], [1]]
+    lod = [0, 4]
+    lod_t = core.LoDTensor()
+    lod_t.set(np.array(data), place)
+    lod_t.set_lod([lod])
 
+#    place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    print(framework.default_main_program())
+    #print(framework.default_main_program())
 
-    for i in range(0, 2):
+    for i in range(0, 10):
+
         fetch_outs = exe.run(framework.default_main_program(),
                              feed={
-                                 feeding_list[0]: tensor_1,
-                                 feeding_list[1]: tensor_2
+                                 feeding_list[0]: lod_t
                              },
                              fetch_list=[avg_cost])
+                                         #decoder_state_expand.name+"@GRAD"])
+                                         #decoder_state_expand.name+"@GRAD"])
         for out in fetch_outs:
             print(out)
 
