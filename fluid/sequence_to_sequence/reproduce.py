@@ -24,10 +24,10 @@ def train():
     fluid.default_startup_program().random_seed = 111
 
     test_data_1 = fluid.layers.data(
-        name='test_data_1', shape=[4], dtype='float32', lod_level=1)
+        name='test_data_1', shape=[4], dtype='int64', lod_level=1)
 
     test_data_2 = fluid.layers.data(
-        name='test_data_2', shape=[1], dtype='float32', lod_level=1)
+        name='test_data_2', shape=[1], dtype='int64', lod_level=1)
 
     data_1_expanded = fluid.layers.sequence_expand(
         x=test_data_1, y=test_data_2)
@@ -48,8 +48,8 @@ def train():
 
     place = core.CPUPlace() if args.device == 'CPU' else core.CUDAPlace(0)
 
-    data_1 = [[1.3, 2.8, 17.2, 2.1]]
-    data_2 = [[0.0], [19.0], [16.0], [1.0]]
+    data_1 = [[1, 3, 17, 2]]
+    data_2 = [[0], [19], [16], [1]]
     lod_1 = [[0, 1]]
     lod_2 = [[0, 4]]
     tensor_1 = core.LoDTensor()
