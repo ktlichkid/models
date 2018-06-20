@@ -343,7 +343,7 @@ def train():
     optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
 
-    fluid.memory_optimize(fluid.default_main_program())
+    # fluid.memory_optimize(fluid.default_main_program())
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
