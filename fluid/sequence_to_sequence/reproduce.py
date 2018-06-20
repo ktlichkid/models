@@ -38,16 +38,16 @@ def train():
 
     decoder_state_proj = fluid.layers.sequence_pool(
         input=encoded_proj, pool_type='last')
-    decoder_state_proj = fluid.layers.Print(
-        decoder_state_proj, message="proj", summarize=10)
+#    decoder_state_proj = fluid.layers.Print(
+#        decoder_state_proj, message="proj")
 
     decoder_state_expand = fluid.layers.sequence_expand(
        x=decoder_state_proj, y=encoded_proj)
 
-    decoder_state_concated = fluid.layers.concat(
-        input=[encoded_proj, decoder_state_expand], axis=1)
+#    decoder_state_expand = fluid.layers.Print(
+#        decoder_state_expand, message="expand")
 
-    prediction = fluid.layers.fc(input=decoder_state_concated,
+    prediction = fluid.layers.fc(input=decoder_state_expand,
                           size=30000,
                           bias_attr=True,
                           act='softmax')
