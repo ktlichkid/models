@@ -23,22 +23,22 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--embedding_dim",
     type=int,
-    default=512,
+    default=64,
     help="The dimension of embedding table. (default: %(default)d)")
 parser.add_argument(
     "--encoder_size",
     type=int,
-    default=512,
+    default=64,
     help="The size of encoder bi-rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--decoder_size",
     type=int,
-    default=512,
+    default=64,
     help="The size of decoder rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--batch_size",
     type=int,
-    default=4,
+    default=1,
     help="The sequence number of a mini-batch data. (default: %(default)d)")
 parser.add_argument(
     "--dict_size",
@@ -54,7 +54,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.01,
+    default=0.1,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -369,7 +369,7 @@ def train():
     optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
 
-    fluid.memory_optimize(fluid.default_main_program(), print_log=False)
+#    fluid.memory_optimize(fluid.default_main_program(), print_log=False)
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
@@ -457,7 +457,7 @@ def infer():
         beam_size=args.beam_size,
         max_length=args.max_length)
 
-    fluid.memory_optimize(fluid.default_main_program(), print_log=False)
+#    fluid.memory_optimize(fluid.default_main_program(), print_log=False)
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
