@@ -67,7 +67,7 @@ parser.add_argument(
 parser.add_argument(
     "--pass_num",
     type=int,
-    default=1,
+    default=10000,
     help="The pass number to train. (default: %(default)d)")
 parser.add_argument(
     "--learning_rate",
@@ -84,7 +84,7 @@ parser.add_argument(
 parser.add_argument(
     '--device',
     type=str,
-    default='CPU',
+    default='GPU',
     choices=['CPU', 'GPU'],
     help="The device type.")
 parser.add_argument(
@@ -343,7 +343,7 @@ def train():
     optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
 
-#    fluid.memory_optimize(fluid.default_main_program())
+    fluid.memory_optimize(fluid.default_main_program())
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
