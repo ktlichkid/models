@@ -34,17 +34,17 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--embedding_dim",
     type=int,
-    default=32,
+    default=512,
     help="The dimension of embedding table. (default: %(default)d)")
 parser.add_argument(
     "--encoder_size",
     type=int,
-    default=32,
+    default=512,
     help="The size of encoder bi-rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--decoder_size",
     type=int,
-    default=32,
+    default=512,
     help="The size of decoder rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--batch_size",
@@ -72,7 +72,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.3,
+    default=0.01,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -211,12 +211,12 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             #    decoder_state_proj, message="decoder_state_proj", summarize=10)
             decoder_state_expand = fluid.layers.sequence_expand(
                x=decoder_state_proj, y=encoder_proj)
-            decoder_state_expanded = fluid.layers.fc(
-                input=decoder_state_expand, size=decoder_size*2, bias_attr=False)
+            #decoder_state_expanded = fluid.layers.fc(
+            #    input=decoder_state_expand, size=decoder_size*2, bias_attr=False)
             #decoder_state_expand = fluid.layers.Print(
             #    decoder_state_expand, message="decoder_state_expand", summarize=10)
             concated = fluid.layers.concat(
-               input=[encoder_proj, decoder_state_expanded], axis=1)
+               input=[encoder_proj, decoder_state_expand], axis=1)
             #concated = fluid.layers.Print(
             #    concated, message="concated", summarize=10)
             attention_weights = fluid.layers.fc(input=concated,
@@ -325,7 +325,7 @@ def lodtensor_to_ndarray(lod_tensor):
 
 
 def train():
-    fluid.default_startup_program().random_seed = 111
+    #fluid.default_startup_program().random_seed = 111
 
     avg_cost, feeding_list = seq_to_seq_net(
         args.embedding_dim,
@@ -343,7 +343,7 @@ def train():
     optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
 
-    fluid.memory_optimize(fluid.default_main_program())
+#    fluid.memory_optimize(fluid.default_main_program())
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
