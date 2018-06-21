@@ -132,7 +132,7 @@ def decoder_decode(state_cell):
                        act='softmax')
         topk_scores, topk_indices = pd.topk(scores, k=50)
         accu_scores = pd.elementwise_add(
-            x=pd.log(x=layers.softmax(topk_scores)),
+            x=pd.log(x=pd.softmax(topk_scores)),
             y=pd.reshape(prev_scores, shape=[-1]),
             axis=0)
         selected_ids, selected_scores = pd.beam_search(
