@@ -287,6 +287,22 @@ class StateCell(object):
 
 
 class TrainingDecoder(object):
+    """
+    A decoder that can only be used for training. The computation with the RNN
+    cell could be defined within decoder's block.
+
+    Args:
+        state_cell (StateCell): A StateCell object that handles the input and
+            state variables.
+        name (str): The name of this decoder.
+
+    Returns:
+        TrainingDecoder: The initialized TrainingDecoder object.
+
+    Examples:
+        .. code-block:: python
+          decoder = TrainingDecoder(state_cell)
+    """
     BEFORE_DECODER = 0
     IN_DECODER = 1
     AFTER_DECODER = 2
@@ -323,10 +339,41 @@ class TrainingDecoder(object):
         return self._type
 
     def step_input(self, x):
+        """
+        Set the input variable as the step input of the RNN cell. For example,
+        in machine translation, each time step we read one word from the target
+        sentences, then the target sentence is a step input of the RNN cell.
+
+        Args:
+            x (Variable): the variable to be used as step input.
+
+        Returns:
+            The variable as input of current step.
+
+        Examples:
+        .. code-block:: python
+          current_word = decoder.step_input(trg_embedding)
+        """
         self._assert_in_decoder_block('step_input')
         return self._dynamic_rnn.step_input(x)
 
     def static_input(self, x):
+        """
+        Set the input variable as a static input of RNN cell. In contrast to
+        step input, this variable will be used as a whole within the RNN decode
+        loop.It might be sorted by its LoD rank if the target output is not
+        unified in length.
+
+        Args:
+            x (Variable): the variable to be used as static input.
+
+        Returns:
+            The variable as input of current step.
+
+        Examples:
+        .. code-block:: python
+          encoder_vec = decoder.static_input(encoded_vector)
+        """
         self._assert_in_decoder_block('static_input')
         return self._dynamic_rnn.static_input(x)
 
@@ -337,6 +384,21 @@ class TrainingDecoder(object):
         return self._dynamic_rnn(*args, **kwargs)
 
     def output(self, *outputs):
+        """
+        Set the output variable of the RNN cell.
+
+        Args:
+            *outputs (Variables): a series of variables that used as output of
+                the RNN cell
+
+        Examples:
+        .. code-block:: python
+          out = fluid.layers.fc(input=h,
+                                size=32,
+                                bias_attr=True,
+                                act='softmax')
+          decoder.output(out)
+        """
         self._assert_in_decoder_block('output')
         self._dynamic_rnn.output(*outputs)
 
