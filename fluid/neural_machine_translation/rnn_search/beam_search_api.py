@@ -7,7 +7,8 @@ from paddle.fluid.layer_helper import LayerHelper
 import paddle.fluid.core as core
 import numpy as np
 
-class DecoderType:
+
+class _DecoderType:
     TRAINING = 1
     BEAM_SEARCH = 2
 
@@ -34,7 +35,7 @@ class InitState(object):
         return self._need_reorder
 
 
-class MemoryState(object):
+class _MemoryState(object):
     def __init__(self, state_name, rnn_obj, init_state):
         self._state_name = state_name  # each is a rnn.memory
         self._rnn_obj = rnn_obj
@@ -48,7 +49,7 @@ class MemoryState(object):
         self._rnn_obj.update_memory(self._state_mem, state)
 
 
-class ArrayState(object):
+class _ArrayState(object):
     def __init__(self, state_name, block, init_state):
         self._state_name = state_name
         self._block = block
@@ -94,6 +95,24 @@ class ArrayState(object):
 
 
 class StateCell(object):
+    """
+    The state cell class stores the hidden state of the RNN cell.
+
+    Args:
+        cell_size (int): Whether to use CUDA or not.
+        inputs (dict): The step input of the RNN cell.
+        states (dict): The initial state of the RNN cell.
+        name (str): The name of the RNN cell. Default None.
+
+    Returns:
+        StateCell: The initialized StateCell object.
+
+    Examples:
+        .. code-block:: python
+          state_cell = StateCell(
+              cell_size=decoder_size, inputs={'x': None}, states={'h': h})
+    """
+
     def __init__(self, cell_size, inputs, states, name=None):
         self._helper = LayerHelper('state_cell', name=name)
         self._cur_states = {}
@@ -119,10 +138,10 @@ class StateCell(object):
         self._switched_decoder = False
 
     def _switch_decoder(self):  # lazy switch
-        if self._in_decoder == False:
+        if not self._in_decoder:
             raise ValueError('StateCell must be enter a decoder.')
 
-        if self._switched_decoder == True:
+        if self._switched_decoder:
             raise ValueError('StateCell already done switching.')
 
         for state_name in self._state_names:
@@ -135,16 +154,16 @@ class StateCell(object):
 
                 self._states_holder[state_name] = {}
 
-                if self._cur_decoder_obj.type == DecoderType.TRAINING:
+                if self._cur_decoder_obj.type == _DecoderType.TRAINING:
                     self._states_holder[state_name][id(self._cur_decoder_obj)] \
-                            = MemoryState(state_name,
-                                          self._cur_decoder_obj.dynamic_rnn,
+                            = _MemoryState(state_name,
+                                           self._cur_decoder_obj.dynamic_rnn,
+                                           state)
+                elif self._cur_decoder_obj.type == _DecoderType.BEAM_SEARCH:
+                    self._states_holder[state_name][id(self._cur_decoder_obj)] \
+                            = _ArrayState(state_name,
+                                          self._cur_decoder_obj.parent_block(),
                                           state)
-                elif self._cur_decoder_obj.type == DecoderType.BEAM_SEARCH:
-                    self._states_holder[state_name][id(self._cur_decoder_obj)] \
-                            = ArrayState(state_name,
-                                         self._cur_decoder_obj.parent_block(),
-                                         state)
                 else:
                     raise ValueError('Unknown decoder type, only support '
                                      '[TRAINING, BEAM_SEARCH]')
@@ -156,6 +175,15 @@ class StateCell(object):
         self._switched_decoder = True
 
     def get_state(self, state_name):
+        """
+        The getter of state object. Find the state variable by its name.
+
+        Args:
+            state_name (str): A string of the state's name.
+
+        Returns:
+            The associated state object.
+        """
         if self._in_decoder and not self._switched_decoder:
             self._switch_decoder()
 
@@ -167,14 +195,38 @@ class StateCell(object):
         return self._cur_states[state_name]
 
     def get_input(self, input_name):
+        """
+        The getter of input variable. Find the input variable by its name.
+
+        Args:
+            input_name (str): The string of the input's name.
+
+        Returns:
+            The associated input variable.
+        """
         if input_name not in self._inputs or self._inputs[input_name] is None:
             raise ValueError('Invalid input %s.' % input_name)
         return self._inputs[input_name]
 
     def set_state(self, state_name, state_value):
+        """
+        The setter of the state variable. Add a new state variable to the cell.
+
+        Args:
+            state_name (str): A string of the name of the new state.
+            state_value (Var): The variable of the new state.
+        """
         self._cur_states[state_name] = state_value
 
     def state_updater(self, updater):
+        """
+        Set up the updater to update the state cell every RNN step. The behavior
+        of updater could be defined by users.
+
+        Args:
+            updater (func): the updater to update the state cell.
+
+        """
         self._state_updater = updater
 
         def _decorator(state_cell):
@@ -186,6 +238,16 @@ class StateCell(object):
         return _decorator
 
     def compute_state(self, inputs):
+        """
+        Provide the step input of the RNN cell.
+
+        Args:
+            inputs (dict): the feed dict of input variables.
+
+        Examples:
+        .. code-block:: python
+          state_cell.compute_state(inputs={'x': current_word}
+        """
         if self._in_decoder and not self._switched_decoder:
             self._switch_decoder()
 
@@ -198,6 +260,9 @@ class StateCell(object):
         self._state_updater(self)
 
     def update_states(self):
+        """
+        Update the state cell with stored specified input and states variables.
+        """
         if self._in_decoder and not self._switched_decoder:
             self._switched_decoder()
 
@@ -209,12 +274,12 @@ class StateCell(object):
                 self._cur_states[state_name])
 
     def leave_decoder(self, decoder_obj):
-        if self._in_decoder == False:
+        if not self._in_decoder:
             raise ValueError('StateCell not in decoder, '
-                             'invlid leaving operation.')
+                             'invalid leaving operation.')
 
         if self._cur_decoder_obj != decoder_obj:
-            raise ValueError('Inconsist decoder object in StateCell.')
+            raise ValueError('Inconsistent decoder object in StateCell.')
 
         self._in_decoder = False
         self._cur_decoder_obj = None
@@ -230,7 +295,7 @@ class TrainingDecoder(object):
         self._helper = LayerHelper('training_decoder', name=name)
         self._status = TrainingDecoder.BEFORE_DECODER
         self._dynamic_rnn = layers.DynamicRNN()
-        self._type = DecoderType.TRAINING
+        self._type = _DecoderType.TRAINING
         self._state_cell = state_cell
         self._state_cell.enter_decoder(self)
 
@@ -290,7 +355,7 @@ class BeamSearchDecoder(object):
         self._helper = LayerHelper('beam_search_decoder', name=name)
         self._counter = layers.zeros(shape=[1], dtype='int64')
         self._counter.stop_gradient = True
-        self._type = DecoderType.BEAM_SEARCH
+        self._type = _DecoderType.BEAM_SEARCH
         self._max_len = layers.fill_constant(
             shape=[1], dtype='int64', value=max_len)
         self._cond = layers.less_than(
