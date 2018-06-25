@@ -14,6 +14,21 @@ class _DecoderType:
 
 
 class InitState(object):
+    """
+    The initial hidden state object. This is usually used as the initial state
+    of StateCell.
+
+    Args:
+        init (Variable): The initial variable of the hidden state.
+        shape (tuple|list): Default None.
+        value (float): Default None.
+        need_reorder (bool): If set true, the init will be sorted by its lod
+            rank within batches. This should be used if `batch_size > 1`.
+        dtype (np.dtype|core.VarDesc.VarType|str):
+
+    Returns:
+        A initialized state object.
+    """
     def __init__(self,
                  init=None,
                  shape=None,
@@ -578,7 +593,6 @@ class BeamSearchDecoder(object):
 
         Returns:
             The parent block of decoder.
-
         """
         program = self._helper.main_program
         parent_block_idx = program.current_block().parent_idx
