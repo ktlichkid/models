@@ -146,7 +146,6 @@ def decoder_decode(state_cell):
                 decoder.update_array(prev_ids, selected_ids)
                 decoder.update_array(prev_scores, selected_scores)
 
-
     translation_ids, translation_scores = decoder()
 
     return translation_ids, translation_scores

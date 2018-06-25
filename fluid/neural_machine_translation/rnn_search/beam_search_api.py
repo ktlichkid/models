@@ -538,8 +538,6 @@ class BeamSearchDecoder(object):
         Args:
             array (Variable): The array to append the new variable to.
             value (Variable): The newly generated value to be stored.
-
-
         """
         self._assert_in_decoder_block('update_array')
 
@@ -555,6 +553,14 @@ class BeamSearchDecoder(object):
         self._array_link.append((value, array))
 
     def __call__(self):
+        """
+        Run the decode process and return the final decode result.
+
+        Returns:
+            A tuple of decoded (id, score) pairs. id is a Variable that holds
+            the generated tokens, and score is a Variable with the same shape
+            as id
+        """
         if self._status != BeamSearchDecoder.AFTER_BEAM_SEARCH_DECODER:
             raise ValueError('Output of BeamSearchDecoder object can '
                              'only be visited outside the block.')
@@ -567,6 +573,13 @@ class BeamSearchDecoder(object):
         return self._state_cell
 
     def parent_block(self):
+        """
+        Getter of parent block.
+
+        Returns:
+            The parent block of decoder.
+
+        """
         program = self._helper.main_program
         parent_block_idx = program.current_block().parent_idx
         if parent_block_idx < 0:
