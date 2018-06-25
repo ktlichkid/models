@@ -27,7 +27,7 @@ class InitState(object):
         dtype (np.dtype|core.VarDesc.VarType|str):
 
     Returns:
-        A initialized state object.
+        An initialized state object.
     """
     def __init__(self,
                  init=None,
