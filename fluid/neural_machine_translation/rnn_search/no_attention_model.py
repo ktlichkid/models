@@ -19,7 +19,8 @@ import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 import paddle.fluid.layers as layers
 from paddle.fluid.executor import Executor
-from beam_search_api import *
+from paddle.fluid.contrib.decoder.beam_search_decoder import *
+
 import os
 
 dict_size = 30000
