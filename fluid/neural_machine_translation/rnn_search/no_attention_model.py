@@ -116,7 +116,7 @@ def decoder_decode(state_cell):
             is_sparse=IS_SPARSE,
             param_attr=fluid.ParamAttr('vemb'))
 
-    decoder = BeamSearchDecoder(state_cell, max_len=max_length)
+    decoder = BeamSearchDecoder(state_cell=state_cell, max_len=max_length, beam_size=beam_size, end_id=1)
 
     with decoder.block():
         prev_ids = decoder.read_array(init=init_ids, is_ids=True)
