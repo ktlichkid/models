@@ -30,21 +30,22 @@ import paddle.fluid.framework as framework
 from paddle.fluid.executor import Executor
 from paddle.fluid.contrib.decoder.beam_search_decoder import *
 
+
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--embedding_dim",
     type=int,
-    default=512,
+    default=1024,
     help="The dimension of embedding table. (default: %(default)d)")
 parser.add_argument(
     "--encoder_size",
     type=int,
-    default=512,
+    default=1024,
     help="The size of encoder bi-rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--decoder_size",
     type=int,
-    default=512,
+    default=1024,
     help="The size of decoder rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--batch_size",
@@ -60,12 +61,12 @@ parser.add_argument(
 parser.add_argument(
     "--pass_num",
     type=int,
-    default=5,
+    default=20,
     help="The pass number to train. (default: %(default)d)")
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.01,
+    default=0.001,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -196,7 +197,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         weigths_reshape = fluid.layers.reshape(x=attention_weights, shape=[-1])
         scaled = fluid.layers.elementwise_mul(
             x=encoder_vec, y=weigths_reshape, axis=0)
-        context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
+        context = fluid.layers.sequence_pool(input=scaled, pool_type='average')
         return context
 
     @state_cell.state_updater
@@ -263,7 +264,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 dtype='float32',
                 param_attr=fluid.ParamAttr('trg_embedding'))
 
-        decoder = BeamSearchDecoder(state_cell, max_len=max_length)
+        decoder = BeamSearchDecoder(state_cell, max_len=max_length, beam_size=beam_size, end_id=1)
 
         with decoder.block():
             #layers.Print(encoded_proj, message="in loop")
@@ -305,10 +306,15 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                      size=target_dict_dim,
                                      act='softmax')
             topk_scores, topk_indices = fluid.layers.topk(scores, k=beam_size)
+            accu_scores = layers.elementwise_add(
+                x=layers.log(x=layers.softmax(topk_scores)),
+                y=layers.reshape(prev_scores, shape=[-1]),
+                axis=0)
             selected_ids, selected_scores = fluid.layers.beam_search(
                 prev_ids,
+                prev_scores,
                 topk_indices,
-                topk_scores,
+                accu_scores,
                 beam_size,
                 end_id=1,
                 level=0)
@@ -380,16 +386,16 @@ def train():
     optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
 
-#    fluid.memory_optimize(fluid.default_main_program(), print_log=False)
+    fluid.memory_optimize(fluid.default_main_program(), print_log=False)
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
+            paddle.dataset.wmt16.train(args.dict_size, args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
+            paddle.dataset.wmt16.train(args.dict_size, args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
@@ -472,20 +478,20 @@ def infer():
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
+            paddle.dataset.wmt16.train(args.dict_size, args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join("model_4data", str(7000))
+    model_path = os.path.join("model_att", str(1000))
     fluid.io.load_persistables(
         executor=exe,
         dirname=model_path,
         main_program=framework.default_main_program())
 
-    src_dict, trg_dict = paddle.dataset.wmt14.get_dict(args.dict_size)
+    src_dict, trg_dict = paddle.dataset.wmt16.get_dict(args.dict_size)
 
     for batch_id, data in enumerate(test_batch_generator()):
 
