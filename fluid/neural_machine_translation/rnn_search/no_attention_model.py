@@ -33,7 +33,7 @@ batch_size = 32
 max_length = 100
 topk_size = 1
 trg_dic_size = 10000
-beam_size = 1
+beam_size = 3
 
 decoder_size = hidden_dim
 
