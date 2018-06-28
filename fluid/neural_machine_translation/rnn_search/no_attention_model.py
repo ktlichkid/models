@@ -137,7 +137,13 @@ def decoder_decode(state_cell):
             y=layers.reshape(prev_scores, shape=[-1]),
             axis=0)
         selected_ids, selected_scores = layers.beam_search(
-            prev_ids, topk_indices, accu_scores, beam_size, end_id=1, level=0)
+            prev_ids,
+            prev_scores,
+            topk_indices,
+            accu_scores,
+            beam_size,
+            end_id=1,
+            level=0)
 
         with layers.Switch() as switch:
             with switch.case(layers.is_empty(selected_ids)):
@@ -246,7 +252,7 @@ def decode_main():
 #    model_path = os.path.join(model_save_dir, str(0))
 #    if not os.path.isdir(model_path):
 #        os.makedirs(model_path)
-    model_path = os.path.join(model_save_dir, str(100))
+    model_path = os.path.join(model_save_dir, str(1))
 #    fluid.io.load_inference_model(dirname=model_path,
 #                                  executor=exe,
 #                                  model_filename='test_save',
@@ -313,5 +319,5 @@ def decode_main():
         break
 
 if __name__ == '__main__':
-    train_main()
-    #decode_main()
+    #train_main()
+    decode_main()
