@@ -198,7 +198,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         weigths_reshape = fluid.layers.reshape(x=attention_weights, shape=[-1])
         scaled = fluid.layers.elementwise_mul(
             x=encoder_vec, y=weigths_reshape, axis=0)
-        context = fluid.layers.sequence_pool(input=scaled, pool_type='average')
+        context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
         return context
 
     @state_cell.state_updater
