@@ -485,7 +485,7 @@ def infer():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join("model_att", str(100))
+    model_path = os.path.join("model_att", str(7))
     fluid.io.load_persistables(
         executor=exe,
         dirname=model_path,
@@ -507,7 +507,7 @@ def infer():
                     words = [trg_dict[tup[i][j]] for j in xrange(len(tup[i]))]
                 sentence = " ".join(words)
                 print(sentence)
-                trg_out.write(sentence)
+                trg_out.write(sentence[0:-4] + '\n')
 
         batch_size = len(data)
         src_seq, _ = to_lodtensor(map(lambda x: x[0], data), place)
@@ -541,9 +541,9 @@ def infer():
         print("Actual result:")
         for paragraph in final_result:
             print(paragraph)
-            inf_out.write(paragraph)
+            inf_out.write(paragraph[0][4:-4] + '\n')
 
-        break
+        #break
 
     trg_out.close()
     inf_out.close()
