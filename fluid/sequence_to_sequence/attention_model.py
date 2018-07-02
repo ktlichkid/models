@@ -92,7 +92,9 @@ model_save_path = "model_att_drop"
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
     def linear(inputs):
-        return fluid.layers.fc(input=inputs, size=size, bias_attr=True)
+        temp = fluid.layers.fc(input=inputs, size=size, bias_attr=True)
+        ret = fluid.layers.dropout(x=temp, dropout_prob=0.2)
+        return ret #fluid.layers.fc(input=inputs, size=size, bias_attr=True)
 
     forget_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
     input_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
@@ -104,13 +106,11 @@ def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
             x=forget_gate, y=cell_t_prev), fluid.layers.elementwise_mul(
                 x=input_gate, y=cell_tilde)
     ])
-    cell = fluid.layers.dropout(x=cell_t, dropout_prob=0.2)
 
     hidden_t = fluid.layers.elementwise_mul(
         x=output_gate, y=fluid.layers.tanh(x=cell_t))
-    hidden = fluid.layers.dropout(x=hidden_t, dropout_prob=0.2)
 
-    return hidden, cell
+    return hidden_t, cell_t
 
 
 def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
@@ -219,8 +219,6 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         decoder_inputs = fluid.layers.concat(
             input=[context, current_word], axis=1)
         h, c = lstm_step(decoder_inputs, prev_h, prev_c, decoder_size)
-        #h = fluid.layers.dropout(x=hidden, dropout_prob=0.2, is_test=is_generating)
-        #c = fluid.layers.dropout(x=cell, dropout_prob=0.2, is_test=is_generating)
         state_cell.set_state('h', h)
         state_cell.set_state('c', c)
 
