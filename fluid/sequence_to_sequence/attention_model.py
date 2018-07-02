@@ -121,27 +121,31 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                              size=gate_size * 4,
                                              act='tanh',
                                              bias_attr=False)
-        forward, _ = fluid.layers.dynamic_lstm(
+        forwarded, _ = fluid.layers.dynamic_lstm(
             input=input_forward_proj, size=gate_size * 4, use_peepholes=False)
+        forward = fluid.layers.dropout(x=forwarded, drop_prob=0.2)
+
         input_reversed_proj = fluid.layers.fc(input=input_seq,
                                               size=gate_size * 4,
                                               act='tanh',
                                               bias_attr=False)
-        reversed, _ = fluid.layers.dynamic_lstm(
+        reverseded, _ = fluid.layers.dynamic_lstm(
             input=input_reversed_proj,
             size=gate_size * 4,
             is_reverse=True,
             use_peepholes=False)
+        reversed = fluid.layers.dropout(x=reverseded, drop_prob=0.2)
         return forward, reversed
 
     src_word_idx = fluid.layers.data(
         name='source_sequence', shape=[1], dtype='int64', lod_level=1)
 
-    src_embedding = fluid.layers.embedding(
+    src_embedding_in = fluid.layers.embedding(
         input=src_word_idx,
         size=[source_dict_dim, embedding_dim],
         dtype='float32',
         param_attr=fluid.ParamAttr(name='src_embedding'))
+    src_embedding = fluid.layers.dropout(x=src_embedding_in, dropout_prob=0.2)
 
     src_forward, src_reversed = bi_lstm_encoder(
         input_seq=src_embedding, gate_size=encoder_size)
@@ -210,7 +214,9 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         context = simple_attention(encoder_vec, encoder_proj, prev_h)
         decoder_inputs = fluid.layers.concat(
             input=[context, current_word], axis=1)
-        h, c = lstm_step(decoder_inputs, prev_h, prev_c, decoder_size)
+        hidden, cell = lstm_step(decoder_inputs, prev_h, prev_c, decoder_size)
+        h = fluid.layers.dropout(x=hidden, drop_prob=0.2, is_test=is_generating)
+        c = fluid.layers.dropout(x=cell, drop_prob=0.2, is_test=is_generating)
         state_cell.set_state('h', h)
         state_cell.set_state('c', c)
 
