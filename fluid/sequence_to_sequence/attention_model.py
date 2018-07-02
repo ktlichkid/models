@@ -458,8 +458,9 @@ def train():
                                  fetch_list=[avg_cost])
 
             avg_cost_val = np.array(fetch_outs[0])
-            print('pass_id=%d, batch_id=%d, train_loss: %f' %
-                  (pass_id, batch_id, avg_cost_val))
+            if batch_id % 200 == 0:
+                print('pass_id=%d, batch_id=%d, train_loss: %f' %
+                      (pass_id, batch_id, avg_cost_val))
 
         pass_end_time = time.time()
         test_loss = do_validation()
