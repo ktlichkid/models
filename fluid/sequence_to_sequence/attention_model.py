@@ -502,12 +502,12 @@ def infer():
         for tup in data:
             for i in range(2, len(tup)):
                 if i == 0:
-                    words = [src_dict[tup[i][j]] for j in xrange(len(tup[i]))]
+                    words = [src_dict[tup[i][j]] for j in xrange(len(tup[i])-1)]  # omit end token
                 else:
-                    words = [trg_dict[tup[i][j]] for j in xrange(len(tup[i]))]
+                    words = [trg_dict[tup[i][j]] for j in xrange(len(tup[i])-1)]
                 sentence = " ".join(words)
                 print(sentence)
-                trg_out.write(sentence[0:-4] + '\n')
+                trg_out.write(sentence + '\n')
 
         batch_size = len(data)
         src_seq, _ = to_lodtensor(map(lambda x: x[0], data), place)
