@@ -214,9 +214,9 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         context = simple_attention(encoder_vec, encoder_proj, prev_h)
         decoder_inputs = fluid.layers.concat(
             input=[context, current_word], axis=1)
-        hidden, cell = lstm_step(decoder_inputs, prev_h, prev_c, decoder_size)
-        h = fluid.layers.dropout(x=hidden, dropout_prob=0.2, is_test=is_generating)
-        c = fluid.layers.dropout(x=cell, dropout_prob=0.2, is_test=is_generating)
+        h, c = lstm_step(decoder_inputs, prev_h, prev_c, decoder_size)
+        #h = fluid.layers.dropout(x=hidden, dropout_prob=0.2, is_test=is_generating)
+        #c = fluid.layers.dropout(x=cell, dropout_prob=0.2, is_test=is_generating)
         state_cell.set_state('h', h)
         state_cell.set_state('c', c)
 
