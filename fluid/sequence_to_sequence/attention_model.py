@@ -123,7 +123,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                              bias_attr=False)
         forwarded, _ = fluid.layers.dynamic_lstm(
             input=input_forward_proj, size=gate_size * 4, use_peepholes=False)
-        forward = fluid.layers.dropout(x=forwarded, drop_prob=0.2)
+        forward = fluid.layers.dropout(x=forwarded, dropout_prob=0.2)
 
         input_reversed_proj = fluid.layers.fc(input=input_seq,
                                               size=gate_size * 4,
@@ -134,7 +134,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             size=gate_size * 4,
             is_reverse=True,
             use_peepholes=False)
-        reversed = fluid.layers.dropout(x=reverseded, drop_prob=0.2)
+        reversed = fluid.layers.dropout(x=reverseded, dropout_prob=0.2)
         return forward, reversed
 
     src_word_idx = fluid.layers.data(
@@ -215,8 +215,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         decoder_inputs = fluid.layers.concat(
             input=[context, current_word], axis=1)
         hidden, cell = lstm_step(decoder_inputs, prev_h, prev_c, decoder_size)
-        h = fluid.layers.dropout(x=hidden, drop_prob=0.2, is_test=is_generating)
-        c = fluid.layers.dropout(x=cell, drop_prob=0.2, is_test=is_generating)
+        h = fluid.layers.dropout(x=hidden, dropout_prob=0.2, is_test=is_generating)
+        c = fluid.layers.dropout(x=cell, dropout_prob=0.2, is_test=is_generating)
         state_cell.set_state('h', h)
         state_cell.set_state('c', c)
 
