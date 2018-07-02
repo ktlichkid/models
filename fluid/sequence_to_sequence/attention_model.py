@@ -543,8 +543,6 @@ def infer():
             print(paragraph)
             inf_out.write(paragraph[0] + '\n')
 
-        #break
-
     trg_out.close()
     inf_out.close()
 
