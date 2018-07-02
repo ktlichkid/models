@@ -395,7 +395,7 @@ def train():
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.train(args.dict_size, args.dict_size, 'de'), buf_size=1000),
+            paddle.dataset.wmt16.validation(args.dict_size, args.dict_size, 'de'), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
