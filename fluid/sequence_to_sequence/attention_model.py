@@ -87,6 +87,8 @@ parser.add_argument(
     help="The maximum length of sequence when doing generation. "
     "(default: %(default)d)")
 
+model_save_path = "model_att_drop"
+
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
     def linear(inputs):
@@ -102,11 +104,13 @@ def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
             x=forget_gate, y=cell_t_prev), fluid.layers.elementwise_mul(
                 x=input_gate, y=cell_tilde)
     ])
+    cell = fluid.layers.dropout(x=cell_t, dropout_prob=0.2)
 
     hidden_t = fluid.layers.elementwise_mul(
         x=output_gate, y=fluid.layers.tanh(x=cell_t))
+    hidden = fluid.layers.dropout(x=hidden_t, dropout_prob=0.2)
 
-    return hidden_t, cell_t
+    return hidden, cell
 
 
 def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
@@ -460,7 +464,7 @@ def train():
               (pass_id, test_loss, words_per_sec, time_consumed))
 
         if pass_id % 1 == 0:
-            model_path = os.path.join("model_att", str(pass_id))
+            model_path = os.path.join(model_save_path, str(pass_id))
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
 
@@ -491,7 +495,7 @@ def infer():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join("model_att", str(7))
+    model_path = os.path.join(model_save_path, str(7))
     fluid.io.load_persistables(
         executor=exe,
         dirname=model_path,
