@@ -494,6 +494,9 @@ def infer():
     src_dict = paddle.dataset.wmt16.get_dict('de', args.dict_size, True)
     trg_dict = paddle.dataset.wmt16.get_dict('en', args.dict_size, True)
 
+    trg_out = open("./trg_out", "w")
+    inf_out = open("./inf_out", "w")
+
     for batch_id, data in enumerate(test_batch_generator()):
 
         for tup in data:
@@ -504,6 +507,7 @@ def infer():
                     words = [trg_dict[tup[i][j]] for j in xrange(len(tup[i]))]
                 sentence = " ".join(words)
                 print(sentence)
+                trg_out.write(sentence)
 
         batch_size = len(data)
         src_seq, _ = to_lodtensor(map(lambda x: x[0], data), place)
@@ -537,8 +541,12 @@ def infer():
         print("Actual result:")
         for paragraph in final_result:
             print(paragraph)
+            inf_out.write(paragraph)
 
         break
+
+    trg_out.close()
+    inf_out.close()
 
 
 if __name__ == '__main__':
