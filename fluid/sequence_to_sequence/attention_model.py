@@ -55,13 +55,13 @@ parser.add_argument(
 parser.add_argument(
     "--dict_size",
     type=int,
-    default=30000,
+    default=20000,
     help="The dictionary capacity. Dictionaries of source sequence and "
     "target dictionary have same capacity. (default: %(default)d)")
 parser.add_argument(
     "--pass_num",
     type=int,
-    default=20,
+    default=100,
     help="The pass number to train. (default: %(default)d)")
 parser.add_argument(
     "--learning_rate",
@@ -197,7 +197,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         weigths_reshape = fluid.layers.reshape(x=attention_weights, shape=[-1])
         scaled = fluid.layers.elementwise_mul(
             x=encoder_vec, y=weigths_reshape, axis=0)
-        context = fluid.layers.sequence_pool(input=scaled, pool_type='average')
+        context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
         return context
 
     @state_cell.state_updater
@@ -390,12 +390,12 @@ def train():
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.train(args.dict_size, args.dict_size), buf_size=1000),
+            paddle.dataset.wmt16.train(args.dict_size, args.dict_size, 'de'), buf_size=1000),
         batch_size=args.batch_size)
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.train(args.dict_size, args.dict_size), buf_size=1000),
+            paddle.dataset.wmt16.train(args.dict_size, args.dict_size, 'de'), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
@@ -478,20 +478,21 @@ def infer():
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.train(args.dict_size, args.dict_size), buf_size=1000),
+            paddle.dataset.wmt16.test(args.dict_size, args.dict_size, 'de'), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join("model_att", str(1000))
+    model_path = os.path.join("model_att", str(100))
     fluid.io.load_persistables(
         executor=exe,
         dirname=model_path,
         main_program=framework.default_main_program())
 
-    src_dict, trg_dict = paddle.dataset.wmt16.get_dict(args.dict_size)
+    src_dict = paddle.dataset.wmt16.get_dict('de', args.dict_size, True)
+    trg_dict = paddle.dataset.wmt16.get_dict('en', args.dict_size, True)
 
     for batch_id, data in enumerate(test_batch_generator()):
 
@@ -537,7 +538,7 @@ def infer():
         for paragraph in final_result:
             print(paragraph)
 
-        #break
+        break
 
 
 if __name__ == '__main__':
