@@ -92,14 +92,16 @@ model_save_path = "model_att_drop"
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
     def linear(inputs):
-        temp = fluid.layers.fc(input=inputs, size=size, bias_attr=True)
-        ret = fluid.layers.dropout(x=temp, dropout_prob=0.2)
-        return ret #fluid.layers.fc(input=inputs, size=size, bias_attr=True)
+        return fluid.layers.fc(input=inputs, size=size, bias_attr=True)
 
-    forget_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    input_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    output_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    cell_tilde = fluid.layers.tanh(x=linear([hidden_t_prev, x_t]))
+    forget = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
+    forget_gate = fluid.layers.dropout(x=forget, dropout_prob=0.2)
+    inputs = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
+    input_gate = fluid.layers.dropout(x=inputs, dropout_prob=0.2)
+    output = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
+    output_gate = fluid.layers.dropout(x=output, dropout_prob=0.2)
+    cell = fluid.layers.tanh(x=linear([hidden_t_prev, x_t]))
+    cell_tilde = fluid.layers.dropout(x=cell, dropout_prob=0.2)
 
     cell_t = fluid.layers.sums(input=[
         fluid.layers.elementwise_mul(
@@ -188,9 +190,11 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 'c': c})
 
     def simple_attention(encoder_vec, encoder_proj, decoder_state):
-        decoder_state_proj = fluid.layers.fc(input=decoder_state,
+        decoder_state_prop = fluid.layers.fc(input=decoder_state,
                                              size=decoder_size,
                                              bias_attr=False)
+        decoder_state_proj = fluid.layers.dropout(
+            x=decoder_state_prop, dropout_prob=0.2)
         decoder_state_expand = fluid.layers.sequence_expand(
             x=decoder_state_proj, y=encoder_proj)
         # concated lod should inherit from encoder_proj
@@ -226,11 +230,14 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         trg_word_idx = fluid.layers.data(
             name='target_sequence', shape=[1], dtype='int64', lod_level=1)
 
-        trg_embedding = fluid.layers.embedding(
+        trg_embedding_in = fluid.layers.embedding(
             input=trg_word_idx,
             size=[target_dict_dim, embedding_dim],
             dtype='float32',
             param_attr=fluid.ParamAttr('trg_embedding'))
+        trg_embedding = fluid.layers.dropout(
+            x=trg_embedding_in,
+            dropout_prob=0.2)
 
         decoder = TrainingDecoder(state_cell)
 
