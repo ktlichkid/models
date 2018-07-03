@@ -279,7 +279,11 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 param_attr=fluid.ParamAttr('trg_embedding'))
 
         # A beam search decoder
-        decoder = BeamSearchDecoder(state_cell, max_len=max_length)
+        decoder = BeamSearchDecoder(
+            state_cell=state_cell,
+            max_len=max_length,
+            beam_size=beam_size,
+            end_id=1)
 
         with decoder.block():
             encoder_vec = decoder.read_array(init=encoded_vector)
@@ -314,13 +318,21 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                      size=target_dict_dim,
                                      act='softmax')
             topk_scores, topk_indices = fluid.layers.topk(scores, k=beam_size)
+
+            accu_scores = layers.elementwise_add(
+                x=layers.log(x=layers.softmax(topk_scores)),
+                y=layers.reshape(prev_scores, shape=[-1]),
+                axis=0)
+
             selected_ids, selected_scores = fluid.layers.beam_search(
                 prev_ids,
+                prev_scores,
                 topk_indices,
-                topk_scores,
+                accu_scores,
                 beam_size,
                 end_id=1,
                 level=0)
+
             with layers.Switch() as switch:
                 with switch.case(layers.is_empty(selected_ids)):
                     decoder.early_stop()
