@@ -85,6 +85,17 @@ parser.add_argument(
     default=50,
     help="The maximum length of sequence when doing generation. "
     "(default: %(default)d)")
+parser.add_argument(
+    "--save_dir",
+    type=str,
+    default="model",
+    help="Specify the path to save trained models.")
+parser.add_argument(
+    "--save_interval",
+    type=int,
+    default=1,
+    help="Save the trained model every n passes."
+    "(default: %(default)d)")
 
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
@@ -167,6 +178,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         dtype='float32')
     cell_init.stop_gradient = False
 
+    # Create a RNN state cell
     h = InitState(init=decoder_boot, need_reorder=True)
     c = InitState(init=cell_init)
 
@@ -179,6 +191,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 'c': c})
 
     def simple_attention(encoder_vec, encoder_proj, decoder_state):
+        # The implementation of simple attention model
         decoder_state_proj = fluid.layers.fc(input=decoder_state,
                                              size=decoder_size,
                                              bias_attr=False)
@@ -189,7 +202,6 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             input=[encoder_proj, decoder_state_expand], axis=1)
         attention_weights = fluid.layers.fc(input=concated,
                                             size=1,
-                                            #act='tanh',
                                             bias_attr=False)
         attention_weights = fluid.layers.sequence_softmax(
             input=attention_weights)
@@ -201,6 +213,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
     @state_cell.state_updater
     def state_updater(state_cell):
+        # Define the updater of RNN state cell
         current_word = state_cell.get_input('x')
         encoder_vec = state_cell.get_input('encoder_vec')
         encoder_proj = state_cell.get_input('encoder_proj')
@@ -214,6 +227,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         state_cell.set_state('c', c)
 
     if not is_generating:
+        # Training process
         trg_word_idx = fluid.layers.data(
             name='target_sequence', shape=[1], dtype='int64', lod_level=1)
 
@@ -223,6 +237,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             dtype='float32',
             param_attr=fluid.ParamAttr('trg_embedding'))
 
+        # A decoder for training
         decoder = TrainingDecoder(state_cell)
 
         with decoder.block():
@@ -246,11 +261,11 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             name='label_sequence', shape=[1], dtype='int64', lod_level=1)
         cost = fluid.layers.cross_entropy(input=decoder(), label=label)
         avg_cost = fluid.layers.mean(x=cost)
-
         feeding_list = ["source_sequence", "target_sequence", "label_sequence"]
-
         return avg_cost, feeding_list
+
     else:
+        # Inference
         init_ids = fluid.layers.data(
             name="init_ids", shape=[1], dtype="int64", lod_level=2)
         init_scores = fluid.layers.data(
@@ -263,26 +278,20 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 dtype='float32',
                 param_attr=fluid.ParamAttr('trg_embedding'))
 
+        # A beam search decoder
         decoder = BeamSearchDecoder(state_cell, max_len=max_length)
 
         with decoder.block():
-            #layers.Print(encoded_proj, message="in loop")
             encoder_vec = decoder.read_array(init=encoded_vector)
-            #layers.Print(encoded_vector, message="encoded_vector")
-            #layers.Print(encoded_proj, message="before")
             encoder_proj = decoder.read_array(init=encoded_proj)
-            with layers.Switch() as switch_1:
-                with switch_1.case(layers.is_empty(encoder_proj)):
-                    decoder.early_stop()
-                with switch_1.case(layers.is_empty(encoder_vec)):
-                    decoder.early_stop()
-            #layers.Print(encoder_proj, message="after")
+            # with layers.Switch() as switch_1:
+            #     with switch_1.case(layers.is_empty(encoder_proj)):
+            #         decoder.early_stop()
+            #     with switch_1.case(layers.is_empty(encoder_vec)):
+            #         decoder.early_stop()
             prev_ids = decoder.read_array(init=init_ids, is_ids=True)
-            #layers.Print(prev_ids, message="prev_ids")
             prev_scores = decoder.read_array(init=init_scores, is_scores=True)
-            #layers.Print(prev_scores, message="prev_scores")
             prev_ids_embedding = embedding(prev_ids)
-            #layers.Print(prev_ids_embedding, message="prev_ids_embedding")
             prev_h = decoder.state_cell.get_state('h')
             prev_c = decoder.state_cell.get_state('c')
             prev_h_expanded = fluid.layers.sequence_expand(prev_h, prev_scores)
@@ -315,56 +324,46 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             with layers.Switch() as switch:
                 with switch.case(layers.is_empty(selected_ids)):
                     decoder.early_stop()
-                with switch.case(layers.is_empty(encoder_proj)):
-                    decoder.early_stop()
+                # with switch.case(layers.is_empty(encoder_proj)):
+                #     decoder.early_stop()
                 with switch.default():
-            #layers.Print(selected_ids, message="selected_ids")
-            #layers.Print(selected_scores, message="selected_scores")
-            #layers.Print(encoder_vec_expanded, message="encoder_vec")
-            #layers.Print(encoder_proj_expanded, message="encoder_proj")
                     decoder.state_cell.update_states()
                     decoder.update_array(prev_ids, selected_ids)
                     decoder.update_array(prev_scores, selected_scores)
                     decoder.update_array(encoder_vec, encoder_vec_expanded)
                     decoder.update_array(encoder_proj, encoder_proj_expanded)
-            #layers.Print(prev_ids, message="prev_ids")
-            #layers.Print(prev_scores, message="prev_scores")
-            #layers.Print(encoder_vec, message="encoder_vec")
-            #layers.Print(encoder_proj, message="encoder_proj")
-
 
         translation_ids, translation_scores = decoder()
-
         feeding_list = ["source_sequence", "init_ids", "init_scores"]
 
         return translation_ids, translation_scores, feeding_list
 
 
-def to_lodtensor(data, place, dtype='int64'):
-    seq_lens = [len(seq) for seq in data]
-    cur_len = 0
-    lod = [cur_len]
-    for l in seq_lens:
-        cur_len += l
-        lod.append(cur_len)
-    flattened_data = np.concatenate(data, axis=0).astype(dtype)
-    flattened_data = flattened_data.reshape([len(flattened_data), 1])
-    lod_t = core.LoDTensor()
-    lod_t.set(flattened_data, place)
-    lod_t.set_lod([lod])
-    return lod_t, lod[-1]
-
-
-def lodtensor_to_ndarray(lod_tensor):
-    dims = lod_tensor.get_dims()
-    ndarray = np.zeros(shape=dims).astype('float32')
-    for i in xrange(np.product(dims)):
-        ndarray.ravel()[i] = lod_tensor.get_float_element(i)
-    return ndarray
+# def to_lodtensor(data, place, dtype='int64'):
+#     seq_lens = [len(seq) for seq in data]
+#     cur_len = 0
+#     lod = [cur_len]
+#     for l in seq_lens:
+#         cur_len += l
+#         lod.append(cur_len)
+#     flattened_data = np.concatenate(data, axis=0).astype(dtype)
+#     flattened_data = flattened_data.reshape([len(flattened_data), 1])
+#     lod_t = core.LoDTensor()
+#     lod_t.set(flattened_data, place)
+#     lod_t.set_lod([lod])
+#     return lod_t, lod[-1]
+#
+#
+# def lodtensor_to_ndarray(lod_tensor):
+#     dims = lod_tensor.get_dims()
+#     ndarray = np.zeros(shape=dims).astype('float32')
+#     for i in xrange(np.product(dims)):
+#         ndarray.ravel()[i] = lod_tensor.get_float_element(i)
+#     return ndarray
 
 
 def train():
-    avg_cost, feeding_list = seq_to_seq_net(
+    avg_cost, feed_order = seq_to_seq_net(
         args.embedding_dim,
         args.encoder_size,
         args.decoder_size,
@@ -375,70 +374,74 @@ def train():
         max_length=args.max_length)
 
     # clone from default main program
+    main_program = fluid.default_main_program()
     inference_program = fluid.default_main_program().clone()
 
     optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
 
-#    fluid.memory_optimize(fluid.default_main_program(), print_log=False)
-
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
             paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
-        batch_size=args.batch_size)
+        batch_size=args.batch_size,
+        drop_last=False)
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
-        batch_size=args.batch_size)
+            paddle.dataset.wmt14.test(args.dict_size), buf_size=1000),
+        batch_size=args.batch_size,
+        drop_last=False)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
+    feed_list = [
+        main_program.global_block().var(var_name) for var_name in feed_order
+    ]
+    feeder = fluid.DataFeeder(feed_list, place)
+
     def do_validation():
         total_loss = 0.0
         count = 0
+        val_feed_list = [
+            inference_program.global_block().var(var_name)
+            for var_name in feed_order
+        ]
+        val_feeder = fluid.DataFeeder(val_feed_list, place)
+
         for batch_id, data in enumerate(test_batch_generator()):
-            src_seq = to_lodtensor(map(lambda x: x[0], data), place)[0]
-            trg_seq = to_lodtensor(map(lambda x: x[1], data), place)[0]
-            lbl_seq = to_lodtensor(map(lambda x: x[2], data), place)[0]
+            # src_seq = to_lodtensor(map(lambda x: x[0], data), place)[0]
+            # trg_seq = to_lodtensor(map(lambda x: x[1], data), place)[0]
+            # lbl_seq = to_lodtensor(map(lambda x: x[2], data), place)[0]
 
-            fetch_outs = exe.run(inference_program,
-                                 feed={
-                                     feeding_list[0]: src_seq,
-                                     feeding_list[1]: trg_seq,
-                                     feeding_list[2]: lbl_seq
-                                 },
-                                 fetch_list=[avg_cost],
-                                 return_numpy=False)
+            val_fetch_outs = exe.run(inference_program,
+                                     feed=val_feeder.feed(data),
+                                     fetch_list=[avg_cost],
+                                     return_numpy=False)
 
-            total_loss += lodtensor_to_ndarray(fetch_outs[0])[0]
+            total_loss += np.array(val_fetch_outs[0])[0]
             count += 1
 
         return total_loss / count
 
-    for pass_id in xrange(args.pass_num + 1):
+    for pass_id in range(1, args.pass_num + 1):
         pass_start_time = time.time()
         words_seen = 0
         for batch_id, data in enumerate(train_batch_generator()):
-            src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
-            words_seen += word_num
-            trg_seq, word_num = to_lodtensor(map(lambda x: x[1], data), place)
-            words_seen += word_num
-            lbl_seq, _ = to_lodtensor(map(lambda x: x[2], data), place)
+            # src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
+            words_seen += len(data) * 2
+            # trg_seq, word_num = to_lodtensor(map(lambda x: x[1], data), place)
+            # words_seen += word_num
+            # lbl_seq, _ = to_lodtensor(map(lambda x: x[2], data), place)
 
             fetch_outs = exe.run(framework.default_main_program(),
-                                 feed={
-                                     feeding_list[0]: src_seq,
-                                     feeding_list[1]: trg_seq,
-                                     feeding_list[2]: lbl_seq
-                                 },
+                                 feed=feeder.feed(data),
                                  fetch_list=[avg_cost])
 
-            avg_cost_val = np.array(fetch_outs[0])
+            avg_cost_train = np.array(fetch_outs[0])
             print('pass_id=%d, batch_id=%d, train_loss: %f' %
-                  (pass_id, batch_id, avg_cost_val))
+                  (pass_id, batch_id, avg_cost_train))
 
         pass_end_time = time.time()
         test_loss = do_validation()
@@ -447,18 +450,19 @@ def train():
         print("pass_id=%d, test_loss: %f, words/s: %f, sec/pass: %f" %
               (pass_id, test_loss, words_per_sec, time_consumed))
 
-        if pass_id % 1 == 0:
-            model_path = os.path.join("model_att", str(pass_id))
+        if pass_id % args.save_interval == 0:
+            model_path = os.path.join(args.save_dir, str(pass_id))
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
 
-            fluid.io.save_persistables(executor=exe,
-                                       dirname=model_path,
-                                       main_program=framework.default_main_program())
+            fluid.io.save_persistables(
+                executor=exe,
+                dirname=model_path,
+                main_program=framework.default_main_program())
 
 
 def infer():
-    translation_ids, translation_scores, feeding_list = seq_to_seq_net(
+    translation_ids, translation_scores, feed_order = seq_to_seq_net(
         args.embedding_dim,
         args.encoder_size,
         args.decoder_size,
@@ -468,18 +472,17 @@ def infer():
         beam_size=args.beam_size,
         max_length=args.max_length)
 
-#    fluid.memory_optimize(fluid.default_main_program(), print_log=False)
-
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
-        batch_size=args.batch_size)
+            paddle.dataset.wmt14.test(args.dict_size), buf_size=1000),
+        batch_size=args.batch_size,
+        drop_last=False)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join("model_4data", str(7000))
+    model_path = os.path.join(args.save_dir, str(args.pass_num))
     fluid.io.load_persistables(
         executor=exe,
         dirname=model_path,
@@ -487,31 +490,43 @@ def infer():
 
     src_dict, trg_dict = paddle.dataset.wmt14.get_dict(args.dict_size)
 
+    feed_list = [
+        framework.default_main_program().global_block().var(var_name)
+        for var_name in feed_order[0:1]
+    ]
+    feeder = fluid.DataFeeder(feed_list, place)
+
     for batch_id, data in enumerate(test_batch_generator()):
 
-        for tup in data:
-            for i in range(2, len(tup)):
-                if i == 0:
-                    words = [src_dict[tup[i][j]] for j in xrange(len(tup[i]))]
-                else:
-                    words = [trg_dict[tup[i][j]] for j in xrange(len(tup[i]))]
-                sentence = " ".join(words)
-                print(sentence)
-
         batch_size = len(data)
-        src_seq, _ = to_lodtensor(map(lambda x: x[0], data), place)
-        init_ids, _ = to_lodtensor([[0] for _ in xrange(batch_size)], place)
-        init_ids.set_lod(init_ids.lod() + [init_ids.lod()[-1]])
-        init_scores, _ = to_lodtensor([[1.0] for _ in xrange(batch_size)],
-                                      place, 'float32')
-        init_scores.set_lod(init_scores.lod() + [init_scores.lod()[-1]])
+
+        init_ids_data = np.array([0 for _ in range(batch_size)], dtype='int64')
+        init_scores_data = np.array(
+            [1. for _ in range(batch_size)], dtype='float32')
+        init_ids_data = init_ids_data.reshape((batch_size, 1))
+        init_scores_data = init_scores_data.reshape((batch_size, 1))
+        init_recursive_seq_lens = [1] * batch_size
+        init_recursive_seq_lens = [init_recursive_seq_lens,
+                                   init_recursive_seq_lens]
+        init_ids = fluid.create_lod_tensor(init_ids_data,
+                                           init_recursive_seq_lens,
+                                           place)
+        init_scores = fluid.create_lod_tensor(init_scores_data,
+                                              init_recursive_seq_lens, place)
+        feed_dict = feeder.feed(data)
+        feed_dict[feed_order[1]] = init_ids
+        feed_dict[feed_order[2]] = init_scores
+
+
+        # src_seq, _ = to_lodtensor(map(lambda x: x[0], data), place)
+        # init_ids, _ = to_lodtensor([[0] for _ in xrange(batch_size)], place)
+        # init_ids.set_lod(init_ids.lod() + [init_ids.lod()[-1]])
+        # init_scores, _ = to_lodtensor([[1.0] for _ in xrange(batch_size)],
+        #                               place, 'float32')
+        # init_scores.set_lod(init_scores.lod() + [init_scores.lod()[-1]])
 
         fetch_outs = exe.run(framework.default_main_program(),
-                             feed={
-                                 feeding_list[0]: src_seq,
-                                 feeding_list[1]: init_ids,
-                                 feeding_list[2]: init_scores
-                             },
+                             feed=feed_dict,
                              fetch_list=[translation_ids, translation_scores],
                              return_numpy=False)
         lod_list_1 = fetch_outs[0].lod()[1]
