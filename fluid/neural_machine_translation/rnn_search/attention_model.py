@@ -525,7 +525,7 @@ def infer():
                                            place)
         init_scores = fluid.create_lod_tensor(init_scores_data,
                                               init_recursive_seq_lens, place)
-        feed_dict = feeder.feed(data)
+        feed_dict = feeder.feed(map(lambda x: [x[0]], data))
         feed_dict[feed_order[1]] = init_ids
         feed_dict[feed_order[2]] = init_scores
 
