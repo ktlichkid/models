@@ -50,7 +50,7 @@ parser.add_argument(
 parser.add_argument(
     "--batch_size",
     type=int,
-    default=32,
+    default=128,
     help="The sequence number of a mini-batch data. (default: %(default)d)")
 parser.add_argument(
     "--dict_size",
@@ -95,13 +95,13 @@ def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
         return fluid.layers.fc(input=inputs, size=size, bias_attr=True)
 
     forget = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    forget_gate = fluid.layers.dropout(x=forget, dropout_prob=0.2)
+    forget_gate = fluid.layers.dropout(x=forget, dropout_prob=0.2, is_test=True)
     inputs = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    input_gate = fluid.layers.dropout(x=inputs, dropout_prob=0.2)
+    input_gate = fluid.layers.dropout(x=inputs, dropout_prob=0.2, is_test=True)
     output = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    output_gate = fluid.layers.dropout(x=output, dropout_prob=0.2)
+    output_gate = fluid.layers.dropout(x=output, dropout_prob=0.2, is_test=True)
     cell = fluid.layers.tanh(x=linear([hidden_t_prev, x_t]))
-    cell_tilde = fluid.layers.dropout(x=cell, dropout_prob=0.2)
+    cell_tilde = fluid.layers.dropout(x=cell, dropout_prob=0.2, is_test=True)
 
     cell_t = fluid.layers.sums(input=[
         fluid.layers.elementwise_mul(
@@ -129,7 +129,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                              bias_attr=False)
         forwarded, _ = fluid.layers.dynamic_lstm(
             input=input_forward_proj, size=gate_size * 4, use_peepholes=False)
-        forward = fluid.layers.dropout(x=forwarded, dropout_prob=0.2)
+        forward = fluid.layers.dropout(x=forwarded, dropout_prob=0.2, is_test=True)
 
         input_reversed_proj = fluid.layers.fc(input=input_seq,
                                               size=gate_size * 4,
@@ -140,7 +140,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             size=gate_size * 4,
             is_reverse=True,
             use_peepholes=False)
-        reversed = fluid.layers.dropout(x=reverseded, dropout_prob=0.2)
+        reversed = fluid.layers.dropout(x=reverseded, dropout_prob=0.2, is_test=True)
         return forward, reversed
 
     src_word_idx = fluid.layers.data(
@@ -151,7 +151,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         size=[source_dict_dim, embedding_dim],
         dtype='float32',
         param_attr=fluid.ParamAttr(name='src_embedding'))
-    src_embedding = fluid.layers.dropout(x=src_embedding_in, dropout_prob=0.2)
+    src_embedding = fluid.layers.dropout(x=src_embedding_in, dropout_prob=0.2, is_test=True)
 
     src_forward, src_reversed = bi_lstm_encoder(
         input_seq=src_embedding, gate_size=encoder_size)
@@ -194,7 +194,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                              size=decoder_size,
                                              bias_attr=False)
         decoder_state_proj = fluid.layers.dropout(
-            x=decoder_state_prop, dropout_prob=0.2)
+            x=decoder_state_prop, dropout_prob=0.2, is_test=True)
         decoder_state_expand = fluid.layers.sequence_expand(
             x=decoder_state_proj, y=encoder_proj)
         # concated lod should inherit from encoder_proj
@@ -237,7 +237,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             param_attr=fluid.ParamAttr('trg_embedding'))
         trg_embedding = fluid.layers.dropout(
             x=trg_embedding_in,
-            dropout_prob=0.2)
+            dropout_prob=0.2,
+            is_test=True)
 
         decoder = TrainingDecoder(state_cell)
 
@@ -405,13 +406,18 @@ def train():
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.train(args.dict_size, args.dict_size, 'de'), buf_size=1000),
-        batch_size=args.batch_size)
+            paddle.dataset.wmt16.train(args.dict_size, args.dict_size, 'de'), 
+            buf_size=1000),
+        batch_size=args.batch_size,
+        drop_last=False)
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.validation(args.dict_size, args.dict_size, 'de'), buf_size=1000),
-        batch_size=args.batch_size)
+            paddle.dataset.wmt16.validation(
+                args.dict_size, args.dict_size, 'de'), 
+            buf_size=1000),
+        batch_size=args.batch_size,
+        drop_last=False)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
     exe = Executor(place)
@@ -501,7 +507,7 @@ def infer():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join(model_save_path, str(7))
+    model_path = os.path.join(model_save_path, str(22))
     fluid.io.load_persistables(
         executor=exe,
         dirname=model_path,
