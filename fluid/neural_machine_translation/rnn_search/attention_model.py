@@ -288,11 +288,6 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         with decoder.block():
             encoder_vec = decoder.read_array(init=encoded_vector)
             encoder_proj = decoder.read_array(init=encoded_proj)
-            # with layers.Switch() as switch_1:
-            #     with switch_1.case(layers.is_empty(encoder_proj)):
-            #         decoder.early_stop()
-            #     with switch_1.case(layers.is_empty(encoder_vec)):
-            #         decoder.early_stop()
             prev_ids = decoder.read_array(init=init_ids, is_ids=True)
             prev_scores = decoder.read_array(init=init_scores, is_scores=True)
             prev_ids_embedding = embedding(prev_ids)
@@ -333,11 +328,10 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 end_id=1,
                 level=0)
 
+            # If empty token generated, stop the RNN steps
             with layers.Switch() as switch:
                 with switch.case(layers.is_empty(selected_ids)):
                     decoder.early_stop()
-                # with switch.case(layers.is_empty(encoder_proj)):
-                #     decoder.early_stop()
                 with switch.default():
                     decoder.state_cell.update_states()
                     decoder.update_array(prev_ids, selected_ids)
@@ -351,30 +345,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         return translation_ids, translation_scores, feeding_list
 
 
-# def to_lodtensor(data, place, dtype='int64'):
-#     seq_lens = [len(seq) for seq in data]
-#     cur_len = 0
-#     lod = [cur_len]
-#     for l in seq_lens:
-#         cur_len += l
-#         lod.append(cur_len)
-#     flattened_data = np.concatenate(data, axis=0).astype(dtype)
-#     flattened_data = flattened_data.reshape([len(flattened_data), 1])
-#     lod_t = core.LoDTensor()
-#     lod_t.set(flattened_data, place)
-#     lod_t.set_lod([lod])
-#     return lod_t, lod[-1]
-#
-#
-# def lodtensor_to_ndarray(lod_tensor):
-#     dims = lod_tensor.get_dims()
-#     ndarray = np.zeros(shape=dims).astype('float32')
-#     for i in xrange(np.product(dims)):
-#         ndarray.ravel()[i] = lod_tensor.get_float_element(i)
-#     return ndarray
-
-
 def train():
+    # Training process
     avg_cost, feed_order = seq_to_seq_net(
         args.embedding_dim,
         args.encoder_size,
@@ -414,6 +386,7 @@ def train():
     feeder = fluid.DataFeeder(feed_list, place)
 
     def do_validation():
+        # Use test set as validation each pass
         total_loss = 0.0
         count = 0
         val_feed_list = [
@@ -423,10 +396,6 @@ def train():
         val_feeder = fluid.DataFeeder(val_feed_list, place)
 
         for batch_id, data in enumerate(test_batch_generator()):
-            # src_seq = to_lodtensor(map(lambda x: x[0], data), place)[0]
-            # trg_seq = to_lodtensor(map(lambda x: x[1], data), place)[0]
-            # lbl_seq = to_lodtensor(map(lambda x: x[2], data), place)[0]
-
             val_fetch_outs = exe.run(inference_program,
                                      feed=val_feeder.feed(data),
                                      fetch_list=[avg_cost],
@@ -441,11 +410,7 @@ def train():
         pass_start_time = time.time()
         words_seen = 0
         for batch_id, data in enumerate(train_batch_generator()):
-            # src_seq, word_num = to_lodtensor(map(lambda x: x[0], data), place)
             words_seen += len(data) * 2
-            # trg_seq, word_num = to_lodtensor(map(lambda x: x[1], data), place)
-            # words_seen += word_num
-            # lbl_seq, _ = to_lodtensor(map(lambda x: x[2], data), place)
 
             fetch_outs = exe.run(framework.default_main_program(),
                                  feed=feeder.feed(data),
@@ -474,6 +439,7 @@ def train():
 
 
 def infer():
+    # Inference
     translation_ids, translation_scores, feed_order = seq_to_seq_net(
         args.embedding_dim,
         args.encoder_size,
@@ -529,14 +495,6 @@ def infer():
         feed_dict[feed_order[1]] = init_ids
         feed_dict[feed_order[2]] = init_scores
 
-
-        # src_seq, _ = to_lodtensor(map(lambda x: x[0], data), place)
-        # init_ids, _ = to_lodtensor([[0] for _ in xrange(batch_size)], place)
-        # init_ids.set_lod(init_ids.lod() + [init_ids.lod()[-1]])
-        # init_scores, _ = to_lodtensor([[1.0] for _ in xrange(batch_size)],
-        #                               place, 'float32')
-        # init_scores.set_lod(init_scores.lod() + [init_scores.lod()[-1]])
-
         fetch_outs = exe.run(framework.default_main_program(),
                              feed=feed_dict,
                              fetch_list=[translation_ids, translation_scores],
@@ -557,8 +515,6 @@ def infer():
         print("Actual result:")
         for paragraph in final_result:
             print(paragraph)
-
-        #break
 
 
 if __name__ == '__main__':
