@@ -60,7 +60,7 @@ parser.add_argument(
 parser.add_argument(
     "--pass_num",
     type=int,
-    default=5,
+    default=1,
     help="The pass number to train. (default: %(default)d)")
 parser.add_argument(
     "--learning_rate",
@@ -208,7 +208,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         weigths_reshape = fluid.layers.reshape(x=attention_weights, shape=[-1])
         scaled = fluid.layers.elementwise_mul(
             x=encoder_vec, y=weigths_reshape, axis=0)
-        context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
+        context = fluid.layers.sequence_pool(input=scaled, pool_type='average')
         return context
 
     @state_cell.state_updater
