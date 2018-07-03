@@ -97,7 +97,6 @@ args = parser.parse_args()
 
 dict_size = args.dict_size
 source_dict_dim = target_dict_dim = dict_size
-src_dict, trg_dict = paddle.dataset.wmt14.get_dict(dict_size)
 hidden_dim = args.encoder_size
 word_dim = args.embedding_dim
 decoder_size = args.decoder_size
@@ -255,7 +254,8 @@ def train_main():
     train_data = paddle.batch(
         paddle.reader.shuffle(
             paddle.dataset.wmt14.train(dict_size), buf_size=1000),
-        batch_size=batch_size)
+        batch_size=batch_size,
+        drop_last=False)
     feed_order = [
         'src_word_id', 'target_language_word', 'target_language_next_word'
     ]
@@ -311,7 +311,7 @@ def decode_main():
         [1. for _ in range(batch_size)], dtype='float32')
     init_ids_data = init_ids_data.reshape((batch_size, 1))
     init_scores_data = init_scores_data.reshape((batch_size, 1))
-    init_recursive_seq_lens = [1] * batch_size  # [i for i in range(batch_size)] + [batch_size]
+    init_recursive_seq_lens = [1] * batch_size
     init_recursive_seq_lens = [init_recursive_seq_lens, init_recursive_seq_lens]
     init_ids = fluid.create_lod_tensor(init_ids_data, init_recursive_seq_lens,
                                        place)
@@ -326,8 +326,10 @@ def decode_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(dict_size), buf_size=1000),
+            paddle.dataset.wmt14.test(dict_size), buf_size=1000),
         batch_size=batch_size)
+
+    src_dict, trg_dict = paddle.dataset.wmt14.get_dict(dict_size)
 
     for _, data in enumerate(train_data()):
         feed_dict = feeder.feed(map(lambda x: [x[0]], data))
