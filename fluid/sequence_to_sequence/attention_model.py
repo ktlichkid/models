@@ -188,11 +188,11 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 'c': c})
 
     def simple_attention(encoder_vec, encoder_proj, decoder_state):
-        decoder_state_prop = fluid.layers.fc(input=decoder_state,
+        decoder_state_drop = fluid.layers.dropout(
+            x=decoder_state, dropout_prob=0.2, is_test=is_generating)
+        decoder_state_proj = fluid.layers.fc(input=decoder_state_drop,
                                              size=decoder_size,
                                              bias_attr=False)
-        decoder_state_proj = fluid.layers.dropout(
-            x=decoder_state_prop, dropout_prob=0.2, is_test=is_generating)
         decoder_state_expand = fluid.layers.sequence_expand(
             x=decoder_state_proj, y=encoder_proj)
         # concated lod should inherit from encoder_proj
