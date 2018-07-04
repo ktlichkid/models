@@ -35,17 +35,17 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--embedding_dim",
     type=int,
-    default=1024,
+    default=512,
     help="The dimension of embedding table. (default: %(default)d)")
 parser.add_argument(
     "--encoder_size",
     type=int,
-    default=1024,
+    default=512,
     help="The size of encoder bi-rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--decoder_size",
     type=int,
-    default=1024,
+    default=512,
     help="The size of decoder rnn unit. (default: %(default)d)")
 parser.add_argument(
     "--batch_size",
@@ -66,14 +66,14 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.001,
+    default=0.0001,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
 parser.add_argument(
     "--beam_size",
     type=int,
-    default=3,
+    default=10,
     help="The width for beam searching. (default: %(default)d)")
 parser.add_argument(
     "--use_gpu",
@@ -549,6 +549,8 @@ def infer():
                              return_numpy=False)
         lod_list_1 = fetch_outs[0].lod()[1]
         token_array = np.array(fetch_outs[0])
+        score_array = np.array(fetch_outs[1])
+        print score_array
         result = []
         for i in xrange(len(lod_list_1) - 1):
             sentence_list = [trg_dict[token]
@@ -564,6 +566,8 @@ def infer():
         for paragraph in final_result:
             print(paragraph)
             inf_out.write(paragraph[0] + '\n')
+        
+        break
 
     trg_out.close()
     inf_out.close()
