@@ -92,9 +92,9 @@ model_save_path = "model_att_drop"
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size, is_test):
     def linear(inputs):
-        droppedout = fluid.layers.dropout(x=inputs, dropout_prob=0.2, is_test=is_test)
-        outputs = fluid.layers.fc(input=droppedout, size=size, bias_attr=True)
-        return outputs
+        outputs = fluid.layers.fc(input=inputs, size=size, bias_attr=True)
+        droppedout = fluid.layers.dropout(x=outputs, dropout_prob=0.2, is_test=is_test)
+        return droppedout
 
     forget_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
     input_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
