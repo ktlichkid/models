@@ -259,7 +259,10 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
         label = fluid.layers.data(
             name='label_sequence', shape=[1], dtype='int64', lod_level=1)
-        cost = fluid.layers.cross_entropy(input=decoder(), label=label)
+        smoothed_label = layers.label_smooth(
+            label=layers.one_hot(input=label, depth=args.dict_size))
+        cost = fluid.layers.cross_entropy(
+            input=decoder(), label=smoothed_label, soft_label=True)
         avg_cost = fluid.layers.mean(x=cost)
 
         feeding_list = ["source_sequence", "target_sequence", "label_sequence"]
