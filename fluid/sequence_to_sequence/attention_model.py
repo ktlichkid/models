@@ -90,18 +90,18 @@ parser.add_argument(
 model_save_path = "model_att_drop"
 
 
-def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
+def lstm_step(x_t, hidden_t_prev, cell_t_prev, size, is_test):
     def linear(inputs):
         return fluid.layers.fc(input=inputs, size=size, bias_attr=True)
 
     forget = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    forget_gate = fluid.layers.dropout(x=forget, dropout_prob=0.2, is_test=True)
+    forget_gate = fluid.layers.dropout(x=forget, dropout_prob=0.2, is_test=is_test)
     inputs = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    input_gate = fluid.layers.dropout(x=inputs, dropout_prob=0.2, is_test=True)
+    input_gate = fluid.layers.dropout(x=inputs, dropout_prob=0.2, is_test=is_test)
     output = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
-    output_gate = fluid.layers.dropout(x=output, dropout_prob=0.2, is_test=True)
+    output_gate = fluid.layers.dropout(x=output, dropout_prob=0.2, is_test=is_test)
     cell = fluid.layers.tanh(x=linear([hidden_t_prev, x_t]))
-    cell_tilde = fluid.layers.dropout(x=cell, dropout_prob=0.2, is_test=True)
+    cell_tilde = fluid.layers.dropout(x=cell, dropout_prob=0.2, is_test=is_test)
 
     cell_t = fluid.layers.sums(input=[
         fluid.layers.elementwise_mul(
@@ -129,7 +129,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                              bias_attr=False)
         forwarded, _ = fluid.layers.dynamic_lstm(
             input=input_forward_proj, size=gate_size * 4, use_peepholes=False)
-        forward = fluid.layers.dropout(x=forwarded, dropout_prob=0.2, is_test=True)
+        forward = fluid.layers.dropout(x=forwarded, dropout_prob=0.2, is_test=is_generating)
 
         input_reversed_proj = fluid.layers.fc(input=input_seq,
                                               size=gate_size * 4,
@@ -140,7 +140,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             size=gate_size * 4,
             is_reverse=True,
             use_peepholes=False)
-        reversed = fluid.layers.dropout(x=reverseded, dropout_prob=0.2, is_test=True)
+        reversed = fluid.layers.dropout(x=reverseded, dropout_prob=0.2, is_test=is_generating)
         return forward, reversed
 
     src_word_idx = fluid.layers.data(
@@ -151,7 +151,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         size=[source_dict_dim, embedding_dim],
         dtype='float32',
         param_attr=fluid.ParamAttr(name='src_embedding'))
-    src_embedding = fluid.layers.dropout(x=src_embedding_in, dropout_prob=0.2, is_test=True)
+    src_embedding = fluid.layers.dropout(x=src_embedding_in, dropout_prob=0.2, is_test=is_generating)
 
     src_forward, src_reversed = bi_lstm_encoder(
         input_seq=src_embedding, gate_size=encoder_size)
@@ -194,7 +194,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                              size=decoder_size,
                                              bias_attr=False)
         decoder_state_proj = fluid.layers.dropout(
-            x=decoder_state_prop, dropout_prob=0.2, is_test=True)
+            x=decoder_state_prop, dropout_prob=0.2, is_test=is_generating)
         decoder_state_expand = fluid.layers.sequence_expand(
             x=decoder_state_proj, y=encoder_proj)
         # concated lod should inherit from encoder_proj
@@ -222,7 +222,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         context = simple_attention(encoder_vec, encoder_proj, prev_h)
         decoder_inputs = fluid.layers.concat(
             input=[context, current_word], axis=1)
-        h, c = lstm_step(decoder_inputs, prev_h, prev_c, decoder_size)
+        h, c = lstm_step(decoder_inputs, prev_h, prev_c, decoder_size, is_generating)
         state_cell.set_state('h', h)
         state_cell.set_state('c', c)
 
@@ -238,7 +238,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         trg_embedding = fluid.layers.dropout(
             x=trg_embedding_in,
             dropout_prob=0.2,
-            is_test=True)
+            is_test=is_generating)
 
         decoder = TrainingDecoder(state_cell)
 
@@ -550,7 +550,7 @@ def infer():
         lod_list_1 = fetch_outs[0].lod()[1]
         token_array = np.array(fetch_outs[0])
         score_array = np.array(fetch_outs[1])
-        print score_array
+        print(score_array)
         result = []
         for i in xrange(len(lod_list_1) - 1):
             sentence_list = [trg_dict[token]
