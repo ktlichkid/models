@@ -508,7 +508,7 @@ def infer():
                 trg_dict[token]
                 for token in token_array[lod_list_1[i]:lod_list_1[i + 1]]
             ]
-            sentence = " ".join(sentence_list)
+            sentence = " ".join(sentence_list[1:-1])
             result.append(sentence)
         lod_list_0 = fetch_outs[0].lod()[0]
         final_result = [
@@ -516,7 +516,6 @@ def infer():
             for i in xrange(len(lod_list_0) - 1)
         ]
 
-        print("Actual result:")
         for paragraph in final_result:
             print(paragraph)
 
