@@ -316,7 +316,8 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
             accu_scores = layers.elementwise_add(
                 x=layers.log(x=layers.softmax(topk_scores)),
-                y=layers.reshape(prev_scores, shape=[-1]),
+                y=layers.reshape(
+                    prev_scores, shape=[-1]),
                 axis=0)
 
             selected_ids, selected_scores = fluid.layers.beam_search(
@@ -484,11 +485,11 @@ def infer():
         init_ids_data = init_ids_data.reshape((batch_size, 1))
         init_scores_data = init_scores_data.reshape((batch_size, 1))
         init_recursive_seq_lens = [1] * batch_size
-        init_recursive_seq_lens = [init_recursive_seq_lens,
-                                   init_recursive_seq_lens]
+        init_recursive_seq_lens = [
+            init_recursive_seq_lens, init_recursive_seq_lens
+        ]
         init_ids = fluid.create_lod_tensor(init_ids_data,
-                                           init_recursive_seq_lens,
-                                           place)
+                                           init_recursive_seq_lens, place)
         init_scores = fluid.create_lod_tensor(init_scores_data,
                                               init_recursive_seq_lens, place)
         feed_dict = feeder.feed(map(lambda x: [x[0]], data))
@@ -503,14 +504,17 @@ def infer():
         token_array = np.array(fetch_outs[0])
         result = []
         for i in xrange(len(lod_list_1) - 1):
-            sentence_list = [trg_dict[token]
-                             for token in
-                             token_array[lod_list_1[i] : lod_list_1[i+1]]]
+            sentence_list = [
+                trg_dict[token]
+                for token in token_array[lod_list_1[i]:lod_list_1[i + 1]]
+            ]
             sentence = " ".join(sentence_list)
             result.append(sentence)
         lod_list_0 = fetch_outs[0].lod()[0]
-        final_result = [result[lod_list_0[i] : lod_list_0[i+1]]
-                        for i in xrange(len(lod_list_0) - 1)]
+        final_result = [
+            result[lod_list_0[i]:lod_list_0[i + 1]]
+            for i in xrange(len(lod_list_0) - 1)
+        ]
 
         print("Actual result:")
         for paragraph in final_result:

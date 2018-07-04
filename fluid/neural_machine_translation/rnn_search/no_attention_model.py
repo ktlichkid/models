@@ -141,8 +141,9 @@ def decoder_state_cell(context):
         current_word = state_cell.get_input('x')
         prev_h = state_cell.get_state('h')
         # make sure lod of h heritted from prev_h
-        h = layers.fc(
-            input=[prev_h, current_word], size=decoder_size, act='tanh')
+        h = layers.fc(input=[prev_h, current_word],
+                      size=decoder_size,
+                      act='tanh')
         state_cell.set_state('h', h)
 
     return state_cell
@@ -214,7 +215,8 @@ def decoder_decode(state_cell):
         topk_scores, topk_indices = layers.topk(scores, k=topk_size)
         accu_scores = layers.elementwise_add(
             x=layers.log(x=layers.softmax(topk_scores)),
-            y=layers.reshape(prev_scores, shape=[-1]),
+            y=layers.reshape(
+                prev_scores, shape=[-1]),
             axis=0)
         selected_ids, selected_scores = layers.beam_search(
             prev_ids,
@@ -277,8 +279,8 @@ def train_main():
                            fetch_list=[avg_cost])
             avg_cost_val = np.array(outs[0])
             if pass_id % 1 == 0:
-                print('pass_id=' + str(pass_id) + ' batch=' + str(batch_id) +
-                     " avg_cost=" + str(avg_cost_val))
+                print("pass_id=" + str(pass_id) + " batch=" + str(batch_id) +
+                      " avg_cost=" + str(avg_cost_val))
             batch_id += 1
 
         if pass_id % save_interval == 0:
@@ -302,9 +304,10 @@ def decode_main():
     exe.run(framework.default_startup_program())
 
     model_path = os.path.join(model_save_dir, str(pass_num))
-    fluid.io.load_persistables(executor=exe,
-                               dirname=model_path,
-                               main_program=framework.default_main_program())
+    fluid.io.load_persistables(
+        executor=exe,
+        dirname=model_path,
+        main_program=framework.default_main_program())
 
     init_ids_data = np.array([0 for _ in range(batch_size)], dtype='int64')
     init_scores_data = np.array(
@@ -346,14 +349,17 @@ def decode_main():
         token_array = np.array(result_ids)
         result = []
         for i in xrange(len(lod_list_1) - 1):
-            sentence_list = [trg_dict[token] 
-                             for token in 
-                             token_array[lod_list_1[i]: lod_list_1[i + 1]]]
+            sentence_list = [
+                trg_dict[token]
+                for token in token_array[lod_list_1[i]:lod_list_1[i + 1]]
+            ]
             sentence = " ".join(sentence_list)
             result.append(sentence)
         lod_list_0 = result_ids.lod()[0]
-        final_result = [result[lod_list_0[i]: lod_list_0[i + 1]]
-                        for i in xrange(len(lod_list_0) - 1)]
+        final_result = [
+            result[lod_list_0[i]:lod_list_0[i + 1]]
+            for i in xrange(len(lod_list_0) - 1)
+        ]
         print "Actual result:"
         for paragraph in final_result:
             print paragraph
