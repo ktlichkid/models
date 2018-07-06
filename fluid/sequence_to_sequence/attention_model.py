@@ -400,7 +400,8 @@ def train():
     # clone from default main program
     inference_program = fluid.default_main_program().clone()
 
-    # regularization = fluid.regularizer.L2DecayRegularizer(regularization_coeff=0.1)
+    # regularization =
+    # fluid.regularizer.L2DecayRegularizer(regularization_coeff=0.1)
 
     optimizer = fluid.optimizer.Adam(
         learning_rate=args.learning_rate,
