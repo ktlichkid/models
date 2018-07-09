@@ -362,7 +362,11 @@ def train():
     main_program = fluid.default_main_program()
     inference_program = fluid.default_main_program().clone()
 
-    optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
+    optimizer = fluid.optimizer.Adam(
+        learning_rate=args.learning_rate,
+        egularization=fluid.regularizer.L2DecayRegularizer(
+            regularization_coeff=1e-5))
+
     optimizer.minimize(avg_cost)
 
     train_batch_generator = paddle.batch(

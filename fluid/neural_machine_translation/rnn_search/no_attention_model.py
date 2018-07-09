@@ -250,7 +250,11 @@ def train_main():
     cost = layers.cross_entropy(input=rnn_out, label=label)
     avg_cost = layers.mean(x=cost)
 
-    optimizer = fluid.optimizer.Adagrad(learning_rate=learning_rate)
+    optimizer = fluid.optimizer.Adam(
+        learning_rate=learning_rate,
+        regularization=fluid.regularizer.L2DecayRegularizer(
+            regularization_coeff=1e-5))
+
     optimizer.minimize(avg_cost)
 
     train_data = paddle.batch(
