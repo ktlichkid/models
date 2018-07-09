@@ -66,7 +66,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=5e-5,
+    default=1e-4,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
@@ -87,7 +87,7 @@ parser.add_argument(
     help="The maximum length of sequence when doing generation. "
     "(default: %(default)d)")
 
-model_save_path = "model_att_drop"
+model_save_path = "model_att_l2"
 
 
 def lstm_step(x_t, hidden_t_prev, cell_t_prev, size, is_test):
@@ -406,7 +406,7 @@ def train():
     optimizer = fluid.optimizer.Adam(
         learning_rate=args.learning_rate,
         regularization=fluid.regularizer.L2DecayRegularizer(
-            regularization_coeff=0.1))
+            regularization_coeff=1e-5))
     optimizer.minimize(avg_cost)
 
     fluid.memory_optimize(fluid.default_main_program(), print_log=False)
