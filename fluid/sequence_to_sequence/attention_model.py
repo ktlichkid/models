@@ -259,10 +259,10 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
         label = fluid.layers.data(
             name='label_sequence', shape=[1], dtype='int64', lod_level=1)
-        smoothed_label = layers.label_smooth(
-            label=layers.one_hot(input=label, depth=args.dict_size))
+        # smoothed_label = layers.label_smooth(
+        #     label=layers.one_hot(input=label, depth=args.dict_size))
         cost = fluid.layers.cross_entropy(
-            input=decoder(), label=smoothed_label, soft_label=True)
+            input=decoder(), label=label, soft_label=False)
         avg_cost = fluid.layers.mean(x=cost)
 
         feeding_list = ["source_sequence", "target_sequence", "label_sequence"]
@@ -406,7 +406,7 @@ def train():
     optimizer = fluid.optimizer.Adam(
         learning_rate=args.learning_rate,
         regularization=fluid.regularizer.L2DecayRegularizer(
-            regularization_coeff=1e-5))
+            regularization_coeff=8e-4))
     optimizer.minimize(avg_cost)
 
     fluid.memory_optimize(fluid.default_main_program(), print_log=False)
