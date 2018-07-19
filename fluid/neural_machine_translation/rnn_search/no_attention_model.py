@@ -25,6 +25,8 @@ import paddle.fluid.layers as layers
 from paddle.fluid.executor import Executor
 from paddle.fluid.contrib.decoder.beam_search_decoder import *
 
+import wmt14
+
 parser = argparse.ArgumentParser(description=__doc__)
 
 parser.add_argument(
@@ -45,7 +47,7 @@ parser.add_argument(
 parser.add_argument(
     "--batch_size",
     type=int,
-    default=32,
+    default=4,
     help="The sequence number of a mini-batch data. (default: %(default)d)")
 parser.add_argument(
     "--dict_size",
@@ -56,19 +58,19 @@ parser.add_argument(
 parser.add_argument(
     "--pass_num",
     type=int,
-    default=5,
+    default=5000,
     help="The pass number to train. (default: %(default)d)")
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=0.01,
+    default=0.001,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
 parser.add_argument(
     "--beam_size",
     type=int,
-    default=3,
+    default=1,
     help="The width for beam searching. (default: %(default)d)")
 parser.add_argument(
     "--use_gpu",
@@ -89,7 +91,7 @@ parser.add_argument(
 parser.add_argument(
     "--save_interval",
     type=int,
-    default=1,
+    default=500,
     help="Save the trained model every n passes."
     "(default: %(default)d)")
 
@@ -121,8 +123,7 @@ def encoder():
         input=src_word_id,
         size=[dict_size, word_dim],
         dtype='float32',
-        is_sparse=IS_SPARSE,
-        param_attr=fluid.ParamAttr(name='vemb'))
+        is_sparse=IS_SPARSE)
 
     fc1 = layers.fc(input=src_embedding, size=hidden_dim * 4, act='tanh')
     lstm_hidden0, lstm_0 = layers.dynamic_lstm(input=fc1, size=hidden_dim * 4)
@@ -133,8 +134,7 @@ def encoder():
 def decoder_state_cell(context):
     # Decoder state cell, specifies the hidden state variable and its updater
     h = InitState(init=context, need_reorder=True)
-    state_cell = StateCell(
-        cell_size=decoder_size, inputs={'x': None}, states={'h': h})
+    state_cell = StateCell(inputs={'x': None}, states={'h': h})
 
     @state_cell.state_updater
     def updater(state_cell):
@@ -157,8 +157,7 @@ def decoder_train(state_cell):
         input=trg_language_word,
         size=[dict_size, word_dim],
         dtype='float32',
-        is_sparse=IS_SPARSE,
-        param_attr=fluid.ParamAttr(name='vemb'))
+        is_sparse=IS_SPARSE)
 
     # A training decoder
     decoder = TrainingDecoder(state_cell)
@@ -188,54 +187,69 @@ def decoder_decode(state_cell):
             input=input,
             size=[dict_size, word_dim],
             dtype='float32',
-            is_sparse=IS_SPARSE,
-            param_attr=fluid.ParamAttr('vemb'))
+            is_sparse=IS_SPARSE)
 
     # A beam search decoder for inference
+    #decoder = BeamSearchDecoder(
+    #    state_cell=state_cell,
+    #    max_len=max_length,
+    #    beam_size=beam_size,
+    #    end_id=1)
+
     decoder = BeamSearchDecoder(
         state_cell=state_cell,
+        init_ids=init_ids,
+        init_scores=init_scores,
+        target_dict_dim=target_dict_dim,
+        word_dim=word_dim,
+        init_var_list=[],
+        topk_size=topk_size,
+        sparse_emb=IS_SPARSE,
         max_len=max_length,
         beam_size=beam_size,
-        end_id=1)
-
-    with decoder.block():
-        prev_ids = decoder.read_array(init=init_ids, is_ids=True)
-        prev_scores = decoder.read_array(init=init_scores, is_scores=True)
-        prev_ids_embedding = embedding(prev_ids)
-        prev_state = decoder.state_cell.get_state('h')
-        prev_state_expanded = layers.sequence_expand(prev_state, prev_scores)
-        decoder.state_cell.set_state('h', prev_state_expanded)
-        decoder.state_cell.compute_state(inputs={'x': prev_ids_embedding})
-        current_state = decoder.state_cell.get_state('h')
-        current_state_with_lod = layers.lod_reset(
-            x=current_state, y=prev_scores)
-        scores = layers.fc(input=current_state_with_lod,
-                           size=target_dict_dim,
-                           act='softmax')
-        topk_scores, topk_indices = layers.topk(scores, k=topk_size)
-        accu_scores = layers.elementwise_add(
-            x=layers.log(x=layers.softmax(topk_scores)),
-            y=layers.reshape(
-                prev_scores, shape=[-1]),
-            axis=0)
-        selected_ids, selected_scores = layers.beam_search(
-            prev_ids,
-            prev_scores,
-            topk_indices,
-            accu_scores,
-            beam_size,
-            end_id=1,
-            level=0)
-
-        with layers.Switch() as switch:
-            with switch.case(layers.is_empty(selected_ids)):
-                decoder.early_stop()
-            with switch.default():
-                decoder.state_cell.update_states()
-                decoder.update_array(prev_ids, selected_ids)
-                decoder.update_array(prev_scores, selected_scores)
-
+        end_id=1,
+        name=None)
+    decoder.decode()
     translation_ids, translation_scores = decoder()
+
+#    with decoder.block():
+#        prev_ids = decoder.read_array(init=init_ids, is_ids=True)
+#        prev_scores = decoder.read_array(init=init_scores, is_scores=True)
+#        prev_ids_embedding = embedding(prev_ids)
+#        prev_state = decoder.state_cell.get_state('h')
+#        prev_state_expanded = layers.sequence_expand(prev_state, prev_scores)
+#        decoder.state_cell.set_state('h', prev_state_expanded)
+#        decoder.state_cell.compute_state(inputs={'x': prev_ids_embedding})
+#        current_state = decoder.state_cell.get_state('h')
+#        current_state_with_lod = layers.lod_reset(
+#            x=current_state, y=prev_scores)
+#        scores = layers.fc(input=current_state_with_lod,
+#                           size=target_dict_dim,
+#                           act='softmax')
+#        topk_scores, topk_indices = layers.topk(scores, k=topk_size)
+#        accu_scores = layers.elementwise_add(
+#            x=layers.log(x=layers.softmax(topk_scores)),
+#            y=layers.reshape(
+#                prev_scores, shape=[-1]),
+#            axis=0)
+#        selected_ids, selected_scores = layers.beam_search(
+#            prev_ids,
+#            prev_scores,
+#            topk_indices,
+#            accu_scores,
+#            beam_size,
+#            end_id=1,
+#            level=0)
+
+#        with layers.Switch() as switch:
+           # with switch.case(layers.is_empty(selected_ids)):
+#                decoder.early_stop()
+#            with switch.default():
+#                decoder.state_cell.update_states()
+#                decoder.update_array(prev_ids, selected_ids)
+#                decoder.update_array(prev_scores, selected_scores)
+
+#    translation_ids, translation_scores = decoder()
 
     return translation_ids, translation_scores
 
@@ -259,7 +273,7 @@ def train_main():
 
     train_data = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(dict_size), buf_size=1000),
+            wmt14.train(dict_size), buf_size=1000),
         batch_size=batch_size,
         drop_last=False)
     feed_order = [
@@ -307,7 +321,7 @@ def decode_main():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join(model_save_dir, str(pass_num))
+    model_path = os.path.join(model_save_dir, str(1000))
     fluid.io.load_persistables(
         executor=exe,
         dirname=model_path,
@@ -332,13 +346,22 @@ def decode_main():
     feeder = fluid.DataFeeder(feed_list, place)
 
     train_data = paddle.batch(
-        paddle.reader.shuffle(
-            paddle.dataset.wmt14.test(dict_size), buf_size=1000),
+        #paddle.reader.shuffle(
+            wmt14.train(dict_size), #buf_size=1000,
         batch_size=batch_size)
 
-    src_dict, trg_dict = paddle.dataset.wmt14.get_dict(dict_size)
+    src_dict, trg_dict = wmt14.get_dict(dict_size)
 
     for _, data in enumerate(train_data()):
+        for tup in data:
+            for i in range(2, len(tup)):
+                if i == 0:
+                    words = [src_dict[tup[i][j]] for j in xrange(len(tup[i])-1)]  # omit end token
+                else:
+                    words = [trg_dict[tup[i][j]] for j in xrange(len(tup[i])-1)]
+                sentence = " ".join(words)
+                print(sentence)
+
         feed_dict = feeder.feed(map(lambda x: [x[0]], data))
         feed_dict['init_ids'] = init_ids
         feed_dict['init_scores'] = init_scores
@@ -367,7 +390,7 @@ def decode_main():
         print "Actual result:"
         for paragraph in final_result:
             print paragraph
-        break
+        #break
 
 
 if __name__ == '__main__':

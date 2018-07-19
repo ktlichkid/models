@@ -29,6 +29,7 @@ import paddle.fluid.core as core
 import paddle.fluid.framework as framework
 from paddle.fluid.executor import Executor
 from paddle.fluid.contrib.decoder.beam_search_decoder import *
+import wmt14
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
@@ -49,7 +50,7 @@ parser.add_argument(
 parser.add_argument(
     "--batch_size",
     type=int,
-    default=32,
+    default=4,
     help="The sequence number of a mini-batch data. (default: %(default)d)")
 parser.add_argument(
     "--dict_size",
@@ -60,7 +61,7 @@ parser.add_argument(
 parser.add_argument(
     "--pass_num",
     type=int,
-    default=1,
+    default=10000,
     help="The pass number to train. (default: %(default)d)")
 parser.add_argument(
     "--learning_rate",
@@ -72,7 +73,7 @@ parser.add_argument(
 parser.add_argument(
     "--beam_size",
     type=int,
-    default=3,
+    default=1,
     help="The width for beam searching. (default: %(default)d)")
 parser.add_argument(
     "--use_gpu",
@@ -93,7 +94,7 @@ parser.add_argument(
 parser.add_argument(
     "--save_interval",
     type=int,
-    default=1,
+    default=500,
     help="Save the trained model every n passes."
     "(default: %(default)d)")
 
@@ -150,8 +151,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     src_embedding = fluid.layers.embedding(
         input=src_word_idx,
         size=[source_dict_dim, embedding_dim],
-        dtype='float32',
-        param_attr=fluid.ParamAttr(name='src_embedding'))
+        dtype='float32')
 
     src_forward, src_reversed = bi_lstm_encoder(
         input_seq=src_embedding, gate_size=encoder_size)
@@ -183,12 +183,12 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
     c = InitState(init=cell_init)
 
     state_cell = StateCell(
-        cell_size=decoder_size,
         inputs={'x': None,
                 'encoder_vec': None,
                 'encoder_proj': None},
         states={'h': h,
-                'c': c})
+                'c': c},
+        out_state='h')
 
     def simple_attention(encoder_vec, encoder_proj, decoder_state):
         # The implementation of simple attention model
@@ -234,8 +234,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         trg_embedding = fluid.layers.embedding(
             input=trg_word_idx,
             size=[target_dict_dim, embedding_dim],
-            dtype='float32',
-            param_attr=fluid.ParamAttr('trg_embedding'))
+            dtype='float32')
 
         # A decoder for training
         decoder = TrainingDecoder(state_cell)
@@ -275,70 +274,85 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             return fluid.layers.embedding(
                 input=input,
                 size=[target_dict_dim, embedding_dim],
-                dtype='float32',
-                param_attr=fluid.ParamAttr('trg_embedding'))
+                dtype='float32')
 
         # A beam search decoder
+        #decoder = BeamSearchDecoder(
+        #    state_cell=state_cell,
+        #    max_len=max_length,
+        #    beam_size=beam_size,
+        #    end_id=1)
+
         decoder = BeamSearchDecoder(
-            state_cell=state_cell,
-            max_len=max_length,
-            beam_size=beam_size,
-            end_id=1)
+            state_cell=state_cell, 
+            init_ids=init_ids, 
+            init_scores=init_scores, 
+            target_dict_dim=target_dict_dim,
+            word_dim=embedding_dim, 
+            input_var_dict={'encoder_vec': encoded_vector, 'encoder_proj': encoded_proj}, 
+            topk_size=50, 
+            sparse_emb=True,
+            max_len=100, 
+            beam_size=1, 
+            end_id=1, 
+            name=None)
 
-        with decoder.block():
-            encoder_vec = decoder.read_array(init=encoded_vector)
-            encoder_proj = decoder.read_array(init=encoded_proj)
-            prev_ids = decoder.read_array(init=init_ids, is_ids=True)
-            prev_scores = decoder.read_array(init=init_scores, is_scores=True)
-            prev_ids_embedding = embedding(prev_ids)
-            prev_h = decoder.state_cell.get_state('h')
-            prev_c = decoder.state_cell.get_state('c')
-            prev_h_expanded = fluid.layers.sequence_expand(prev_h, prev_scores)
-            prev_c_expanded = fluid.layers.sequence_expand(prev_c, prev_scores)
-            encoder_vec_expanded = fluid.layers.sequence_expand(encoder_vec,
-                                                                prev_scores)
-            encoder_proj_expanded = fluid.layers.sequence_expand(encoder_proj,
-                                                                 prev_scores)
-            decoder.state_cell.set_state('h', prev_h_expanded)
-            decoder.state_cell.set_state('c', prev_c_expanded)
-            decoder.state_cell.compute_state(inputs={
-                'x': prev_ids_embedding,
-                'encoder_vec': encoder_vec_expanded,
-                'encoder_proj': encoder_proj_expanded
-            })
-            current_state = decoder.state_cell.get_state('h')
-            current_state_with_lod = fluid.layers.lod_reset(
-                x=current_state, y=prev_scores)
-            scores = fluid.layers.fc(input=current_state_with_lod,
-                                     size=target_dict_dim,
-                                     act='softmax')
-            topk_scores, topk_indices = fluid.layers.topk(scores, k=beam_size)
+        decoder.decode()
 
-            accu_scores = layers.elementwise_add(
-                x=layers.log(x=layers.softmax(topk_scores)),
-                y=layers.reshape(
-                    prev_scores, shape=[-1]),
-                axis=0)
+#        with decoder.block():
+#            encoder_vec = decoder.read_array(init=encoded_vector)
+#            encoder_proj = decoder.read_array(init=encoded_proj)
+#            prev_ids = decoder.read_array(init=init_ids, is_ids=True)
+#            prev_scores = decoder.read_array(init=init_scores, is_scores=True)
+#            prev_ids_embedding = embedding(prev_ids)
+#            prev_h = decoder.state_cell.get_state('h')
+#            prev_c = decoder.state_cell.get_state('c')
+#            prev_h_expanded = fluid.layers.sequence_expand(prev_h, prev_scores)
+#            prev_c_expanded = fluid.layers.sequence_expand(prev_c, prev_scores)
+#            encoder_vec_expanded = fluid.layers.sequence_expand(encoder_vec,
+#                                                                prev_scores)
+#            encoder_proj_expanded = fluid.layers.sequence_expand(encoder_proj,
+#                                                                 prev_scores)
+#            decoder.state_cell.set_state('h', prev_h_expanded)
+#            decoder.state_cell.set_state('c', prev_c_expanded)
+#            decoder.state_cell.compute_state(inputs={
+#                'x': prev_ids_embedding,
+#                'encoder_vec': encoder_vec_expanded,
+#                'encoder_proj': encoder_proj_expanded
+#            })
+#            current_state = decoder.state_cell.get_state('h')
+#            current_state_with_lod = fluid.layers.lod_reset(
+               # x=current_state, y=prev_scores)
+#            scores = fluid.layers.fc(input=current_state_with_lod,
+#                                     size=target_dict_dim,
+                                    # act='softmax')
+#            topk_scores, topk_indices = fluid.layers.topk(scores, k=beam_size)
 
-            selected_ids, selected_scores = fluid.layers.beam_search(
-                prev_ids,
-                prev_scores,
-                topk_indices,
-                accu_scores,
-                beam_size,
-                end_id=1,
-                level=0)
+#            accu_scores = layers.elementwise_add(
+#                x=layers.log(x=layers.softmax(topk_scores)),
+#                y=layers.reshape(
+#                    prev_scores, shape=[-1]),
+#                axis=0)
+
+#            selected_ids, selected_scores = fluid.layers.beam_search(
+#                prev_ids,
+#                prev_scores,
+#                topk_indices,
+#                accu_scores,
+#                beam_size,
+#                end_id=1,
+#                level=0)
 
             # If empty token generated, stop the RNN steps
-            with layers.Switch() as switch:
-                with switch.case(layers.is_empty(selected_ids)):
-                    decoder.early_stop()
-                with switch.default():
-                    decoder.state_cell.update_states()
-                    decoder.update_array(prev_ids, selected_ids)
-                    decoder.update_array(prev_scores, selected_scores)
-                    decoder.update_array(encoder_vec, encoder_vec_expanded)
-                    decoder.update_array(encoder_proj, encoder_proj_expanded)
+#            with layers.Switch() as switch:
+#                with switch.case(layers.is_empty(selected_ids)):
+#                    decoder.early_stop()
+#                with switch.default():
+#                    decoder.state_cell.update_states()
+#                    decoder.update_array(prev_ids, selected_ids)
+#                    decoder.update_array(prev_scores, selected_scores)
+#                    decoder.update_array(encoder_vec, encoder_vec_expanded)
+#                    decoder.update_array(encoder_proj, encoder_proj_expanded)
 
         translation_ids, translation_scores = decoder()
         feeding_list = ["source_sequence", "init_ids", "init_scores"]
@@ -363,21 +377,21 @@ def train():
     inference_program = fluid.default_main_program().clone()
 
     optimizer = fluid.optimizer.Adam(
-        learning_rate=args.learning_rate,
-        egularization=fluid.regularizer.L2DecayRegularizer(
-            regularization_coeff=1e-5))
+        learning_rate=args.learning_rate)
+        #egularization=fluid.regularizer.L2DecayRegularizer(
+        #    regularization_coeff=1e-5))
 
     optimizer.minimize(avg_cost)
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
+            wmt14.train(args.dict_size), buf_size=1000),
         batch_size=args.batch_size,
         drop_last=False)
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.test(args.dict_size), buf_size=1000),
+            wmt14.train(args.dict_size), buf_size=1000),
         batch_size=args.batch_size,
         drop_last=False)
 
@@ -457,7 +471,7 @@ def infer():
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt14.test(args.dict_size), buf_size=1000),
+            wmt14.train(args.dict_size), buf_size=1000),
         batch_size=args.batch_size,
         drop_last=False)
 
@@ -465,13 +479,13 @@ def infer():
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join(args.save_dir, str(args.pass_num))
+    model_path = os.path.join(args.save_dir, str(500))
     fluid.io.load_persistables(
         executor=exe,
         dirname=model_path,
         main_program=framework.default_main_program())
 
-    src_dict, trg_dict = paddle.dataset.wmt14.get_dict(args.dict_size)
+    src_dict, trg_dict = wmt14.get_dict(args.dict_size)
 
     feed_list = [
         framework.default_main_program().global_block().var(var_name)
