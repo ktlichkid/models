@@ -141,6 +141,7 @@ def train():
             if args.enable_ce and batch_id >= 100:
                 break
             if batch_id >= 0:
+                exit(0)
                 break
 
         pass_end_time = time.time()
