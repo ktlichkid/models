@@ -51,7 +51,7 @@ def parse_args():
     parser.add_argument(
         "--pass_num",
         type=int,
-        default=5,
+        default=1,
         help="The pass number to train. (default: %(default)d)")
     parser.add_argument(
         "--learning_rate",
