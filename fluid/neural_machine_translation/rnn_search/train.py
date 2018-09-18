@@ -140,7 +140,7 @@ def train():
             # This is for continuous evaluation only
             if args.enable_ce and batch_id >= 100:
                 break
-            if batch_id >= 3:
+            if batch_id >= 0:
                 break
 
         pass_end_time = time.time()
