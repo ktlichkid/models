@@ -130,9 +130,6 @@ def train():
         words_seen = 0
         for batch_id, data in enumerate(train_batch_generator()):
             words_seen += len(data) * 2
-
-            print(data)
-
             fetch_outs = exe.run(framework.default_main_program(),
                                  feed=feeder.feed(data),
                                  fetch_list=[avg_cost])
