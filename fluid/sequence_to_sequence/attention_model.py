@@ -30,7 +30,6 @@ import paddle.fluid.framework as framework
 from paddle.fluid.executor import Executor
 from paddle.fluid.contrib.decoder.beam_search_decoder import *
 
-
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--embedding_dim",
@@ -55,25 +54,25 @@ parser.add_argument(
 parser.add_argument(
     "--dict_size",
     type=int,
-    default=20000,
+    default=30000,
     help="The dictionary capacity. Dictionaries of source sequence and "
     "target dictionary have same capacity. (default: %(default)d)")
 parser.add_argument(
     "--pass_num",
     type=int,
-    default=100,
+    default=5,
     help="The pass number to train. (default: %(default)d)")
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=1e-4,
+    default=0.01,
     help="Learning rate used to train the model. (default: %(default)f)")
 parser.add_argument(
     "--infer_only", action='store_true', help="If set, run forward only.")
 parser.add_argument(
     "--beam_size",
     type=int,
-    default=10,
+    default=3,
     help="The width for beam searching. (default: %(default)d)")
 parser.add_argument(
     "--use_gpu",
@@ -87,14 +86,10 @@ parser.add_argument(
     help="The maximum length of sequence when doing generation. "
     "(default: %(default)d)")
 
-model_save_path = "model_att_l2"
 
-
-def lstm_step(x_t, hidden_t_prev, cell_t_prev, size, is_test):
+def lstm_step(x_t, hidden_t_prev, cell_t_prev, size):
     def linear(inputs):
-        outputs = fluid.layers.fc(input=inputs, size=size, bias_attr=True)
-        #droppedout = fluid.layers.dropout(x=outputs, dropout_prob=0.2, is_test=is_test)
-        return outputs #droppedout
+        return fluid.layers.fc(input=inputs, size=size, bias_attr=True)
 
     forget_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
     input_gate = fluid.layers.sigmoid(x=linear([hidden_t_prev, x_t]))
@@ -127,8 +122,6 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                              bias_attr=False)
         forward, _ = fluid.layers.dynamic_lstm(
             input=input_forward_proj, size=gate_size * 4, use_peepholes=False)
-        # forward = fluid.layers.dropout(x=forwarded, dropout_prob=0.2, is_test=is_generating)
-
         input_reversed_proj = fluid.layers.fc(input=input_seq,
                                               size=gate_size * 4,
                                               act='tanh',
@@ -138,7 +131,6 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             size=gate_size * 4,
             is_reverse=True,
             use_peepholes=False)
-        # reversed = fluid.layers.dropout(x=reverseded, dropout_prob=0.2, is_test=is_generating)
         return forward, reversed
 
     src_word_idx = fluid.layers.data(
@@ -149,7 +141,6 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         size=[source_dict_dim, embedding_dim],
         dtype='float32',
         param_attr=fluid.ParamAttr(name='src_embedding'))
-    # src_embedding = fluid.layers.dropout(x=src_embedding_in, dropout_prob=0.2, is_test=is_generating)
 
     src_forward, src_reversed = bi_lstm_encoder(
         input_seq=src_embedding, gate_size=encoder_size)
@@ -188,8 +179,6 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 'c': c})
 
     def simple_attention(encoder_vec, encoder_proj, decoder_state):
-        # decoder_state_drop = fluid.layers.dropout(
-        #     x=decoder_state, dropout_prob=0.2, is_test=is_generating)
         decoder_state_proj = fluid.layers.fc(input=decoder_state,
                                              size=decoder_size,
                                              bias_attr=False)
@@ -207,7 +196,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         weigths_reshape = fluid.layers.reshape(x=attention_weights, shape=[-1])
         scaled = fluid.layers.elementwise_mul(
             x=encoder_vec, y=weigths_reshape, axis=0)
-        context = fluid.layers.sequence_pool(input=scaled, pool_type='average')
+        context = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
         return context
 
     @state_cell.state_updater
@@ -220,7 +209,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
         context = simple_attention(encoder_vec, encoder_proj, prev_h)
         decoder_inputs = fluid.layers.concat(
             input=[context, current_word], axis=1)
-        h, c = lstm_step(decoder_inputs, prev_h, prev_c, decoder_size, is_generating)
+        h, c = lstm_step(decoder_inputs, prev_h, prev_c, decoder_size)
         state_cell.set_state('h', h)
         state_cell.set_state('c', c)
 
@@ -233,10 +222,6 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
             size=[target_dict_dim, embedding_dim],
             dtype='float32',
             param_attr=fluid.ParamAttr('trg_embedding'))
-        #trg_embedding = fluid.layers.dropout(
-        #    x=trg_embedding_in,
-        #    dropout_prob=0.2,
-        #    is_test=is_generating)
 
         decoder = TrainingDecoder(state_cell)
 
@@ -259,10 +244,7 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
 
         label = fluid.layers.data(
             name='label_sequence', shape=[1], dtype='int64', lod_level=1)
-        # smoothed_label = layers.label_smooth(
-        #     label=layers.one_hot(input=label, depth=args.dict_size))
-        cost = fluid.layers.cross_entropy(
-            input=decoder(), label=label, soft_label=False)
+        cost = fluid.layers.cross_entropy(input=decoder(), label=label)
         avg_cost = fluid.layers.mean(x=cost)
 
         feeding_list = ["source_sequence", "target_sequence", "label_sequence"]
@@ -281,26 +263,15 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 dtype='float32',
                 param_attr=fluid.ParamAttr('trg_embedding'))
 
-        decoder = BeamSearchDecoder(state_cell, max_len=max_length, beam_size=beam_size, end_id=1)
+        decoder = BeamSearchDecoder(state_cell, max_len=max_length)
 
         with decoder.block():
-            #layers.Print(encoded_proj, message="in loop")
             encoder_vec = decoder.read_array(init=encoded_vector)
-            #layers.Print(encoded_vector, message="encoded_vector")
-            #layers.Print(encoded_proj, message="before")
             encoder_proj = decoder.read_array(init=encoded_proj)
-            with layers.Switch() as switch_1:
-                with switch_1.case(layers.is_empty(encoder_proj)):
-                    decoder.early_stop()
-                with switch_1.case(layers.is_empty(encoder_vec)):
-                    decoder.early_stop()
-            #layers.Print(encoder_proj, message="after")
+
             prev_ids = decoder.read_array(init=init_ids, is_ids=True)
-            #layers.Print(prev_ids, message="prev_ids")
             prev_scores = decoder.read_array(init=init_scores, is_scores=True)
-            #layers.Print(prev_scores, message="prev_scores")
             prev_ids_embedding = embedding(prev_ids)
-            #layers.Print(prev_ids_embedding, message="prev_ids_embedding")
             prev_h = decoder.state_cell.get_state('h')
             prev_c = decoder.state_cell.get_state('c')
             prev_h_expanded = fluid.layers.sequence_expand(prev_h, prev_scores)
@@ -323,15 +294,10 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                                      size=target_dict_dim,
                                      act='softmax')
             topk_scores, topk_indices = fluid.layers.topk(scores, k=beam_size)
-            accu_scores = layers.elementwise_add(
-                x=layers.log(x=layers.softmax(topk_scores)),
-                y=layers.reshape(prev_scores, shape=[-1]),
-                axis=0)
             selected_ids, selected_scores = fluid.layers.beam_search(
                 prev_ids,
-                prev_scores,
                 topk_indices,
-                accu_scores,
+                topk_scores,
                 beam_size,
                 end_id=1,
                 level=0)
@@ -341,20 +307,11 @@ def seq_to_seq_net(embedding_dim, encoder_size, decoder_size, source_dict_dim,
                 with switch.case(layers.is_empty(encoder_proj)):
                     decoder.early_stop()
                 with switch.default():
-            #layers.Print(selected_ids, message="selected_ids")
-            #layers.Print(selected_scores, message="selected_scores")
-            #layers.Print(encoder_vec_expanded, message="encoder_vec")
-            #layers.Print(encoder_proj_expanded, message="encoder_proj")
                     decoder.state_cell.update_states()
                     decoder.update_array(prev_ids, selected_ids)
                     decoder.update_array(prev_scores, selected_scores)
                     decoder.update_array(encoder_vec, encoder_vec_expanded)
                     decoder.update_array(encoder_proj, encoder_proj_expanded)
-            #layers.Print(prev_ids, message="prev_ids")
-            #layers.Print(prev_scores, message="prev_scores")
-            #layers.Print(encoder_vec, message="encoder_vec")
-            #layers.Print(encoder_proj, message="encoder_proj")
-
 
         translation_ids, translation_scores = decoder()
 
@@ -400,31 +357,20 @@ def train():
     # clone from default main program
     inference_program = fluid.default_main_program().clone()
 
-    # regularization =
-    # fluid.regularizer.L2DecayRegularizer(regularization_coeff=0.1)
-
-    optimizer = fluid.optimizer.Adam(
-        learning_rate=args.learning_rate,
-        regularization=fluid.regularizer.L2DecayRegularizer(
-            regularization_coeff=8e-4))
+    optimizer = fluid.optimizer.Adam(learning_rate=args.learning_rate)
     optimizer.minimize(avg_cost)
 
-    fluid.memory_optimize(fluid.default_main_program(), print_log=False)
+#    fluid.memory_optimize(fluid.default_main_program(), print_log=False)
 
     train_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.train(args.dict_size, args.dict_size, 'en'),
-            buf_size=8192),
-        batch_size=args.batch_size,
-        drop_last=False)
+            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
+        batch_size=args.batch_size)
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.validation(
-                args.dict_size, args.dict_size, 'en'),
-            buf_size=8192),
-        batch_size=args.batch_size,
-        drop_last=False)
+            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
+        batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
     exe = Executor(place)
@@ -471,9 +417,8 @@ def train():
                                  fetch_list=[avg_cost])
 
             avg_cost_val = np.array(fetch_outs[0])
-            if batch_id % 200 == 0:
-                print('pass_id=%d, batch_id=%d, train_loss: %f' %
-                      (pass_id, batch_id, avg_cost_val))
+            print('pass_id=%d, batch_id=%d, train_loss: %f' %
+                  (pass_id, batch_id, avg_cost_val))
 
         pass_end_time = time.time()
         test_loss = do_validation()
@@ -483,7 +428,7 @@ def train():
               (pass_id, test_loss, words_per_sec, time_consumed))
 
         if pass_id % 1 == 0:
-            model_path = os.path.join(model_save_path, str(pass_id))
+            model_path = os.path.join("model_att", str(pass_id))
             if not os.path.isdir(model_path):
                 os.makedirs(model_path)
 
@@ -507,36 +452,31 @@ def infer():
 
     test_batch_generator = paddle.batch(
         paddle.reader.shuffle(
-            paddle.dataset.wmt16.test(args.dict_size, args.dict_size, 'en'), buf_size=8192),
+            paddle.dataset.wmt14.train(args.dict_size), buf_size=1000),
         batch_size=args.batch_size)
 
     place = core.CUDAPlace(0) if args.use_gpu else core.CPUPlace()
     exe = Executor(place)
     exe.run(framework.default_startup_program())
 
-    model_path = os.path.join(model_save_path, str(22))
+    model_path = os.path.join("model_4data", str(7000))
     fluid.io.load_persistables(
         executor=exe,
         dirname=model_path,
         main_program=framework.default_main_program())
 
-    src_dict = paddle.dataset.wmt16.get_dict('en', args.dict_size, True)
-    trg_dict = paddle.dataset.wmt16.get_dict('de', args.dict_size, True)
-
-    trg_out = open("./trg_out", "w")
-    inf_out = open("./inf_out", "w")
+    src_dict, trg_dict = paddle.dataset.wmt14.get_dict(args.dict_size)
 
     for batch_id, data in enumerate(test_batch_generator()):
 
         for tup in data:
             for i in range(2, len(tup)):
                 if i == 0:
-                    words = [src_dict[tup[i][j]] for j in xrange(len(tup[i])-1)]  # omit end token
+                    words = [src_dict[tup[i][j]] for j in xrange(len(tup[i]))]
                 else:
-                    words = [trg_dict[tup[i][j]] for j in xrange(len(tup[i])-1)]
+                    words = [trg_dict[tup[i][j]] for j in xrange(len(tup[i]))]
                 sentence = " ".join(words)
                 print(sentence)
-                trg_out.write(sentence + '\n')
 
         batch_size = len(data)
         src_seq, _ = to_lodtensor(map(lambda x: x[0], data), place)
@@ -556,14 +496,12 @@ def infer():
                              return_numpy=False)
         lod_list_1 = fetch_outs[0].lod()[1]
         token_array = np.array(fetch_outs[0])
-        score_array = np.array(fetch_outs[1])
-        print(score_array)
         result = []
         for i in xrange(len(lod_list_1) - 1):
             sentence_list = [trg_dict[token]
                              for token in
                              token_array[lod_list_1[i] : lod_list_1[i+1]]]
-            sentence = " ".join(sentence_list[1:-1])
+            sentence = " ".join(sentence_list)
             result.append(sentence)
         lod_list_0 = fetch_outs[0].lod()[0]
         final_result = [result[lod_list_0[i] : lod_list_0[i+1]]
@@ -572,12 +510,8 @@ def infer():
         print("Actual result:")
         for paragraph in final_result:
             print(paragraph)
-            inf_out.write(paragraph[0] + '\n')
-        
-        break
 
-    trg_out.close()
-    inf_out.close()
+        #break
 
 
 if __name__ == '__main__':
