@@ -131,6 +131,8 @@ def train():
         for batch_id, data in enumerate(train_batch_generator()):
             words_seen += len(data) * 2
 
+            print(data)
+
             fetch_outs = exe.run(framework.default_main_program(),
                                  feed=feeder.feed(data),
                                  fetch_list=[avg_cost])
@@ -141,7 +143,7 @@ def train():
             # This is for continuous evaluation only
             if args.enable_ce and batch_id >= 100:
                 break
-            if batch_id > 3:
+            if batch_id >= 3:
                 break
 
         pass_end_time = time.time()

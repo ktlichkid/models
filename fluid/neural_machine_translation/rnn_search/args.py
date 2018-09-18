@@ -40,7 +40,7 @@ def parse_args():
     parser.add_argument(
         "--batch_size",
         type=int,
-        default=32,
+        default=4,
         help="The sequence number of a mini-batch data. (default: %(default)d)")
     parser.add_argument(
         "--dict_size",
